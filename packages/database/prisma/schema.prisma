@@ -1,0 +1,164 @@
+// ASuite Database Schema
+// Supporte SQLite (dev) et PostgreSQL/MySQL (prod)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== UTILISATEURS ====================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  name          String?
+  image         String?
+  role          String    @default("user") // admin, user, guest
+  
+  // 2FA
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+  
+  // SSO
+  ssoProvider   String?
+  ssoProviderId String?
+  
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  auditLogs     AuditLog[]
+  
+  // ALinks
+  links         Link[]
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  userAgent    String?
+  ipAddress    String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==================== AUDIT LOGS ====================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // login, logout, create_link, delete_link, etc.
+  resource  String?  // link, user, etc.
+  resourceId String?
+  metadata  String?  // JSON string pour les détails
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ==================== ALINKS - Raccourcisseur ====================
+
+model Link {
+  id          String    @id @default(cuid())
+  shortCode   String    @unique
+  originalUrl String
+  title       String?
+  
+  // Propriétaire
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Paramètres
+  password    String?   // Protection par mot de passe
+  expiresAt   DateTime? // Date d'expiration
+  maxClicks   Int?      // Limite de clics
+  
+  // QR Code
+  qrCode      String?   // URL ou data du QR code généré
+  qrStyle     String?   // JSON pour le style du QR code
+  
+  // Statistiques
+  clickCount  Int       @default(0)
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  clicks      LinkClick[]
+
+  @@index([shortCode])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model LinkClick {
+  id        String   @id @default(cuid())
+  linkId    String
+  
+  // Analytics
+  ipAddress String?
+  country   String?
+  city      String?
+  device    String?  // desktop, mobile, tablet
+  browser   String?
+  os        String?
+  referer   String?
+  
+  createdAt DateTime @default(now())
+
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+  @@index([createdAt])
+}
+
