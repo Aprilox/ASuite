@@ -46,23 +46,3 @@ lerna-debug.log*
 # Testing
 coverage/
 .nyc_output/
-
-# Cache
-.cache/
-.eslintcache
-.stylelintcache
-
-# TypeScript
-*.tsbuildinfo
-
-# Vercel
-.vercel
-
-# Lock files backup
-*.lock.bak
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.temp

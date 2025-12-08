@@ -185,12 +185,20 @@ ASuite/
 - ✅ Notifications toast personnalisées
 - ✅ Popups de confirmation personnalisées
 
-## 📄 License
+## 📄 Licence
 
-Propriétaire - Tous droits réservés
+**Propriétaire - Tous droits réservés**
+
+Ce projet est sous licence propriétaire. Toute utilisation, modification ou distribution 
+sans autorisation écrite préalable est strictement interdite.
+
+📧 Contact : [contact@aprilox.fr](mailto:contact@aprilox.fr)
+
+Voir le fichier [LICENSE](./LICENSE) pour plus de détails.
 
 ---
 
 <div align="center">
   <p>Fait avec ❤️ pour la productivité</p>
+  <p>© 2025 Aprilox - Tous droits réservés</p>
 </div>
