@@ -11,6 +11,12 @@ export const metadata: Metadata = {
   title: 'ASuite - Suite Collaborative Professionnelle',
   description: 'Communiquez, partagez et donnez vie à vos idées en sécurité avec ASuite.',
   keywords: ['suite collaborative', 'productivité', 'cloud', 'sécurisé'],
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

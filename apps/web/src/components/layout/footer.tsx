@@ -11,18 +11,18 @@ import {
 } from 'lucide-react';
 
 const toolLinks = [
-  { name: 'ALinks', href: '/alinks', icon: Link2 },
-  { name: 'AVault', href: '/avault', icon: Lock },
-  { name: 'ATransfer', href: '/atransfer', icon: Send },
-  { name: 'ACalendar', href: '/acalendar', icon: Calendar },
-  { name: 'AMail', href: '/amail', icon: Mail },
-  { name: 'ADrive', href: '/adrive', icon: HardDrive },
+  { name: 'ALinks', href: '/alinks', icon: Link2, available: true },
+  { name: 'AVault', href: '/coming-soon?tool=avault', icon: Lock, available: false },
+  { name: 'ATransfer', href: '/coming-soon?tool=atransfer', icon: Send, available: false },
+  { name: 'ACalendar', href: '/coming-soon?tool=acalendar', icon: Calendar, available: false },
+  { name: 'AMail', href: '/coming-soon?tool=amail', icon: Mail, available: false },
+  { name: 'ADrive', href: '/coming-soon?tool=adrive', icon: HardDrive, available: false },
 ];
 
 const legalLinks = [
-  { name: 'Mentions légales', href: '/legal' },
-  { name: 'Confidentialité', href: '/privacy' },
-  { name: 'CGU', href: '/terms' },
+  { name: 'Mentions légales', href: '/coming-soon?tool=legal' },
+  { name: 'Confidentialité', href: '/coming-soon?tool=privacy' },
+  { name: 'CGU', href: '/coming-soon?tool=terms' },
 ];
 
 export function Footer() {
@@ -43,7 +43,7 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-3">
               <a
-                href="https://github.com"
+                href="https://github.com/Aprilox/ASuite"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-lg border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
@@ -73,6 +73,11 @@ export function Footer() {
                   >
                     <link.icon className="w-4 h-4" />
                     {link.name}
+                    {!link.available && (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                        Bientôt
+                      </span>
+                    )}
                   </Link>
                 </li>
               ))}
@@ -85,7 +90,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/docs"
+                  href="/coming-soon?tool=docs"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Documentation
@@ -93,7 +98,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/support"
+                  href="/coming-soon?tool=support"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Support
@@ -101,7 +106,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/changelog"
+                  href="/coming-soon?tool=changelog"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Changelog
@@ -109,7 +114,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/status"
+                  href="/coming-soon?tool=status"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Statut des services
@@ -149,4 +154,3 @@ export function Footer() {
     </footer>
   );
 }
-
