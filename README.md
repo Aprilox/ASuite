@@ -2,9 +2,9 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/TypeScript-5.3-blue?style=flat-square&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind" />
-  <img src="https://img.shields.io/badge/Prisma-5.22-2D3748?style=flat-square&logo=prisma" alt="Prisma" />
+  <img src="https://img.shields.io/badge/Prisma-6.1-2D3748?style=flat-square&logo=prisma" alt="Prisma" />
 </div>
 
 <br />
@@ -19,8 +19,14 @@ Une suite d'outils collaboratifs moderne, sécurisée et professionnelle. Inspir
 - 🔐 Protection par mot de passe
 - ⏰ Date d'expiration configurable
 - 🎯 Limite de clics
-- 📱 QR codes personnalisables (couleurs, transparent)
+- 📱 QR codes personnalisables (couleurs, fond transparent)
 - ✏️ Édition complète des liens
+
+### Interface utilisateur ✅
+- 🎨 Thèmes clair / sombre / système
+- 🔔 Notifications toast personnalisées
+- 💬 Popups de confirmation personnalisées
+- 📱 Interface responsive
 
 ### Outils à venir
 | Outil | Description | Status |
@@ -47,7 +53,7 @@ Une suite d'outils collaboratifs moderne, sécurisée et professionnelle. Inspir
 ```bash
 # Cloner le projet
 git clone https://github.com/Aprilox/ASuite.git
-cd asuite
+cd ASuite
 
 # Installer les dépendances
 pnpm install
@@ -114,12 +120,13 @@ DATABASE_URL="mysql://user:password@host:3306/asuite"
 ASuite/
 ├── apps/
 │   └── web/                    # Application Next.js principale
+│       ├── public/             # Assets statiques (favicon, images)
 │       ├── src/
 │       │   ├── app/            # Routes et pages
 │       │   ├── components/     # Composants React
 │       │   ├── hooks/          # Hooks personnalisés
 │       │   ├── lib/            # Utilitaires
-│       │   ├── providers/      # Context providers
+│       │   ├── providers/      # Context providers (Auth, Theme)
 │       │   └── types/          # Types TypeScript
 │       └── ...
 ├── packages/
@@ -161,6 +168,11 @@ ASuite/
 - **Langage** : TypeScript
 
 ## 📝 Changelog
+
+### v1.1.0
+- ✨ Thèmes clair / sombre / système
+- ✨ Favicon personnalisé
+- ✨ Page "Coming Soon" pour les outils à venir
 
 ### v1.0.0 (Initial Release)
 - ✅ Système d'authentification complet

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/providers/auth-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { ToastProvider } from '@/components/ui/toast';
 
@@ -26,14 +27,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans`}>
-        <AuthProvider>
-          <ConfirmProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </ConfirmProvider>
-        </AuthProvider>
+      <body className={`${inter.variable} font-sans`} suppressHydrationWarning>
+        <ThemeProvider>
+          <AuthProvider>
+            <ConfirmProvider>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </ConfirmProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

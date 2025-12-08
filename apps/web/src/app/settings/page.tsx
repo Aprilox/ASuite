@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { useToast } from '@/components/ui/toast';
 import { useConfirm } from '@/components/ui/confirm-dialog';
+import { useTheme } from '@/providers/theme-provider';
 import {
   User,
   Lock,
@@ -20,6 +21,9 @@ import {
   EyeOff,
   Check,
   X,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -27,6 +31,7 @@ export default function SettingsPage() {
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const toast = useToast();
   const confirm = useConfirm();
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   // Profile state
   const [name, setName] = useState('');
@@ -171,7 +176,7 @@ export default function SettingsPage() {
     { id: 'profile', label: 'Profil', icon: User, available: true },
     { id: 'security', label: 'Sécurité', icon: Lock, available: true },
     { id: 'notifications', label: 'Notifications', icon: Bell, available: false },
-    { id: 'appearance', label: 'Apparence', icon: Palette, available: false },
+    { id: 'appearance', label: 'Apparence', icon: Palette, available: true },
     { id: 'danger', label: 'Zone de danger', icon: Shield, available: true },
   ];
 
@@ -428,30 +433,89 @@ export default function SettingsPage() {
 
                 {/* Appearance Tab */}
                 {activeTab === 'appearance' && (
-                  <div className="bg-card rounded-xl border p-6 opacity-60">
-                    <div className="flex items-center gap-2 mb-6">
-                      <h2 className="text-lg font-semibold">Apparence</h2>
-                      <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                        Bientôt disponible
-                      </span>
-                    </div>
-                    <div className="space-y-6 pointer-events-none">
+                  <div className="bg-card rounded-xl border p-6">
+                    <h2 className="text-lg font-semibold mb-6">Apparence</h2>
+                    <div className="space-y-6">
                       <div>
-                        <p className="font-medium mb-3 text-muted-foreground">Thème</p>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="p-4 rounded-xl border-2 border-muted bg-muted/30">
-                            <div className="w-full h-8 bg-white/50 rounded mb-2 border" />
-                            <p className="text-sm font-medium text-muted-foreground">Clair</p>
-                          </div>
-                          <div className="p-4 rounded-xl border border-muted">
-                            <div className="w-full h-8 bg-gray-900/50 rounded mb-2" />
-                            <p className="text-sm font-medium text-muted-foreground">Sombre</p>
-                          </div>
-                          <div className="p-4 rounded-xl border border-muted">
-                            <div className="w-full h-8 bg-gradient-to-r from-white/50 to-gray-900/50 rounded mb-2" />
-                            <p className="text-sm font-medium text-muted-foreground">Système</p>
-                          </div>
+                        <p className="font-medium mb-4">Thème</p>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Choisissez le thème de l'interface. Le thème "Système" s'adapte automatiquement aux préférences de votre appareil.
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {/* Light Theme */}
+                          <button
+                            onClick={() => setTheme('light')}
+                            className={`relative p-4 rounded-xl border-2 transition-all ${
+                              theme === 'light'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50 hover:bg-accent'
+                            }`}
+                          >
+                            {theme === 'light' && (
+                              <div className="absolute top-2 right-2">
+                                <Check className="w-4 h-4 text-primary" />
+                              </div>
+                            )}
+                            <div className="w-full aspect-video bg-white rounded-lg mb-3 border flex items-center justify-center">
+                              <Sun className="w-8 h-8 text-amber-500" />
+                            </div>
+                            <p className="font-medium text-sm">Clair</p>
+                          </button>
+
+                          {/* Dark Theme */}
+                          <button
+                            onClick={() => setTheme('dark')}
+                            className={`relative p-4 rounded-xl border-2 transition-all ${
+                              theme === 'dark'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50 hover:bg-accent'
+                            }`}
+                          >
+                            {theme === 'dark' && (
+                              <div className="absolute top-2 right-2">
+                                <Check className="w-4 h-4 text-primary" />
+                              </div>
+                            )}
+                            <div className="w-full aspect-video bg-gray-900 rounded-lg mb-3 border border-gray-700 flex items-center justify-center">
+                              <Moon className="w-8 h-8 text-blue-400" />
+                            </div>
+                            <p className="font-medium text-sm">Sombre</p>
+                          </button>
+
+                          {/* System Theme */}
+                          <button
+                            onClick={() => setTheme('system')}
+                            className={`relative p-4 rounded-xl border-2 transition-all ${
+                              theme === 'system'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50 hover:bg-accent'
+                            }`}
+                          >
+                            {theme === 'system' && (
+                              <div className="absolute top-2 right-2">
+                                <Check className="w-4 h-4 text-primary" />
+                              </div>
+                            )}
+                            <div className="w-full aspect-video bg-gradient-to-r from-white to-gray-900 rounded-lg mb-3 border flex items-center justify-center">
+                              <Monitor className="w-8 h-8 text-gray-500" />
+                            </div>
+                            <p className="font-medium text-sm">Système</p>
+                          </button>
                         </div>
+                      </div>
+
+                      {/* Current theme info */}
+                      <div className="p-4 rounded-lg bg-muted/50 border">
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium">Thème actuel :</span>{' '}
+                          {theme === 'system' ? (
+                            <>Système ({resolvedTheme === 'dark' ? 'Sombre' : 'Clair'})</>
+                          ) : theme === 'dark' ? (
+                            'Sombre'
+                          ) : (
+                            'Clair'
+                          )}
+                        </p>
                       </div>
                     </div>
                   </div>
