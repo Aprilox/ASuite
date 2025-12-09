@@ -27,6 +27,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Appliquer la locale de l'utilisateur
+  const applyUserLocale = (locale: string, forceReload = false) => {
+    if (typeof window !== 'undefined' && locale) {
+      const currentLocale = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('locale='))
+        ?.split('=')[1];
+      
+      // Si la locale est différente, mettre à jour et recharger
+      if (currentLocale !== locale) {
+        document.cookie = `locale=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+        if (forceReload) {
+          // Recharger pour appliquer la nouvelle locale
+          window.location.reload();
+        }
+      }
+    }
+  };
+
   const checkAuth = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/me');
@@ -36,6 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Appliquer le thème de l'utilisateur connecté
         if (data.theme) {
           applyUserTheme(data.theme);
+        }
+        // Appliquer la locale de l'utilisateur connecté
+        if (data.locale) {
+          applyUserLocale(data.locale);
         }
       } else {
         setUser(null);
@@ -67,6 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.user?.theme) {
           applyUserTheme(data.user.theme);
         }
+        // Appliquer la locale de l'utilisateur après connexion (avec reload si différente)
+        if (data.user?.locale) {
+          applyUserLocale(data.user.locale, true);
+        }
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Erreur de connexion' };
@@ -88,6 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
       }
+      // Note: On ne réinitialise pas la locale à la déconnexion
+      // car l'utilisateur peut vouloir rester dans sa langue
     } catch (error) {
       console.error('Logout error:', error);
       setUser(null);
@@ -121,4 +150,3 @@ export function useAuth() {
   }
   return context;
 }
-

@@ -3,7 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
+import { useLocale } from '@/providers/locale-provider';
+import { FlagIcon } from '@/components/ui/flag-icon';
 import {
   Menu,
   X,
@@ -19,11 +22,14 @@ interface HeaderProps {
 }
 
 export function Header({ variant = 'default' }: HeaderProps) {
+  const t = useTranslations('header');
   const router = useRouter();
   const pathname = usePathname();
   const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const { locale, setLocale, locales, localeNames } = useLocale();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -31,8 +37,8 @@ export function Header({ variant = 'default' }: HeaderProps) {
   };
 
   const navLinks = [
-    { href: '/#tools', label: 'Outils' },
-    { href: '/#features', label: 'Fonctionnalités' },
+    { href: '/#tools', label: t('tools') },
+    { href: '/#features', label: t('features') },
   ];
 
   const isHomePage = pathname === '/';
@@ -45,17 +51,19 @@ export function Header({ variant = 'default' }: HeaderProps) {
           : 'bg-background'
       }`}
     >
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">A</span>
-          </div>
-          <span className="font-bold text-xl">ASuite</span>
-        </Link>
+      <div className="container mx-auto px-4 h-16 flex items-center">
+        {/* Logo - Left */}
+        <div className="flex-1 flex items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">A</span>
+            </div>
+            <span className="font-bold text-xl">ASuite</span>
+          </Link>
+        </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        {/* Desktop Navigation - Center */}
+        <nav className="hidden md:flex items-center justify-center gap-6">
           {isHomePage &&
             navLinks.map((link) => (
               <Link
@@ -68,8 +76,44 @@ export function Header({ variant = 'default' }: HeaderProps) {
             ))}
         </nav>
 
-        {/* Desktop Auth */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Desktop Auth - Right */}
+        <div className="flex-1 hidden md:flex items-center justify-end gap-3">
+          {/* Language Switcher */}
+          <div className="relative">
+            <button
+              onClick={() => setLangMenuOpen(!langMenuOpen)}
+              className="flex items-center gap-2 px-2 h-9 rounded-lg hover:bg-accent transition-colors text-sm"
+            >
+              <FlagIcon locale={locale} className="w-5 h-4 rounded-sm shadow-sm" />
+              <ChevronDown className="w-3 h-3 text-muted-foreground" />
+            </button>
+            {langMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setLangMenuOpen(false)}
+                />
+                <div className="absolute right-0 top-full mt-2 w-40 bg-popover border rounded-lg shadow-lg py-1 z-50">
+                  {locales.map((loc) => (
+                    <button
+                      key={loc}
+                      onClick={() => {
+                        setLangMenuOpen(false);
+                        setLocale(loc);
+                      }}
+                      className={`flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-accent transition-colors w-full text-left ${
+                        locale === loc ? 'bg-accent font-medium' : ''
+                      }`}
+                    >
+                      <FlagIcon locale={loc} className="w-5 h-4 rounded-sm shadow-sm" />
+                      <span>{localeNames[loc]}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
           {isLoading ? (
             <div className="w-20 h-9 bg-muted animate-pulse rounded-md" />
           ) : isAuthenticated && user ? (
@@ -95,7 +139,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                   />
                   <div className="absolute right-0 top-full mt-2 w-48 bg-popover border rounded-lg shadow-lg py-1 z-50">
                     <div className="px-3 py-2 border-b">
-                      <p className="text-sm font-medium truncate">{user.name || 'Utilisateur'}</p>
+                      <p className="text-sm font-medium truncate">{user.name || t('user')}</p>
                       <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
                     <Link
@@ -104,7 +148,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors"
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      Dashboard
+                      {t('dashboard')}
                     </Link>
                     <Link
                       href="/settings"
@@ -112,7 +156,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors"
                     >
                       <Settings className="w-4 h-4" />
-                      Paramètres
+                      {t('settings')}
                     </Link>
                     <div className="border-t my-1" />
                     <button
@@ -123,7 +167,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors w-full text-left text-red-600"
                     >
                       <LogOut className="w-4 h-4" />
-                      Déconnexion
+                      {t('logout')}
                     </button>
                   </div>
                 </>
@@ -135,13 +179,13 @@ export function Header({ variant = 'default' }: HeaderProps) {
                 href="/login"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Connexion
+                {t('login')}
               </Link>
               <Link
                 href="/register"
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
-                Commencer gratuitement
+                {t('register')}
               </Link>
             </>
           )}
@@ -179,6 +223,25 @@ export function Header({ variant = 'default' }: HeaderProps) {
               </nav>
             )}
 
+            {/* Language Switcher Mobile */}
+            <div className="flex gap-2 py-2">
+              {locales.map((loc) => (
+                <button
+                  key={loc}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setLocale(loc);
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
+                    locale === loc ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}
+                >
+                  <FlagIcon locale={loc} className="w-5 h-4 rounded-sm" />
+                  <span>{localeNames[loc]}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="pt-4 border-t space-y-2">
               {isLoading ? (
                 <div className="w-full h-10 bg-muted animate-pulse rounded-md" />
@@ -189,7 +252,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                       <User className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium">{user.name || 'Utilisateur'}</p>
+                      <p className="font-medium">{user.name || t('user')}</p>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
                   </div>
@@ -199,7 +262,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                     className="flex items-center gap-2 py-2 text-foreground"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
+                    {t('dashboard')}
                   </Link>
                   <Link
                     href="/settings"
@@ -207,7 +270,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                     className="flex items-center gap-2 py-2 text-foreground"
                   >
                     <Settings className="w-4 h-4" />
-                    Paramètres
+                    {t('settings')}
                   </Link>
                   <button
                     onClick={() => {
@@ -217,7 +280,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                     className="flex items-center gap-2 py-2 text-red-600 w-full"
                   >
                     <LogOut className="w-4 h-4" />
-                    Déconnexion
+                    {t('logout')}
                   </button>
                 </>
               ) : (
@@ -227,14 +290,14 @@ export function Header({ variant = 'default' }: HeaderProps) {
                     onClick={() => setMobileMenuOpen(false)}
                     className="block w-full text-center py-2 rounded-md border hover:bg-accent transition-colors"
                   >
-                    Connexion
+                    {t('login')}
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMobileMenuOpen(false)}
                     className="block w-full text-center py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                   >
-                    Commencer gratuitement
+                    {t('register')}
                   </Link>
                 </>
               )}
@@ -245,4 +308,3 @@ export function Header({ variant = 'default' }: HeaderProps) {
     </header>
   );
 }
-

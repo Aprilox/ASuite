@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -32,6 +33,9 @@ export default function SettingsPage() {
   const toast = useToast();
   const confirm = useConfirm();
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const t = useTranslations('settings');
+  const tAuth = useTranslations('auth');
+  const tCommon = useTranslations('common');
 
   // Profile state
   const [name, setName] = useState('');
@@ -74,13 +78,13 @@ export default function SettingsPage() {
       });
 
       if (res.ok) {
-        toast.success('Profil mis à jour avec succès');
+        toast.success(t('profileUpdated'));
       } else {
         const data = await res.json();
-        toast.error(data.error || 'Erreur lors de la mise à jour');
+        toast.error(data.error || t('updateError'));
       }
     } catch (error) {
-      toast.error('Erreur de connexion');
+      toast.error(tCommon('connectionError'));
     } finally {
       setIsSavingProfile(false);
     }
@@ -88,10 +92,10 @@ export default function SettingsPage() {
 
   // Password validation
   const passwordChecks = [
-    { label: 'Au moins 8 caractères', valid: newPassword.length >= 8 },
-    { label: 'Une majuscule', valid: /[A-Z]/.test(newPassword) },
-    { label: 'Une minuscule', valid: /[a-z]/.test(newPassword) },
-    { label: 'Un chiffre', valid: /\d/.test(newPassword) },
+    { label: tAuth('passwordStrength.minLength'), valid: newPassword.length >= 8 },
+    { label: tAuth('passwordStrength.uppercase'), valid: /[A-Z]/.test(newPassword) },
+    { label: tAuth('passwordStrength.lowercase'), valid: /[a-z]/.test(newPassword) },
+    { label: tAuth('passwordStrength.number'), valid: /\d/.test(newPassword) },
   ];
 
   const isNewPasswordValid = passwordChecks.every((check) => check.valid);
@@ -100,12 +104,12 @@ export default function SettingsPage() {
     e.preventDefault();
 
     if (!isNewPasswordValid) {
-      toast.error('Le mot de passe ne respecte pas les critères requis');
+      toast.error(t('passwordRequirements'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
+      toast.error(t('passwordsDontMatch'));
       return;
     }
 
@@ -119,16 +123,16 @@ export default function SettingsPage() {
       });
 
       if (res.ok) {
-        toast.success('Mot de passe modifié avec succès');
+        toast.success(t('passwordChanged'));
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
       } else {
         const data = await res.json();
-        toast.error(data.error || 'Erreur lors de la modification');
+        toast.error(data.error || t('updateError'));
       }
     } catch (error) {
-      toast.error('Erreur de connexion');
+      toast.error(tCommon('connectionError'));
     } finally {
       setIsSavingPassword(false);
     }
@@ -136,10 +140,10 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     const confirmed = await confirm({
-      title: 'Supprimer votre compte',
-      message: 'Cette action est irréversible. Toutes vos données, liens et statistiques seront définitivement supprimés.',
-      confirmText: 'Supprimer mon compte',
-      cancelText: 'Annuler',
+      title: t('deleteAccountTitle'),
+      message: t('deleteAccountConfirm'),
+      confirmText: t('deleteAccount'),
+      cancelText: tCommon('cancel'),
       variant: 'danger',
     });
 
@@ -149,14 +153,14 @@ export default function SettingsPage() {
       const res = await fetch('/api/auth/account', { method: 'DELETE' });
 
       if (res.ok) {
-        toast.success('Compte supprimé');
+        toast.success(t('accountDeleted'));
         await logout();
         router.push('/');
       } else {
-        toast.error('Erreur lors de la suppression');
+        toast.error(t('deleteError'));
       }
     } catch (error) {
-      toast.error('Erreur de connexion');
+      toast.error(tCommon('connectionError'));
     }
   };
 
@@ -173,11 +177,11 @@ export default function SettingsPage() {
   }
 
   const tabs = [
-    { id: 'profile', label: 'Profil', icon: User, available: true },
-    { id: 'security', label: 'Sécurité', icon: Lock, available: true },
-    { id: 'notifications', label: 'Notifications', icon: Bell, available: false },
-    { id: 'appearance', label: 'Apparence', icon: Palette, available: true },
-    { id: 'danger', label: 'Zone de danger', icon: Shield, available: true },
+    { id: 'profile', label: t('profile'), icon: User, available: true },
+    { id: 'security', label: t('security'), icon: Lock, available: true },
+    { id: 'notifications', label: t('notifications'), icon: Bell, available: false },
+    { id: 'appearance', label: t('appearance'), icon: Palette, available: true },
+    { id: 'danger', label: t('dangerZone'), icon: Shield, available: true },
   ];
 
   return (
@@ -189,9 +193,9 @@ export default function SettingsPage() {
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-2xl font-bold">Paramètres</h1>
+              <h1 className="text-2xl font-bold">{t('title')}</h1>
               <p className="text-muted-foreground">
-                Gérez votre compte et vos préférences
+                {t('subtitle')}
               </p>
             </div>
 
@@ -221,7 +225,7 @@ export default function SettingsPage() {
                         <span className="flex-1 text-left">{tab.label}</span>
                         {isDisabled && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                            Bientôt
+                            {tCommon('comingSoon')}
                           </span>
                         )}
                       </button>
@@ -235,24 +239,24 @@ export default function SettingsPage() {
                 {/* Profile Tab */}
                 {activeTab === 'profile' && (
                   <div className="bg-card rounded-xl border p-6">
-                    <h2 className="text-lg font-semibold mb-6">Informations du profil</h2>
+                    <h2 className="text-lg font-semibold mb-6">{t('profileInfo')}</h2>
                     <form onSubmit={handleSaveProfile} className="space-y-4">
                       <div>
                         <label htmlFor="name" className="text-sm font-medium mb-2 block">
-                          Nom d'affichage
+                          {t('displayName')}
                         </label>
                         <input
                           id="name"
                           type="text"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          placeholder="Votre nom"
+                          placeholder={t('displayNamePlaceholder')}
                           className="w-full h-11 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                       <div>
                         <label htmlFor="email" className="text-sm font-medium mb-2 block">
-                          Adresse email
+                          {t('emailAddress')}
                         </label>
                         <input
                           id="email"
@@ -262,7 +266,7 @@ export default function SettingsPage() {
                           className="w-full h-11 px-4 rounded-lg border border-input bg-muted text-sm text-muted-foreground cursor-not-allowed"
                         />
                         <p className="text-xs text-muted-foreground mt-1">
-                          L'email ne peut pas être modifié pour le moment
+                          {t('emailCannotChange')}
                         </p>
                       </div>
                       <button
@@ -275,7 +279,7 @@ export default function SettingsPage() {
                         ) : (
                           <Save className="w-4 h-4" />
                         )}
-                        Enregistrer
+                        {t('updateProfile')}
                       </button>
                     </form>
                   </div>
@@ -284,11 +288,11 @@ export default function SettingsPage() {
                 {/* Security Tab */}
                 {activeTab === 'security' && (
                   <div className="bg-card rounded-xl border p-6">
-                    <h2 className="text-lg font-semibold mb-6">Changer le mot de passe</h2>
+                    <h2 className="text-lg font-semibold mb-6">{t('changePasswordTitle')}</h2>
                     <form onSubmit={handleChangePassword} className="space-y-4">
                       <div>
                         <label htmlFor="current-password" className="text-sm font-medium mb-2 block">
-                          Mot de passe actuel
+                          {t('currentPassword')}
                         </label>
                         <div className="relative">
                           <input
@@ -310,7 +314,7 @@ export default function SettingsPage() {
                       </div>
                       <div>
                         <label htmlFor="new-password" className="text-sm font-medium mb-2 block">
-                          Nouveau mot de passe
+                          {t('newPassword')}
                         </label>
                         <div className="relative">
                           <input
@@ -351,7 +355,7 @@ export default function SettingsPage() {
                       </div>
                       <div>
                         <label htmlFor="confirm-password" className="text-sm font-medium mb-2 block">
-                          Confirmer le mot de passe
+                          {t('confirmNewPassword')}
                         </label>
                         <input
                           id="confirm-password"
@@ -366,10 +370,10 @@ export default function SettingsPage() {
                             {confirmPassword === newPassword ? (
                               <>
                                 <Check className="w-4 h-4 text-green-500" />
-                                <span className="text-xs text-green-500">Les mots de passe correspondent</span>
+                                <span className="text-xs text-green-500">{t('passwordsMatch')}</span>
                               </>
                             ) : (
-                              <span className="text-xs text-red-500">Les mots de passe ne correspondent pas</span>
+                              <span className="text-xs text-red-500">{t('passwordsDontMatch')}</span>
                             )}
                           </div>
                         )}
@@ -384,7 +388,7 @@ export default function SettingsPage() {
                         ) : (
                           <Lock className="w-4 h-4" />
                         )}
-                        Changer le mot de passe
+                        {t('changePassword')}
                       </button>
                     </form>
                   </div>
@@ -394,16 +398,16 @@ export default function SettingsPage() {
                 {activeTab === 'notifications' && (
                   <div className="bg-card rounded-xl border p-6 opacity-60">
                     <div className="flex items-center gap-2 mb-6">
-                      <h2 className="text-lg font-semibold">Préférences de notifications</h2>
+                      <h2 className="text-lg font-semibold">{t('notificationsTitle')}</h2>
                       <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                        Bientôt disponible
+                        {tCommon('comingSoon')}
                       </span>
                     </div>
                     <div className="space-y-4 pointer-events-none">
                       <div className="flex items-center justify-between py-3 border-b">
                         <div>
-                          <p className="font-medium text-muted-foreground">Notifications par email</p>
-                          <p className="text-sm text-muted-foreground/70">Recevoir des emails pour les mises à jour importantes</p>
+                          <p className="font-medium text-muted-foreground">{t('emailNotifications')}</p>
+                          <p className="text-sm text-muted-foreground/70">{t('emailNotificationsDesc')}</p>
                         </div>
                         <div className="relative w-12 h-7 rounded-full bg-muted">
                           <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white/50 shadow" />
@@ -411,8 +415,8 @@ export default function SettingsPage() {
                       </div>
                       <div className="flex items-center justify-between py-3 border-b">
                         <div>
-                          <p className="font-medium text-muted-foreground">Rapports hebdomadaires</p>
-                          <p className="text-sm text-muted-foreground/70">Recevoir un résumé de vos statistiques chaque semaine</p>
+                          <p className="font-medium text-muted-foreground">{t('weeklyReports')}</p>
+                          <p className="text-sm text-muted-foreground/70">{t('weeklyReportsDesc')}</p>
                         </div>
                         <div className="relative w-12 h-7 rounded-full bg-muted">
                           <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white/50 shadow" />
@@ -420,8 +424,8 @@ export default function SettingsPage() {
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
-                          <p className="font-medium text-muted-foreground">Alertes de sécurité</p>
-                          <p className="text-sm text-muted-foreground/70">Être notifié des connexions suspectes</p>
+                          <p className="font-medium text-muted-foreground">{t('securityAlerts')}</p>
+                          <p className="text-sm text-muted-foreground/70">{t('securityAlertsDesc')}</p>
                         </div>
                         <div className="relative w-12 h-7 rounded-full bg-muted">
                           <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white/50 shadow" />
@@ -434,12 +438,12 @@ export default function SettingsPage() {
                 {/* Appearance Tab */}
                 {activeTab === 'appearance' && (
                   <div className="bg-card rounded-xl border p-6">
-                    <h2 className="text-lg font-semibold mb-6">Apparence</h2>
+                    <h2 className="text-lg font-semibold mb-6">{t('appearance')}</h2>
                     <div className="space-y-6">
                       <div>
-                        <p className="font-medium mb-4">Thème</p>
+                        <p className="font-medium mb-4">{t('theme.title')}</p>
                         <p className="text-sm text-muted-foreground mb-4">
-                          Choisissez le thème de l'interface. Le thème "Système" s'adapte automatiquement aux préférences de votre appareil.
+                          {t('theme.description')}
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           {/* Light Theme */}
@@ -459,7 +463,7 @@ export default function SettingsPage() {
                             <div className="w-full aspect-video bg-white rounded-lg mb-3 border flex items-center justify-center">
                               <Sun className="w-8 h-8 text-amber-500" />
                             </div>
-                            <p className="font-medium text-sm">Clair</p>
+                            <p className="font-medium text-sm">{t('theme.light')}</p>
                           </button>
 
                           {/* Dark Theme */}
@@ -479,7 +483,7 @@ export default function SettingsPage() {
                             <div className="w-full aspect-video bg-gray-900 rounded-lg mb-3 border border-gray-700 flex items-center justify-center">
                               <Moon className="w-8 h-8 text-blue-400" />
                             </div>
-                            <p className="font-medium text-sm">Sombre</p>
+                            <p className="font-medium text-sm">{t('theme.dark')}</p>
                           </button>
 
                           {/* System Theme */}
@@ -499,7 +503,7 @@ export default function SettingsPage() {
                             <div className="w-full aspect-video bg-gradient-to-r from-white to-gray-900 rounded-lg mb-3 border flex items-center justify-center">
                               <Monitor className="w-8 h-8 text-gray-500" />
                             </div>
-                            <p className="font-medium text-sm">Système</p>
+                            <p className="font-medium text-sm">{t('theme.system')}</p>
                           </button>
                         </div>
                       </div>
@@ -507,13 +511,13 @@ export default function SettingsPage() {
                       {/* Current theme info */}
                       <div className="p-4 rounded-lg bg-muted/50 border">
                         <p className="text-sm text-muted-foreground">
-                          <span className="font-medium">Thème actuel :</span>{' '}
+                          <span className="font-medium">{t('theme.current')} :</span>{' '}
                           {theme === 'system' ? (
-                            <>Système ({resolvedTheme === 'dark' ? 'Sombre' : 'Clair'})</>
+                            <>{t('theme.system')} ({resolvedTheme === 'dark' ? t('theme.dark') : t('theme.light')})</>
                           ) : theme === 'dark' ? (
-                            'Sombre'
+                            t('theme.dark')
                           ) : (
-                            'Clair'
+                            t('theme.light')
                           )}
                         </p>
                       </div>
@@ -524,17 +528,17 @@ export default function SettingsPage() {
                 {/* Danger Zone Tab */}
                 {activeTab === 'danger' && (
                   <div className="bg-card rounded-xl border border-red-200 dark:border-red-900 p-6">
-                    <h2 className="text-lg font-semibold text-red-600 mb-2">Zone de danger</h2>
+                    <h2 className="text-lg font-semibold text-red-600 mb-2">{t('dangerZone')}</h2>
                     <p className="text-sm text-muted-foreground mb-6">
-                      Ces actions sont irréversibles. Procédez avec prudence.
+                      {t('dangerZoneDesc')}
                     </p>
                     <div className="space-y-4">
                       <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <p className="font-medium text-red-600">Supprimer mon compte</p>
+                            <p className="font-medium text-red-600">{t('deleteAccount')}</p>
                             <p className="text-sm text-muted-foreground mt-1">
-                              Supprime définitivement votre compte et toutes les données associées (liens, statistiques, etc.)
+                              {t('deleteAccountDesc')}
                             </p>
                           </div>
                           <button
@@ -542,7 +546,7 @@ export default function SettingsPage() {
                             className="shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
-                            Supprimer
+                            {tCommon('delete')}
                           </button>
                         </div>
                       </div>
@@ -557,4 +561,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

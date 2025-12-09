@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -12,6 +13,7 @@ export default function ALinksLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const t = useTranslations('common');
   const router = useRouter();
   const { isLoading, isAuthenticated } = useAuth();
 
@@ -26,7 +28,7 @@ export default function ALinksLayout({
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 import {
   ArrowLeft,
@@ -20,64 +21,22 @@ import {
 } from 'lucide-react';
 import { Header, Footer } from '@/components/layout';
 
-const toolsInfo: Record<string, { name: string; description: string; icon: React.ElementType; color: string }> = {
-  avault: {
-    name: 'AVault',
-    description: 'Partagez des notes et documents chiffrés de bout en bout. Vos données restent privées.',
-    icon: Lock,
-    color: 'from-violet-500 to-purple-600',
-  },
-  atransfer: {
-    name: 'ATransfer',
-    description: 'Transférez des fichiers volumineux jusqu\'à 50 Go facilement et en toute sécurité.',
-    icon: Send,
-    color: 'from-emerald-500 to-teal-600',
-  },
-  acalendar: {
-    name: 'ACalendar',
-    description: 'Gérez votre agenda, planifiez des événements et partagez vos disponibilités.',
-    icon: Calendar,
-    color: 'from-amber-500 to-orange-600',
-  },
-  amail: {
-    name: 'AMail',
-    description: 'Une messagerie sécurisée et respectueuse de votre vie privée.',
-    icon: Mail,
-    color: 'from-red-500 to-rose-600',
-  },
-  adrive: {
-    name: 'ADrive',
-    description: 'Stockez, synchronisez et partagez vos fichiers dans le cloud.',
-    icon: HardDrive,
-    color: 'from-cyan-500 to-blue-600',
-  },
-  ameet: {
-    name: 'AMeet',
-    description: 'Organisez des visioconférences sécurisées avec votre équipe.',
-    icon: Video,
-    color: 'from-pink-500 to-rose-600',
-  },
-  adocs: {
-    name: 'ADocs',
-    description: 'Créez et collaborez sur des documents en temps réel.',
-    icon: FileText,
-    color: 'from-indigo-500 to-blue-600',
-  },
-  asheets: {
-    name: 'ASheets',
-    description: 'Créez des feuilles de calcul puissantes et collaboratives.',
-    icon: Table,
-    color: 'from-green-500 to-emerald-600',
-  },
-  aslides: {
-    name: 'ASlides',
-    description: 'Créez des présentations percutantes et professionnelles.',
-    icon: Presentation,
-    color: 'from-orange-500 to-amber-600',
-  },
+const toolsInfo: Record<string, { icon: React.ElementType; color: string }> = {
+  avault: { icon: Lock, color: 'from-violet-500 to-purple-600' },
+  atransfer: { icon: Send, color: 'from-emerald-500 to-teal-600' },
+  acalendar: { icon: Calendar, color: 'from-amber-500 to-orange-600' },
+  amail: { icon: Mail, color: 'from-red-500 to-rose-600' },
+  adrive: { icon: HardDrive, color: 'from-cyan-500 to-blue-600' },
+  ameet: { icon: Video, color: 'from-pink-500 to-rose-600' },
+  adocs: { icon: FileText, color: 'from-indigo-500 to-blue-600' },
+  asheets: { icon: Table, color: 'from-green-500 to-emerald-600' },
+  aslides: { icon: Presentation, color: 'from-orange-500 to-amber-600' },
 };
 
 function ComingSoonContent() {
+  const t = useTranslations('comingSoon');
+  const tTools = useTranslations('tools');
+  const tCommon = useTranslations('common');
   const searchParams = useSearchParams();
   const tool = searchParams.get('tool')?.toLowerCase();
   
@@ -97,14 +56,14 @@ function ComingSoonContent() {
 
           {/* Title */}
           <h1 className="text-3xl font-bold mb-4">
-            {toolInfo ? toolInfo.name : 'Fonctionnalité'} arrive bientôt !
+            {toolInfo && tool ? `${tTools(`${tool}.name`)} - ` : ''}{t('title')}
           </h1>
 
           {/* Description */}
           <p className="text-lg text-muted-foreground mb-8">
-            {toolInfo 
-              ? toolInfo.description 
-              : 'Cette fonctionnalité est en cours de développement et sera disponible prochainement.'
+            {toolInfo && tool 
+              ? tTools(`${tool}.description`)
+              : t('description')
             }
           </p>
 
@@ -120,7 +79,7 @@ function ComingSoonContent() {
               className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-primary/10 text-primary font-medium cursor-not-allowed opacity-60"
             >
               <Bell className="w-4 h-4" />
-              Me notifier (bientôt)
+              {tCommon('comingSoon')}
             </button>
           </div>
 
@@ -131,7 +90,7 @@ function ComingSoonContent() {
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              Retour à l'accueil
+              {t('backHome')}
             </Link>
             <span className="hidden sm:inline text-muted-foreground">•</span>
             <Link
@@ -139,7 +98,7 @@ function ComingSoonContent() {
               className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
             >
               <Link2 className="w-4 h-4" />
-              Essayer ALinks (disponible)
+              {tTools('alinks.name')}
             </Link>
           </div>
         </div>
@@ -165,4 +124,3 @@ export default function ComingSoonPage() {
     </Suspense>
   );
 }
-

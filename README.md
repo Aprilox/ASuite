@@ -23,10 +23,12 @@ Une suite d'outils collaboratifs moderne, sécurisée et professionnelle. Inspir
 - ✏️ Édition complète des liens
 
 ### Interface utilisateur ✅
+- 🌍 Multi-langue (Français / English) avec détection automatique
 - 🎨 Thèmes clair / sombre / système (synchronisé avec le compte)
 - 🔔 Notifications toast personnalisées
 - 💬 Popups de confirmation personnalisées
 - 📱 Interface responsive
+- ⚖️ Pages légales complètes (Mentions, Confidentialité, CGU, Cookies)
 
 ### Outils à venir
 | Outil | Description | Status |
@@ -144,6 +146,7 @@ ASuite/
 |----------|-------------|
 | `pnpm dev` | Lancer en mode développement |
 | `pnpm build` | Build de production |
+| `pnpm start` | Lancer en mode production (après build) |
 | `pnpm lint` | Vérification du code |
 | `pnpm db:generate` | Générer le client Prisma |
 | `pnpm db:push` | Appliquer le schéma à la DB |
@@ -172,6 +175,14 @@ ASuite/
 
 ## 📝 Changelog
 
+### v1.3.0 (Actuel)
+- 🌍 Multi-langue (Français / English)
+- 🌍 Détection automatique de la langue selon le pays
+- 🌍 Sauvegarde de la préférence de langue dans le profil
+- ⚖️ Pages légales complètes (Mentions, Confidentialité, CGU, Cookies)
+- 📋 Page Journal des modifications dynamique
+- ✨ Changement de langue sans rechargement de page
+
 ### v1.2.0
 - ✨ Thème synchronisé avec le compte utilisateur
 - 🔐 Protection anti brute-force (rate limiting par IP)
@@ -194,6 +205,8 @@ ASuite/
 - ✅ Page de paramètres utilisateur
 - ✅ Notifications toast personnalisées
 - ✅ Popups de confirmation personnalisées
+
+> 📋 Voir le [Journal des modifications](./CHANGELOG.md) complet pour plus de détails.
 
 ## 📄 Licence
 

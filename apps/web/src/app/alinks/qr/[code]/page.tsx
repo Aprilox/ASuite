@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Link2,
   ArrowLeft,
@@ -17,6 +18,9 @@ import QRCode from 'qrcode';
 export default function QRCodePage() {
   const params = useParams();
   const code = params.code as string;
+  const t = useTranslations('alinks');
+  const tCommon = useTranslations('common');
+  const tErrors = useTranslations('errors.link');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copied, setCopied] = useState(false);
@@ -120,7 +124,7 @@ export default function QRCodePage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-muted-foreground">{tCommon('loading')}</p>
         </div>
       </div>
     );
@@ -130,9 +134,9 @@ export default function QRCodePage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-destructive mb-4">Lien non trouvé</p>
+          <p className="text-destructive mb-4">{tErrors('notFound.title')}</p>
           <Link href="/alinks/dashboard" className="text-primary hover:underline">
-            Retour aux liens
+            {t('qr.backToLinks')}
           </Link>
         </div>
       </div>
@@ -150,7 +154,7 @@ export default function QRCodePage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">QR Code</h1>
+          <h1 className="text-2xl font-bold">{t('qr.title')}</h1>
           <p className="text-muted-foreground">{linkData.shortUrl}</p>
         </div>
       </div>
@@ -180,12 +184,12 @@ export default function QRCodePage() {
             <div>
               <h3 className="font-medium mb-4 flex items-center gap-2">
                 <Palette className="w-4 h-4" />
-                Personnalisation
+                {t('qr.customize')}
               </h3>
               <div className="space-y-4">
                 <div>
                   <label className="text-sm text-muted-foreground mb-2 block">
-                    Couleur du code
+                    {t('qr.foreground')}
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -205,10 +209,10 @@ export default function QRCodePage() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm text-muted-foreground">
-                      Couleur du fond
+                      {t('qr.background')}
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <span className="text-xs text-muted-foreground">Transparent</span>
+                      <span className="text-xs text-muted-foreground">{t('qr.transparent')}</span>
                       <button
                         type="button"
                         onClick={() => setTransparentBg(!transparentBg)}
@@ -234,7 +238,7 @@ export default function QRCodePage() {
                     />
                     <input
                       type="text"
-                      value={transparentBg ? 'Transparent' : bgColor}
+                      value={transparentBg ? t('qr.transparent') : bgColor}
                       onChange={(e) => setBgColor(e.target.value)}
                       disabled={transparentBg}
                       className="flex-1 h-12 px-4 rounded-lg border border-input bg-background text-sm uppercase font-mono disabled:cursor-not-allowed"
@@ -251,14 +255,14 @@ export default function QRCodePage() {
                 className="w-full h-11 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Télécharger PNG
+                {t('qr.downloadPNG')}
               </button>
               <button
                 onClick={downloadSVG}
                 className="w-full h-11 rounded-lg border border-input bg-background hover:bg-accent font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Télécharger SVG
+                {t('qr.downloadSVG')}
               </button>
               <button
                 onClick={copyToClipboard}
@@ -267,12 +271,12 @@ export default function QRCodePage() {
                 {copied ? (
                   <>
                     <Check className="w-4 h-4 text-green-500" />
-                    Lien copié !
+                    {tCommon('copied')}
                   </>
                 ) : (
                   <>
                     <Copy className="w-4 h-4" />
-                    Copier le lien
+                    {t('copyLink')}
                   </>
                 )}
               </button>

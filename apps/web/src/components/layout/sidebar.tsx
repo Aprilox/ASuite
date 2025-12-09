@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Link2,
   Lock,
@@ -19,67 +20,67 @@ import {
 
 const tools = [
   {
-    name: 'Dashboard',
+    key: 'dashboard',
     icon: LayoutDashboard,
     href: '/dashboard',
     status: 'active' as const,
   },
   {
-    name: 'ALinks',
+    key: 'alinks',
     icon: Link2,
     href: '/alinks',
     status: 'active' as const,
   },
   {
-    name: 'AVault',
+    key: 'avault',
     icon: Lock,
     href: '/avault',
     status: 'coming' as const,
   },
   {
-    name: 'ATransfer',
+    key: 'atransfer',
     icon: Send,
     href: '/atransfer',
     status: 'coming' as const,
   },
   {
-    name: 'ACalendar',
+    key: 'acalendar',
     icon: Calendar,
     href: '/acalendar',
     status: 'coming' as const,
   },
   {
-    name: 'AMail',
+    key: 'amail',
     icon: Mail,
     href: '/amail',
     status: 'coming' as const,
   },
   {
-    name: 'ADrive',
+    key: 'adrive',
     icon: HardDrive,
     href: '/adrive',
     status: 'coming' as const,
   },
   {
-    name: 'AMeet',
+    key: 'ameet',
     icon: Video,
     href: '/ameet',
     status: 'coming' as const,
   },
   {
-    name: 'ADocs',
+    key: 'adocs',
     icon: FileText,
     href: '/adocs',
     status: 'coming' as const,
   },
   {
-    name: 'ASheets',
+    key: 'asheets',
     icon: Table,
     href: '/asheets',
     status: 'coming' as const,
   },
   {
-    name: 'ASlides',
+    key: 'aslides',
     icon: Presentation,
     href: '/aslides',
     status: 'coming' as const,
@@ -92,12 +93,20 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed = false }: SidebarProps) {
   const pathname = usePathname();
+  const t = useTranslations('sidebar');
+  const tTools = useTranslations('tools');
+  const tCommon = useTranslations('common');
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
       return pathname === '/dashboard';
     }
     return pathname.startsWith(href);
+  };
+
+  const getToolName = (key: string) => {
+    if (key === 'dashboard') return t('dashboard');
+    return tTools(`${key}.name`);
   };
 
   return (
@@ -111,10 +120,11 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
           const Icon = tool.icon;
           const active = isActive(tool.href);
           const disabled = tool.status === 'coming';
+          const toolName = getToolName(tool.key);
 
           return (
             <Link
-              key={tool.name}
+              key={tool.key}
               href={disabled ? '#' : tool.href}
               onClick={(e) => disabled && e.preventDefault()}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -124,15 +134,15 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                   ? 'text-muted-foreground/50 cursor-not-allowed'
                   : 'text-muted-foreground hover:text-foreground hover:bg-accent'
               } ${collapsed ? 'justify-center' : ''}`}
-              title={collapsed ? tool.name : undefined}
+              title={collapsed ? toolName : undefined}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
               {!collapsed && (
                 <>
-                  <span className="flex-1">{tool.name}</span>
+                  <span className="flex-1">{toolName}</span>
                   {disabled && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                      Bientôt
+                      {tCommon('comingSoon')}
                     </span>
                   )}
                 </>
@@ -149,13 +159,12 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
           className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${
             collapsed ? 'justify-center' : ''
           }`}
-          title={collapsed ? 'Paramètres' : undefined}
+          title={collapsed ? t('settings') : undefined}
         >
           <Settings className="w-5 h-5" />
-          {!collapsed && <span>Paramètres</span>}
+          {!collapsed && <span>{t('settings')}</span>}
         </Link>
       </div>
     </aside>
   );
 }
-

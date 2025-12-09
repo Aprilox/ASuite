@@ -1,11 +1,22 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Mail, Construction } from 'lucide-react';
+import { LanguageSelector } from '@/components/ui/language-selector';
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('forgotPassword');
+  const tCommon = useTranslations('common');
+  const tFooter = useTranslations('footer');
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 relative">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector variant="compact" />
+      </div>
+
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -24,21 +35,20 @@ export default function ForgotPasswordPage() {
               <Construction className="w-8 h-8 text-amber-600 dark:text-amber-400" />
             </div>
             
-            <h1 className="text-2xl font-bold mb-2">Mot de passe oublié</h1>
+            <h1 className="text-2xl font-bold mb-2">{t('title')}</h1>
             
             <span className="inline-block px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-sm font-medium mb-4">
-              Bientôt disponible
+              {tCommon('comingSoon')}
             </span>
             
             <p className="text-muted-foreground mb-6">
-              La fonctionnalité de réinitialisation de mot de passe est en cours de développement. 
-              Elle sera disponible très prochainement.
+              {t('description')}
             </p>
 
             <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 mb-6">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="w-5 h-5 text-primary" />
-                <span>En attendant, contactez le support si vous avez besoin d'aide.</span>
+                <span>contact@aprilox.fr</span>
               </div>
             </div>
 
@@ -47,17 +57,16 @@ export default function ForgotPasswordPage() {
               className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
-              Retour à la connexion
+              {t('backToLogin')}
             </Link>
           </div>
         </div>
 
         {/* Footer */}
         <p className="text-center text-sm text-muted-foreground mt-6">
-          © {new Date().getFullYear()} ASuite. Tous droits réservés.
+          © {new Date().getFullYear()} ASuite. {tFooter('allRightsReserved')}
         </p>
       </div>
     </div>
   );
 }
-

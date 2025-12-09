@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   Link2,
   Lock,
@@ -7,25 +10,22 @@ import {
   Mail,
   HardDrive,
   Github,
-  Twitter,
 } from 'lucide-react';
 
 const toolLinks = [
-  { name: 'ALinks', href: '/alinks', icon: Link2, available: true },
-  { name: 'AVault', href: '/coming-soon?tool=avault', icon: Lock, available: false },
-  { name: 'ATransfer', href: '/coming-soon?tool=atransfer', icon: Send, available: false },
-  { name: 'ACalendar', href: '/coming-soon?tool=acalendar', icon: Calendar, available: false },
-  { name: 'AMail', href: '/coming-soon?tool=amail', icon: Mail, available: false },
-  { name: 'ADrive', href: '/coming-soon?tool=adrive', icon: HardDrive, available: false },
-];
-
-const legalLinks = [
-  { name: 'Mentions légales', href: '/coming-soon?tool=legal' },
-  { name: 'Confidentialité', href: '/coming-soon?tool=privacy' },
-  { name: 'CGU', href: '/coming-soon?tool=terms' },
+  { key: 'alinks', href: '/alinks', icon: Link2, available: true },
+  { key: 'avault', href: '/coming-soon?tool=avault', icon: Lock, available: false },
+  { key: 'atransfer', href: '/coming-soon?tool=atransfer', icon: Send, available: false },
+  { key: 'acalendar', href: '/coming-soon?tool=acalendar', icon: Calendar, available: false },
+  { key: 'amail', href: '/coming-soon?tool=amail', icon: Mail, available: false },
+  { key: 'adrive', href: '/coming-soon?tool=adrive', icon: HardDrive, available: false },
 ];
 
 export function Footer() {
+  const t = useTranslations('footer');
+  const tTools = useTranslations('tools');
+  const tCommon = useTranslations('common');
+
   return (
     <footer className="border-t bg-muted/30">
       <div className="container mx-auto px-4 py-12">
@@ -39,7 +39,7 @@ export function Footer() {
               <span className="font-bold text-xl">ASuite</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
-              Suite collaborative professionnelle pour communiquer, partager et donner vie à vos idées en sécurité.
+              {t('madeWith')} ❤️ {t('forProductivity')}
             </p>
             <div className="flex items-center gap-3">
               <a
@@ -50,32 +50,24 @@ export function Footer() {
               >
                 <Github className="w-4 h-4" />
               </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
             </div>
           </div>
 
           {/* Tools */}
           <div>
-            <h4 className="font-semibold mb-4">Outils</h4>
+            <h4 className="font-semibold mb-4">{t('tools')}</h4>
             <ul className="space-y-2">
               {toolLinks.map((link) => (
-                <li key={link.name}>
+                <li key={link.key}>
                   <Link
                     href={link.href}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
                   >
                     <link.icon className="w-4 h-4" />
-                    {link.name}
+                    {tTools(`${link.key}.name`)}
                     {!link.available && (
                       <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                        Bientôt
+                        {tCommon('comingSoon')}
                       </span>
                     )}
                   </Link>
@@ -84,16 +76,16 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Ressources */}
+          {/* Resources */}
           <div>
-            <h4 className="font-semibold mb-4">Ressources</h4>
+            <h4 className="font-semibold mb-4">{t('resources')}</h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/coming-soon?tool=docs"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Documentation
+                  {t('documentation')}
                 </Link>
               </li>
               <li>
@@ -101,23 +93,15 @@ export function Footer() {
                   href="/coming-soon?tool=support"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Support
+                  {t('support')}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/coming-soon?tool=changelog"
+                  href="/changelog"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Changelog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/coming-soon?tool=status"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Statut des services
+                  {t('changelog')}
                 </Link>
               </li>
             </ul>
@@ -125,18 +109,40 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="font-semibold mb-4">Légal</h4>
+            <h4 className="font-semibold mb-4">{t('legal')}</h4>
             <ul className="space-y-2">
-              {legalLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link
+                  href="/legal"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t('legal')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t('privacy')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t('terms')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cookies"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t('cookies')}
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -144,10 +150,10 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ASuite. Tous droits réservés.
+            © {new Date().getFullYear()} ASuite. {t('allRightsReserved')}
           </p>
           <p className="text-sm text-muted-foreground">
-            Fait avec ❤️ pour la productivité
+            {t('madeWith')} ❤️ {t('forProductivity')}
           </p>
         </div>
       </div>

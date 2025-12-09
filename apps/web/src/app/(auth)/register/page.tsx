@@ -3,10 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, Check, X } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { LanguageSelector } from '@/components/ui/language-selector';
 
 export default function RegisterPage() {
+  const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -15,10 +19,10 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
 
   const passwordChecks = [
-    { label: 'Au moins 8 caractères', valid: password.length >= 8 },
-    { label: 'Une majuscule', valid: /[A-Z]/.test(password) },
-    { label: 'Une minuscule', valid: /[a-z]/.test(password) },
-    { label: 'Un chiffre', valid: /\d/.test(password) },
+    { label: t('passwordStrength.minLength'), valid: password.length >= 8 },
+    { label: t('passwordStrength.uppercase'), valid: /[A-Z]/.test(password) },
+    { label: t('passwordStrength.lowercase'), valid: /[a-z]/.test(password) },
+    { label: t('passwordStrength.number'), valid: /\d/.test(password) },
   ];
 
   const isPasswordValid = passwordChecks.every((check) => check.valid);
@@ -34,7 +38,7 @@ export default function RegisterPage() {
     e.preventDefault();
     
     if (!isPasswordValid) {
-      setError('Le mot de passe ne respecte pas les critères requis');
+      setError(t('errors.passwordRequired'));
       return;
     }
 
@@ -56,7 +60,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Erreur lors de l\'inscription');
+        throw new Error(data.error || t('errors.invalidCredentials'));
       }
 
       // Auto-login after registration
@@ -70,7 +74,7 @@ export default function RegisterPage() {
         router.push('/login?registered=true');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'inscription');
+      setError(err instanceof Error ? err.message : t('errors.invalidCredentials'));
       setIsLoading(false);
     }
   };
@@ -89,16 +93,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex relative">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector variant="compact" />
+      </div>
+
       {/* Left Panel - Decorative */}
       <div className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-500 to-violet-600 items-center justify-center p-12">
         <div className="text-white text-center max-w-md">
           <div className="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-8">
             <span className="text-4xl font-bold">A</span>
           </div>
-          <h2 className="text-3xl font-bold mb-4">Rejoignez ASuite</h2>
+          <h2 className="text-3xl font-bold mb-4">{t('registerTitle')}</h2>
           <p className="text-white/80">
-            Créez votre compte et accédez à une suite complète d&apos;outils de productivité.
+            {t('registerSubtitle')}
           </p>
           <div className="mt-8 grid grid-cols-2 gap-4 text-left">
             {['ALinks', 'AVault', 'ATransfer', 'ADrive'].map((tool) => (
@@ -119,13 +128,13 @@ export default function RegisterPage() {
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à l&apos;accueil
+            {tCommon('back')}
           </Link>
 
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2">Créer un compte</h1>
+            <h1 className="text-2xl font-bold mb-2">{t('registerTitle')}</h1>
             <p className="text-muted-foreground">
-              Inscrivez-vous gratuitement à ASuite
+              {t('registerSubtitle')}
             </p>
           </div>
 
@@ -138,7 +147,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium">
-                Nom complet
+                {t('name')}
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -147,7 +156,7 @@ export default function RegisterPage() {
                   name="name"
                   type="text"
                   required
-                  placeholder="Jean Dupont"
+                  placeholder={t('namePlaceholder')}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -155,7 +164,7 @@ export default function RegisterPage() {
 
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                {t('email')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -164,7 +173,7 @@ export default function RegisterPage() {
                   name="email"
                   type="email"
                   required
-                  placeholder="vous@exemple.com"
+                  placeholder={t('emailPlaceholder')}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -172,7 +181,7 @@ export default function RegisterPage() {
 
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Mot de passe
+                {t('password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -181,7 +190,7 @@ export default function RegisterPage() {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-11 pl-10 pr-12 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
@@ -219,39 +228,19 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="flex items-start gap-2">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                required
-                className="mt-1 h-4 w-4 rounded border-gray-300"
-              />
-              <label htmlFor="terms" className="text-sm text-muted-foreground">
-                J&apos;accepte les{' '}
-                <Link href="/terms" className="text-primary hover:underline">
-                  conditions d&apos;utilisation
-                </Link>{' '}
-                et la{' '}
-                <Link href="/privacy" className="text-primary hover:underline">
-                  politique de confidentialité
-                </Link>
-              </label>
-            </div>
-
             <button
               type="submit"
               disabled={isLoading || !isPasswordValid}
               className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Création du compte...' : 'Créer mon compte'}
+              {isLoading ? tCommon('loading') : t('registerButton')}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            Déjà un compte ?{' '}
+            {t('hasAccount')}{' '}
             <Link href="/login" className="text-primary hover:underline font-medium">
-              Se connecter
+              {t('loginNow')}
             </Link>
           </div>
         </div>

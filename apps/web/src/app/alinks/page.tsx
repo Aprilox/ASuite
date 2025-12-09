@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   Link2,
   Copy,
@@ -16,6 +17,8 @@ import {
 import { useToast } from '@/components/ui/toast';
 
 export default function ALinksPage() {
+  const t = useTranslations('alinks');
+  const tCommon = useTranslations('common');
   const toast = useToast();
   const [url, setUrl] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -53,7 +56,7 @@ export default function ALinksPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Erreur lors de la création du lien');
+        throw new Error(data.error || tCommon('error'));
       }
 
       setResult({
@@ -66,7 +69,7 @@ export default function ALinksPage() {
       setExpiresAt('');
       setMaxClicks('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +79,7 @@ export default function ALinksPage() {
     if (result?.shortUrl) {
       await navigator.clipboard.writeText(result.shortUrl);
       setCopied(true);
-      toast.success('Lien copié dans le presse-papiers');
+      toast.success(t('linkCopied'));
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -90,10 +93,10 @@ export default function ALinksPage() {
             <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
               <Link2 className="w-5 h-5 text-white" />
             </div>
-            ALinks
+            {t('title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Créez des liens courts et suivez leurs performances
+            {t('description')}
           </p>
         </div>
         <Link
@@ -101,7 +104,7 @@ export default function ALinksPage() {
           className="inline-flex items-center gap-2 px-4 h-9 rounded-lg border border-input bg-background hover:bg-accent text-sm font-medium transition-colors"
         >
           <BarChart3 className="w-4 h-4" />
-          Mes liens
+          {t('myLinks')}
         </Link>
       </div>
 
@@ -111,7 +114,7 @@ export default function ALinksPage() {
           {/* URL Input */}
           <div className="space-y-2">
             <label htmlFor="url" className="text-sm font-medium">
-              URL à raccourcir
+              {t('urlLabel')}
             </label>
             <div className="relative">
               <ExternalLink className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -121,7 +124,7 @@ export default function ALinksPage() {
                 required
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://exemple.com/mon-super-long-lien"
+                placeholder={t('urlPlaceholder')}
                 className="w-full h-14 pl-12 pr-4 rounded-xl border border-input bg-background text-base focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
@@ -134,7 +137,7 @@ export default function ALinksPage() {
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <Settings className="w-4 h-4" />
-            Options avancées
+            {t('advancedOptions')}
             <span className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>
               ▼
             </span>
@@ -148,14 +151,14 @@ export default function ALinksPage() {
                 <div className="space-y-2">
                   <label htmlFor="password" className="text-sm font-medium flex items-center gap-2">
                     <Lock className="w-4 h-4" />
-                    Mot de passe
+                    {t('linkPassword')}
                   </label>
                   <input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Protection par mot de passe"
+                    placeholder={t('linkPasswordPlaceholder')}
                     className="w-full h-10 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
@@ -164,7 +167,7 @@ export default function ALinksPage() {
                 <div className="space-y-2">
                   <label htmlFor="expiresAt" className="text-sm font-medium flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Date d&apos;expiration
+                    {t('expirationDate')}
                   </label>
                   <input
                     id="expiresAt"
@@ -179,7 +182,7 @@ export default function ALinksPage() {
                 <div className="space-y-2">
                   <label htmlFor="maxClicks" className="text-sm font-medium flex items-center gap-2">
                     <BarChart3 className="w-4 h-4" />
-                    Limite de clics
+                    {t('maxClicksLimit')}
                   </label>
                   <input
                     id="maxClicks"
@@ -187,7 +190,7 @@ export default function ALinksPage() {
                     min="1"
                     value={maxClicks}
                     onChange={(e) => setMaxClicks(e.target.value)}
-                    placeholder="Illimité"
+                    placeholder={t('unlimited')}
                     className="w-full h-10 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
@@ -211,12 +214,12 @@ export default function ALinksPage() {
             {isLoading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Création...
+                {t('creating')}
               </>
             ) : (
               <>
                 <Link2 className="w-5 h-5" />
-                Raccourcir le lien
+                {t('shortenButton')}
               </>
             )}
           </button>
@@ -227,7 +230,7 @@ export default function ALinksPage() {
           <div className="mt-6 p-6 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900">
             <div className="flex items-center gap-2 text-green-700 dark:text-green-400 mb-4">
               <Check className="w-5 h-5" />
-              <span className="font-medium">Lien créé avec succès !</span>
+              <span className="font-medium">{t('linkCreated')}</span>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -243,12 +246,12 @@ export default function ALinksPage() {
                   {copied ? (
                     <>
                       <Check className="w-4 h-4" />
-                      Copié !
+                      {tCommon('copied')}
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4" />
-                      Copier
+                      {tCommon('copy')}
                     </>
                   )}
                 </button>
@@ -279,28 +282,28 @@ export default function ALinksPage() {
         {[
           {
             icon: Link2,
-            title: 'Liens courts',
-            description: 'Transformez vos URLs longues en liens mémorables',
+            titleKey: 'shortLinks',
+            descKey: 'shortLinksDesc',
           },
           {
             icon: QrCode,
-            title: 'QR Codes',
-            description: 'Générez des QR codes personnalisables',
+            titleKey: 'qrCodes',
+            descKey: 'qrCodesDesc',
           },
           {
             icon: BarChart3,
-            title: 'Statistiques',
-            description: 'Suivez les clics et analysez vos performances',
+            titleKey: 'statistics',
+            descKey: 'statisticsDesc',
           },
         ].map((feature) => {
           const Icon = feature.icon;
           return (
-            <div key={feature.title} className="text-center p-6 bg-card rounded-xl border">
+            <div key={feature.titleKey} className="text-center p-6 bg-card rounded-xl border">
               <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto mb-4">
                 <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="font-semibold mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
+              <h3 className="font-semibold mb-2">{t(`features.${feature.titleKey}`)}</h3>
+              <p className="text-sm text-muted-foreground">{t(`features.${feature.descKey}`)}</p>
             </div>
           );
         })}

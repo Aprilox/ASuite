@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "start": "pnpm --filter @asuite/web start",
     "lint": "turbo lint",
     "clean": "turbo clean && rm -rf node_modules",
     "db:generate": "turbo db:generate",

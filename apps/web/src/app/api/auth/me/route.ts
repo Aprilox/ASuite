@@ -18,6 +18,7 @@ export async function GET() {
       name: user.name,
       role: user.role,
       theme: user.theme,
+      locale: user.locale,
     });
   } catch (error) {
     console.error('Error checking auth:', error);

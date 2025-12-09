@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   Link2,
   Copy,
@@ -37,6 +38,8 @@ interface LinkItem {
 }
 
 export default function ALinksDashboardPage() {
+  const t = useTranslations('alinks');
+  const tCommon = useTranslations('common');
   const confirm = useConfirm();
   const toast = useToast();
   const [links, setLinks] = useState<LinkItem[]>([]);
@@ -74,10 +77,10 @@ export default function ALinksDashboardPage() {
 
   const deleteLink = async (id: string) => {
     const confirmed = await confirm({
-      title: 'Supprimer le lien',
-      message: 'Êtes-vous sûr de vouloir supprimer ce lien ? Cette action est irréversible et toutes les statistiques seront perdues.',
-      confirmText: 'Supprimer',
-      cancelText: 'Annuler',
+      title: t('deleteLinkTitle'),
+      message: t('deleteLinkConfirm'),
+      confirmText: tCommon('delete'),
+      cancelText: tCommon('cancel'),
       variant: 'danger',
     });
 
@@ -87,20 +90,20 @@ export default function ALinksDashboardPage() {
       const res = await fetch(`/api/alinks/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setLinks(links.filter((link) => link.id !== id));
-        toast.success('Lien supprimé avec succès');
+        toast.success(t('linkDeleted'));
       } else {
-        toast.error('Erreur lors de la suppression du lien');
+        toast.error(tCommon('error'));
       }
     } catch (error) {
       console.error('Error deleting link:', error);
-      toast.error('Erreur de connexion');
+      toast.error(tCommon('connectionError'));
     }
   };
 
   const copyToClipboard = async (url: string, id: string) => {
     await navigator.clipboard.writeText(url);
     setCopiedId(id);
-    toast.success('Lien copié dans le presse-papiers');
+    toast.success(t('linkCopied'));
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -160,7 +163,7 @@ export default function ALinksDashboardPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Erreur lors de la modification');
+        throw new Error(data.error || tCommon('error'));
       }
 
       // Update link in list
@@ -176,10 +179,10 @@ export default function ALinksDashboardPage() {
           : link
       ));
 
-      toast.success('Lien modifié avec succès');
+      toast.success(t('linkUpdated'));
       closeEditModal();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : 'Erreur');
+      setEditError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setIsSaving(false);
     }
@@ -197,9 +200,9 @@ export default function ALinksDashboardPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Mes liens</h1>
+          <h1 className="text-2xl font-bold">{t('myLinks')}</h1>
           <p className="text-muted-foreground">
-            Gérez tous vos liens raccourcis
+            {t('description')}
           </p>
         </div>
         <Link
@@ -207,7 +210,7 @@ export default function ALinksDashboardPage() {
           className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Nouveau lien
+          {t('createLink')}
         </Link>
       </div>
 
@@ -216,7 +219,7 @@ export default function ALinksDashboardPage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Rechercher un lien..."
+          placeholder={t('searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full h-11 pl-12 pr-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
@@ -228,13 +231,13 @@ export default function ALinksDashboardPage() {
         {isLoading ? (
           <div className="p-12 text-center">
             <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">Chargement...</p>
+            <p className="text-muted-foreground">{tCommon('loading')}</p>
           </div>
         ) : filteredLinks.length === 0 ? (
           <div className="p-12 text-center">
             <Link2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground mb-4">
-              {searchQuery ? 'Aucun lien trouvé' : 'Vous n\'avez pas encore de liens'}
+              {searchQuery ? tCommon('noResults') : t('noLinks')}
             </p>
             {!searchQuery && (
               <Link
@@ -242,7 +245,7 @@ export default function ALinksDashboardPage() {
                 className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Créer mon premier lien
+                {t('createLink')}
               </Link>
             )}
           </div>
@@ -277,7 +280,7 @@ export default function ALinksDashboardPage() {
                   <div className="flex items-center gap-6 text-sm">
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <MousePointerClick className="w-4 h-4" />
-                      <span>{link.clickCount} clics</span>
+                      <span>{link.clickCount} {link.clickCount === 1 ? t('click') : t('clicks')}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Clock className="w-4 h-4" />
@@ -290,7 +293,7 @@ export default function ALinksDashboardPage() {
                     <button
                       onClick={() => copyToClipboard(link.shortUrl, link.id)}
                       className="flex items-center justify-center w-9 h-9 rounded-lg border border-input bg-background hover:bg-accent transition-colors"
-                      title="Copier"
+                      title={tCommon('copy')}
                     >
                       {copiedId === link.id ? (
                         <Check className="w-4 h-4 text-green-500" />
@@ -301,28 +304,28 @@ export default function ALinksDashboardPage() {
                     <button
                       onClick={() => openEditModal(link)}
                       className="flex items-center justify-center w-9 h-9 rounded-lg border border-input bg-background hover:bg-accent transition-colors"
-                      title="Modifier"
+                      title={tCommon('edit')}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <Link
                       href={`/alinks/qr/${link.shortCode}`}
                       className="flex items-center justify-center w-9 h-9 rounded-lg border border-input bg-background hover:bg-accent transition-colors"
-                      title="QR Code"
+                      title={t('qrCode')}
                     >
                       <QrCode className="w-4 h-4" />
                     </Link>
                     <Link
                       href={`/alinks/stats/${link.shortCode}`}
                       className="flex items-center justify-center w-9 h-9 rounded-lg border border-input bg-background hover:bg-accent transition-colors"
-                      title="Statistiques"
+                      title={t('stats')}
                     >
                       <BarChart3 className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => deleteLink(link.id)}
                       className="flex items-center justify-center w-9 h-9 rounded-lg border border-input bg-background hover:bg-destructive/10 hover:text-destructive hover:border-destructive transition-colors"
-                      title="Supprimer"
+                      title={tCommon('delete')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -347,7 +350,7 @@ export default function ALinksDashboardPage() {
           <div className="relative bg-card rounded-2xl border shadow-xl w-full max-w-md mx-4 p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold">Modifier le lien</h2>
+              <h2 className="text-xl font-bold">{t('editLink')}</h2>
               <button
                 onClick={closeEditModal}
                 className="p-2 hover:bg-accent rounded-lg transition-colors"
@@ -372,14 +375,14 @@ export default function ALinksDashboardPage() {
               {/* Title */}
               <div className="space-y-2">
                 <label htmlFor="edit-title" className="text-sm font-medium">
-                  Titre (optionnel)
+                  {t('title_label')}
                 </label>
                 <input
                   id="edit-title"
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="Mon lien important"
+                  placeholder={t('titlePlaceholder')}
                   className="w-full h-10 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -388,7 +391,7 @@ export default function ALinksDashboardPage() {
               <div className="space-y-2">
                 <label htmlFor="edit-expires" className="text-sm font-medium flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  Date d'expiration
+                  {t('expirationDate')}
                 </label>
                 <input
                   id="edit-expires"
@@ -403,7 +406,7 @@ export default function ALinksDashboardPage() {
                     onClick={() => setEditExpiresAt('')}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
-                    Supprimer l'expiration
+                    {t('noExpiration')}
                   </button>
                 )}
               </div>
@@ -412,7 +415,7 @@ export default function ALinksDashboardPage() {
               <div className="space-y-2">
                 <label htmlFor="edit-maxclicks" className="text-sm font-medium flex items-center gap-2">
                   <BarChart3 className="w-4 h-4" />
-                  Limite de clics
+                  {t('maxClicksLimit')}
                 </label>
                 <input
                   id="edit-maxclicks"
@@ -420,7 +423,7 @@ export default function ALinksDashboardPage() {
                   min="1"
                   value={editMaxClicks}
                   onChange={(e) => setEditMaxClicks(e.target.value)}
-                  placeholder="Illimité"
+                  placeholder={t('unlimited')}
                   className="w-full h-10 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -429,10 +432,10 @@ export default function ALinksDashboardPage() {
               <div className="space-y-2">
                 <label htmlFor="edit-password" className="text-sm font-medium flex items-center gap-2">
                   <Lock className="w-4 h-4" />
-                  Mot de passe
+                  {t('password')}
                   {editingLink?.hasPassword && !removePassword && (
                     <span className="text-xs text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
-                      Actif
+                      {t('passwordProtected')}
                     </span>
                   )}
                 </label>
@@ -443,7 +446,7 @@ export default function ALinksDashboardPage() {
                       type="password"
                       value={editPassword}
                       onChange={(e) => setEditPassword(e.target.value)}
-                      placeholder="Nouveau mot de passe (laisser vide pour garder l'actuel)"
+                      placeholder={t('newPassword')}
                       className="w-full h-10 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <button
@@ -451,18 +454,18 @@ export default function ALinksDashboardPage() {
                       onClick={() => setRemovePassword(true)}
                       className="text-xs text-red-600 hover:text-red-700"
                     >
-                      Supprimer la protection par mot de passe
+                      {t('removePassword')}
                     </button>
                   </div>
                 ) : removePassword ? (
                   <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-sm">
-                    <p className="text-red-600">Le mot de passe sera supprimé</p>
+                    <p className="text-red-600">{t('removePassword')}</p>
                     <button
                       type="button"
                       onClick={() => setRemovePassword(false)}
                       className="text-xs text-red-600 hover:text-red-700 underline mt-1"
                     >
-                      Annuler
+                      {tCommon('cancel')}
                     </button>
                   </div>
                 ) : (
@@ -471,7 +474,7 @@ export default function ALinksDashboardPage() {
                     type="password"
                     value={editPassword}
                     onChange={(e) => setEditPassword(e.target.value)}
-                    placeholder="Ajouter un mot de passe (optionnel)"
+                    placeholder={t('linkPasswordPlaceholder')}
                     className="w-full h-10 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 )}
@@ -490,7 +493,7 @@ export default function ALinksDashboardPage() {
                   onClick={closeEditModal}
                   className="flex-1 h-10 rounded-lg border border-input bg-background hover:bg-accent font-medium transition-colors"
                 >
-                  Annuler
+                  {tCommon('cancel')}
                 </button>
                 <button
                   onClick={saveEdit}
@@ -500,10 +503,10 @@ export default function ALinksDashboardPage() {
                   {isSaving ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Enregistrement...
+                      {tCommon('loading')}
                     </>
                   ) : (
-                    'Enregistrer'
+                    t('saveChanges')
                   )}
                 </button>
               </div>

@@ -4,6 +4,7 @@ export interface User {
   name: string | null;
   role: string;
   theme?: string;
+  locale?: string;
 }
 
 export interface AuthState {
