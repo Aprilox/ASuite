@@ -2,6 +2,18 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.3.1] - 2025-01-09
+
+### Corrections
+- Attributs autocomplete sur tous les champs de formulaire
+- Champ username caché pour l'accessibilité des formulaires de mot de passe
+- Correction des erreurs 401 sur les pages non authentifiées
+- Formulaire dans la modal d'édition des liens ALinks
+
+### Améliorations
+- Meilleure gestion des sessions pour éviter les déconnexions inattendues
+- Sidebar fixe avec scroll uniquement sur le contenu
+
 ## [1.3.0] - 2025-01-09
 
 ### Nouveautés

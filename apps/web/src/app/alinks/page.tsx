@@ -156,6 +156,7 @@ export default function ALinksPage() {
                   <input
                     id="password"
                     type="password"
+                    autoComplete="off"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t('linkPasswordPlaceholder')}

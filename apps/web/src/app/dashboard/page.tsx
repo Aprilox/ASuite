@@ -66,11 +66,11 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-muted/30">
       <Header />
 
-      <div className="flex pt-16">
+      <div className="flex pt-16 h-[calc(100vh-4rem)]">
         <Sidebar />
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 overflow-y-auto">
           {/* Welcome */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-2">

@@ -182,7 +182,7 @@ ASuite/
 
 ## 📝 Changelog
 
-**Version actuelle : v1.3.0** - Multi-langue, pages légales, changelog dynamique
+**Version actuelle : v1.3.1** - Corrections d'accessibilité et stabilité
 
 > 📋 Voir le [Journal des modifications complet](./CHANGELOG.md)
 

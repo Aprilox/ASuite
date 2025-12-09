@@ -5,11 +5,9 @@ export async function GET() {
   try {
     const user = await getSession();
 
+    // Retourner null si pas connecté (pas de 401 pour éviter les erreurs console)
     if (!user) {
-      return NextResponse.json(
-        { error: 'Non authentifié' },
-        { status: 401 }
-      );
+      return NextResponse.json(null);
     }
 
     return NextResponse.json({
@@ -22,10 +20,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error checking auth:', error);
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    );
+    return NextResponse.json(null);
   }
 }
 

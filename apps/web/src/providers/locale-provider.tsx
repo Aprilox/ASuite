@@ -55,16 +55,14 @@ export function LocaleProvider({ children, initialLocale }: LocaleProviderProps)
     setLocaleState(newLocale);
     setMessages(messagesMap[newLocale]);
 
-    // Sauvegarder en DB si connecté (en arrière-plan)
-    try {
-      await fetch('/api/auth/locale', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locale: newLocale }),
-      });
-    } catch {
-      // Ignore si pas connecté
-    }
+    // Sauvegarder en DB si connecté (en arrière-plan, ignorer les erreurs)
+    fetch('/api/auth/locale', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locale: newLocale }),
+    }).catch(() => {
+      // Ignore les erreurs (utilisateur non connecté)
+    });
 
     // PAS de reload - les messages sont mis à jour dynamiquement !
   }, []);

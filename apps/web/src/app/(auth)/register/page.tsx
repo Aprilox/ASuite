@@ -155,6 +155,7 @@ export default function RegisterPage() {
                   id="name"
                   name="name"
                   type="text"
+                  autoComplete="name"
                   required
                   placeholder={t('namePlaceholder')}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
@@ -172,6 +173,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   placeholder={t('emailPlaceholder')}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
@@ -189,6 +191,7 @@ export default function RegisterPage() {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   placeholder={t('passwordPlaceholder')}
                   value={password}

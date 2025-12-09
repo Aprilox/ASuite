@@ -6,8 +6,9 @@ export async function PATCH(request: Request) {
   try {
     const user = await getSession();
     
+    // Si pas connecté, retourner success: false sans erreur 401
     if (!user) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+      return NextResponse.json({ success: false });
     }
 
     const { locale } = await request.json();
@@ -24,7 +25,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Erreur mise à jour locale:', error);
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+    return NextResponse.json({ success: false });
   }
 }
 

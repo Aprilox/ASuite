@@ -111,7 +111,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col border-r bg-card h-[calc(100vh-4rem)] sticky top-0 transition-all ${
+      className={`hidden lg:flex flex-col border-r bg-card h-[calc(100vh-4rem)] sticky top-16 flex-shrink-0 transition-all ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >

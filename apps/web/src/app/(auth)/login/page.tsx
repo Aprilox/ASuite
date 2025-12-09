@@ -102,6 +102,7 @@ function LoginForm() {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   placeholder={t('emailPlaceholder')}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
@@ -127,6 +128,7 @@ function LoginForm() {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   required
                   placeholder={t('passwordPlaceholder')}
                   className="w-full h-11 pl-10 pr-12 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"

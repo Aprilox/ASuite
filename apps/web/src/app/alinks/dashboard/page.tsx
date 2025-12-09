@@ -371,7 +371,7 @@ export default function ALinksDashboardPage() {
             </div>
 
             {/* Form */}
-            <div className="space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); saveEdit(); }} className="space-y-4">
               {/* Title */}
               <div className="space-y-2">
                 <label htmlFor="edit-title" className="text-sm font-medium">
@@ -444,6 +444,7 @@ export default function ALinksDashboardPage() {
                     <input
                       id="edit-password"
                       type="password"
+                      autoComplete="off"
                       value={editPassword}
                       onChange={(e) => setEditPassword(e.target.value)}
                       placeholder={t('newPassword')}
@@ -472,6 +473,7 @@ export default function ALinksDashboardPage() {
                   <input
                     id="edit-password"
                     type="password"
+                    autoComplete="off"
                     value={editPassword}
                     onChange={(e) => setEditPassword(e.target.value)}
                     placeholder={t('linkPasswordPlaceholder')}
@@ -496,7 +498,7 @@ export default function ALinksDashboardPage() {
                   {tCommon('cancel')}
                 </button>
                 <button
-                  onClick={saveEdit}
+                  type="submit"
                   disabled={isSaving}
                   className="flex-1 h-10 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
@@ -510,7 +512,7 @@ export default function ALinksDashboardPage() {
                   )}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}

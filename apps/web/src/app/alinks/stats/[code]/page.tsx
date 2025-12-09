@@ -106,13 +106,13 @@ export default function LinkStatsPage() {
   const getDeviceName = (device: string) => {
     switch (device.toLowerCase()) {
       case 'mobile':
-        return t('stats.mobile');
+        return t('statsPage.mobile');
       case 'tablet':
-        return t('stats.tablet');
+        return t('statsPage.tablet');
       case 'desktop':
-        return t('stats.desktop');
+        return t('statsPage.desktop');
       default:
-        return t('stats.unknown');
+        return t('statsPage.unknown');
     }
   };
 
@@ -136,7 +136,7 @@ export default function LinkStatsPage() {
             href="/alinks/dashboard"
             className="text-primary hover:underline"
           >
-            {t('stats.backToLinks')}
+            {t('statsPage.backToLinks')}
           </Link>
         </div>
       </div>
@@ -176,7 +176,7 @@ export default function LinkStatsPage() {
         <div className="bg-card rounded-xl border p-6">
           <div className="flex items-center gap-3 mb-2">
             <MousePointerClick className="w-5 h-5 text-blue-500" />
-            <span className="text-sm text-muted-foreground">{t('stats.totalClicks')}</span>
+            <span className="text-sm text-muted-foreground">{t('statsPage.totalClicks')}</span>
           </div>
           <p className="text-3xl font-bold">{stats.clickCount}</p>
         </div>
@@ -209,7 +209,7 @@ export default function LinkStatsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* By Device */}
         <div className="bg-card rounded-xl border p-6">
-          <h3 className="font-semibold mb-4">{t('stats.deviceBreakdown')}</h3>
+          <h3 className="font-semibold mb-4">{t('statsPage.deviceBreakdown')}</h3>
           {stats.analytics.clicksByDevice.length > 0 ? (
             <div className="space-y-3">
               {stats.analytics.clicksByDevice.map((item) => {
@@ -237,13 +237,13 @@ export default function LinkStatsPage() {
               })}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">{t('stats.noData')}</p>
+            <p className="text-sm text-muted-foreground">{t('statsPage.noData')}</p>
           )}
         </div>
 
         {/* By Browser */}
         <div className="bg-card rounded-xl border p-6">
-          <h3 className="font-semibold mb-4">{t('stats.browserBreakdown')}</h3>
+          <h3 className="font-semibold mb-4">{t('statsPage.browserBreakdown')}</h3>
           {stats.analytics.clicksByBrowser.length > 0 ? (
             <div className="space-y-3">
               {stats.analytics.clicksByBrowser.map((item) => {
@@ -270,14 +270,14 @@ export default function LinkStatsPage() {
               })}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">{t('stats.noData')}</p>
+            <p className="text-sm text-muted-foreground">{t('statsPage.noData')}</p>
           )}
         </div>
       </div>
 
       {/* Recent Clicks */}
       <div className="bg-card rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">{t('stats.recentClicks')}</h3>
+        <h3 className="font-semibold mb-4">{t('statsPage.recentClicks')}</h3>
         {stats.analytics.recentClicks.length > 0 ? (
           <div className="space-y-3">
             {stats.analytics.recentClicks.map((click) => {
@@ -311,7 +311,7 @@ export default function LinkStatsPage() {
           <div className="p-12 text-center">
             <MousePointerClick className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">
-              {t('stats.noData')}
+              {t('statsPage.noData')}
             </p>
           </div>
         )}

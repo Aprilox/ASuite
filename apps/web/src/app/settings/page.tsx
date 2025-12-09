@@ -187,9 +187,9 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-muted/30">
       <Header />
-      <div className="flex pt-16">
+      <div className="flex pt-16 h-[calc(100vh-4rem)]">
         <Sidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div className="mb-8">
@@ -290,6 +290,16 @@ export default function SettingsPage() {
                   <div className="bg-card rounded-xl border p-6">
                     <h2 className="text-lg font-semibold mb-6">{t('changePasswordTitle')}</h2>
                     <form onSubmit={handleChangePassword} className="space-y-4">
+                      {/* Hidden username field for accessibility */}
+                      <input
+                        type="text"
+                        name="username"
+                        autoComplete="username"
+                        value={user?.email || ''}
+                        readOnly
+                        className="sr-only"
+                        tabIndex={-1}
+                      />
                       <div>
                         <label htmlFor="current-password" className="text-sm font-medium mb-2 block">
                           {t('currentPassword')}
@@ -298,6 +308,7 @@ export default function SettingsPage() {
                           <input
                             id="current-password"
                             type={showCurrentPassword ? 'text' : 'password'}
+                            autoComplete="current-password"
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
                             required
@@ -320,6 +331,7 @@ export default function SettingsPage() {
                           <input
                             id="new-password"
                             type={showNewPassword ? 'text' : 'password'}
+                            autoComplete="new-password"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             required
@@ -360,6 +372,7 @@ export default function SettingsPage() {
                         <input
                           id="confirm-password"
                           type="password"
+                          autoComplete="new-password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           required

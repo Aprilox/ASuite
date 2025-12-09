@@ -244,7 +244,7 @@
       "customize": "Personnaliser le QR Code",
       "backToLinks": "Retour aux liens"
     },
-    "stats": {
+    "statsPage": {
       "title": "Statistiques",
       "totalClicks": "Total des clics",
       "uniqueVisitors": "Visiteurs uniques",

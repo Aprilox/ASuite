@@ -49,8 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuth = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/me');
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json();
+      
+      if (data) {
         setUser(data);
         // Appliquer le thème de l'utilisateur connecté
         if (data.theme) {
