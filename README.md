@@ -175,38 +175,9 @@ ASuite/
 
 ## 📝 Changelog
 
-### v1.3.0 (Actuel)
-- 🌍 Multi-langue (Français / English)
-- 🌍 Détection automatique de la langue selon le pays
-- 🌍 Sauvegarde de la préférence de langue dans le profil
-- ⚖️ Pages légales complètes (Mentions, Confidentialité, CGU, Cookies)
-- 📋 Page Journal des modifications dynamique
-- ✨ Changement de langue sans rechargement de page
+**Version actuelle : v1.3.0** - Multi-langue, pages légales, changelog dynamique
 
-### v1.2.0
-- ✨ Thème synchronisé avec le compte utilisateur
-- 🔐 Protection anti brute-force (rate limiting par IP)
-- 🔐 Headers HTTP sécurisés
-- 🔐 Invalidation des sessions au changement de mot de passe
-- 🔐 Page "Mot de passe oublié" (bientôt)
-
-### v1.1.0
-- ✨ Thèmes clair / sombre / système
-- ✨ Favicon personnalisé
-- ✨ Page "Coming Soon" pour les outils à venir
-
-### v1.0.0 (Initial Release)
-- ✅ Système d'authentification complet
-- ✅ Dashboard utilisateur
-- ✅ ALinks : création, édition, suppression de liens
-- ✅ ALinks : statistiques et analytics
-- ✅ ALinks : QR codes personnalisables
-- ✅ ALinks : protection par mot de passe
-- ✅ Page de paramètres utilisateur
-- ✅ Notifications toast personnalisées
-- ✅ Popups de confirmation personnalisées
-
-> 📋 Voir le [Journal des modifications](./CHANGELOG.md) complet pour plus de détails.
+> 📋 Voir le [Journal des modifications complet](./CHANGELOG.md)
 
 ## 📄 Licence
 
