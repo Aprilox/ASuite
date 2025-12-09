@@ -1,15 +1,22 @@
-# ASuite - Suite Collaborative Professionnelle
-
 <div align="center">
+  <img src=".github/assets/banner.svg" alt="ASuite Banner" width="100%" />
+  
+  <br />
+  <br />
+  
   <img src="https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind" />
   <img src="https://img.shields.io/badge/Prisma-6.1-2D3748?style=flat-square&logo=prisma" alt="Prisma" />
+  
+  <br />
+  <br />
+  
+  <p><strong>Une suite d'outils collaboratifs moderne, sécurisée et professionnelle.</strong></p>
+  <p><em>Inspirée de kSuite d'Infomaniak</em></p>
 </div>
 
 <br />
-
-Une suite d'outils collaboratifs moderne, sécurisée et professionnelle. Inspirée de kSuite d'Infomaniak.
 
 ## ✨ Fonctionnalités
 
