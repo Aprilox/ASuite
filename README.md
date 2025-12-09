@@ -23,7 +23,7 @@ Une suite d'outils collaboratifs moderne, sécurisée et professionnelle. Inspir
 - ✏️ Édition complète des liens
 
 ### Interface utilisateur ✅
-- 🎨 Thèmes clair / sombre / système
+- 🎨 Thèmes clair / sombre / système (synchronisé avec le compte)
 - 🔔 Notifications toast personnalisées
 - 💬 Popups de confirmation personnalisées
 - 📱 Interface responsive
@@ -153,7 +153,10 @@ ASuite/
 ## 🔐 Sécurité
 
 - ✅ Authentification par session sécurisée
-- ✅ Mots de passe hashés avec bcrypt
+- ✅ Mots de passe hashés avec bcrypt (cost 12)
+- ✅ Protection anti brute-force (rate limiting par IP)
+- ✅ Headers HTTP sécurisés (CSP, X-Frame-Options, etc.)
+- ✅ Invalidation des sessions au changement de mot de passe
 - ✅ Protection CSRF
 - ✅ Validation des entrées côté serveur
 - ✅ Données isolées par utilisateur
@@ -168,6 +171,13 @@ ASuite/
 - **Langage** : TypeScript
 
 ## 📝 Changelog
+
+### v1.2.0
+- ✨ Thème synchronisé avec le compte utilisateur
+- 🔐 Protection anti brute-force (rate limiting par IP)
+- 🔐 Headers HTTP sécurisés
+- 🔐 Invalidation des sessions au changement de mot de passe
+- 🔐 Page "Mot de passe oublié" (bientôt)
 
 ### v1.1.0
 - ✨ Thèmes clair / sombre / système
