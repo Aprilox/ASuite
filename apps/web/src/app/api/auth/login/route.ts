@@ -4,13 +4,15 @@ import { prisma } from '@asuite/database';
 import { isValidEmail } from '@asuite/utils';
 import { cookies } from 'next/headers';
 import { createUniqueId } from '@asuite/utils';
+import { checkRateLimit, recordLoginAttempt, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
+    const clientIp = getClientIp(request);
 
-    // Validation
+    // Validation basique avant le rate limit check
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email et mot de passe requis' },
@@ -25,12 +27,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Vérifier le rate limit AVANT toute opération coûteuse
+    const rateLimitResult = checkRateLimit(email, clientIp);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: rateLimitResult.reason },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.retryAfter || 900),
+          },
+        }
+      );
+    }
+
     // Find user
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
 
     if (!user || !user.password) {
+      // Enregistrer l'échec
+      recordLoginAttempt(email, clientIp, false);
       return NextResponse.json(
         { error: 'Email ou mot de passe incorrect' },
         { status: 401 }
@@ -41,11 +59,16 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await compare(password, user.password);
 
     if (!isValidPassword) {
+      // Enregistrer l'échec
+      recordLoginAttempt(email, clientIp, false);
       return NextResponse.json(
         { error: 'Email ou mot de passe incorrect' },
         { status: 401 }
       );
     }
+
+    // Enregistrer le succès (réinitialise le compteur email)
+    recordLoginAttempt(email, clientIp, true);
 
     // Create session
     const sessionToken = createUniqueId();
@@ -89,6 +112,7 @@ export async function POST(request: NextRequest) {
         name: user.name,
         email: user.email,
         role: user.role,
+        theme: user.theme,
       },
     });
   } catch (error) {

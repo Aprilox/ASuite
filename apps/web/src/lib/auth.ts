@@ -6,6 +6,7 @@ export interface AuthUser {
   email: string;
   name: string | null;
   role: string;
+  theme: string;
 }
 
 export async function getSession(): Promise<AuthUser | null> {
@@ -31,6 +32,7 @@ export async function getSession(): Promise<AuthUser | null> {
       email: session.user.email,
       name: session.user.name,
       role: session.user.role,
+      theme: session.user.theme,
     };
   } catch (error) {
     console.error('Error getting session:', error);

@@ -21,6 +21,9 @@ model User {
   image         String?
   role          String    @default("user") // admin, user, guest
   
+  // Préférences
+  theme         String    @default("light") // light, dark, system
+  
   // 2FA
   twoFactorEnabled Boolean @default(false)
   twoFactorSecret  String?
