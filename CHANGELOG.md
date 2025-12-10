@@ -5,7 +5,7 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 ## [1.4.0] - 2025-01-10
 
 ### Nouveautés
-- **AVault** : Partage de notes chiffrées de bout en bout (AES-256)
+- AVault : Partage de notes chiffrées de bout en bout (AES-256)
 - AVault : Protection par mot de passe optionnelle
 - AVault : Auto-destruction après lecture (burn after read)
 - AVault : Date d'expiration configurable
