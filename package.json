@@ -11,7 +11,9 @@
     "clean": "turbo clean && rm -rf node_modules",
     "db:generate": "turbo db:generate",
     "db:push": "turbo db:push",
-    "db:studio": "pnpm --filter @asuite/database studio"
+    "db:seed": "pnpm --filter @asuite/database db:seed",
+    "db:studio": "pnpm --filter @asuite/database studio",
+    "admin:create": "pnpm --filter @asuite/database admin:create"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",

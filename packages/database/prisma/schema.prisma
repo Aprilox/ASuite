@@ -19,7 +19,6 @@ model User {
   password      String?
   name          String?
   image         String?
-  role          String    @default("user") // admin, user, guest
   
   // Préférences
   theme         String    @default("light") // light, dark, system
@@ -33,10 +32,23 @@ model User {
   ssoProvider   String?
   ssoProviderId String?
   
+  // Blocage
+  isBlocked     Boolean   @default(false)
+  blockedReason String?
+  blockedAt     DateTime?
+  blockedBy     String?   // ID de l'admin qui a bloqué
+  
+  // Connexion
+  lastLoginAt   DateTime?
+  lastLoginIp   String?
+  
   // Relations
   accounts      Account[]
   sessions      Session[]
   auditLogs     AuditLog[]
+  
+  // Roles (nouveau système)
+  userRoles     UserRole[]
   
   // ALinks
   links         Link[]
@@ -44,11 +56,16 @@ model User {
   // AVault
   vaults        Vault[]
   
+  // Tickets
+  tickets           Ticket[]
+  ticketMessages    TicketMessage[]
+  
   // Timestamps
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@index([email])
+  @@index([isBlocked])
 }
 
 model Account {
@@ -92,13 +109,143 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// ==================== ROLES & PERMISSIONS ====================
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique  // "admin", "support", "moderator"...
+  displayName String             // Nom affiché
+  description String?
+  color       String   @default("#6366f1") // Couleur badge
+  isSystem    Boolean  @default(false)     // Roles non supprimables (admin)
+  priority    Int      @default(100)       // Priorité (0 = plus haut, admin = 0)
+  
+  permissions RolePermission[]
+  users       UserRole[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
+  @@index([isSystem])
+  @@index([priority])
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  code        String   @unique  // "users.view", "users.edit"...
+  name        String             // "Voir les utilisateurs"
+  description String?
+  module      String             // "users", "tickets", "settings"
+  
+  roles       RolePermission[]
+
+  @@index([code])
+  @@index([module])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model UserRole {
+  userId    String
+  roleId    String
+  
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  grantedBy String?   // ID de l'admin qui a assigné
+  grantedAt DateTime  @default(now())
+
+  @@id([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+// ==================== TICKETS SUPPORT ====================
+
+model Ticket {
+  id          String   @id @default(cuid())
+  number      Int      @unique  // Numéro auto-généré
+  subject     String
+  category    String   // "bug", "question", "feature", "other"
+  priority    String   @default("normal") // "low", "normal", "high", "urgent"
+  status      String   @default("open")   // "open", "in_progress", "pending", "resolved", "closed"
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  messages    TicketMessage[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([number])
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model TicketMessage {
+  id          String   @id @default(cuid())
+  ticketId    String
+  authorId    String
+  content     String
+  isInternal  Boolean  @default(false)  // Note interne (visible staff uniquement)
+  
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+// ==================== PARAMÈTRES SYSTÈME ====================
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string") // string, boolean, number, json
+  category  String   // "general", "security", "email", "storage"
+  label     String?  // Label pour l'affichage
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+}
+
+// ==================== COMPTEUR POUR TICKETS ====================
+
+model Counter {
+  id      String @id @default(cuid())
+  name    String @unique
+  value   Int    @default(0)
+
+  @@index([name])
+}
+
 // ==================== AUDIT LOGS ====================
 
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
-  action    String   // login, logout, create_link, delete_link, etc.
-  resource  String?  // link, user, etc.
+  action    String   // login, logout, create_link, delete_link, admin.user.block, etc.
+  resource  String?  // link, user, ticket, role, etc.
   resourceId String?
   metadata  String?  // JSON string pour les détails
   ipAddress String?
@@ -109,6 +256,7 @@ model AuditLog {
 
   @@index([userId])
   @@index([action])
+  @@index([resource])
   @@index([createdAt])
 }
 
@@ -225,4 +373,3 @@ model VaultView {
   @@index([vaultId])
   @@index([createdAt])
 }
-

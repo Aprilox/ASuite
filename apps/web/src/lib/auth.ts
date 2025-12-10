@@ -10,6 +10,24 @@ export interface AuthUser {
   locale: string;
 }
 
+/**
+ * Détermine le rôle principal d'un utilisateur à partir de ses userRoles
+ */
+function getPrimaryRole(userRoles: Array<{ role: { name: string; isSystem: boolean } }>): string {
+  if (!userRoles || userRoles.length === 0) {
+    return 'user';
+  }
+  
+  // Si l'utilisateur a un rôle système (admin), c'est son rôle principal
+  const systemRole = userRoles.find((ur) => ur.role.isSystem);
+  if (systemRole) {
+    return systemRole.role.name;
+  }
+  
+  // Sinon, retourner le premier rôle
+  return userRoles[0].role.name;
+}
+
 export async function getSession(): Promise<AuthUser | null> {
   try {
     const cookieStore = await cookies();
@@ -21,18 +39,40 @@ export async function getSession(): Promise<AuthUser | null> {
 
     const session = await prisma.session.findUnique({
       where: { sessionToken },
-      include: { user: true },
+      include: {
+        user: {
+          include: {
+            userRoles: {
+              include: {
+                role: {
+                  select: {
+                    name: true,
+                    isSystem: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!session || session.expires < new Date()) {
       return null;
     }
 
+    // Vérifier si l'utilisateur est bloqué
+    if (session.user.isBlocked) {
+      return null;
+    }
+
+    const role = getPrimaryRole(session.user.userRoles);
+
     return {
       id: session.user.id,
       email: session.user.email,
       name: session.user.name,
-      role: session.user.role,
+      role,
       theme: session.user.theme,
       locale: session.user.locale,
     };
@@ -50,3 +90,10 @@ export async function requireAuth(): Promise<AuthUser> {
   return user;
 }
 
+/**
+ * Vérifie si l'utilisateur a un rôle admin (pour compatibilité avec l'ancien système)
+ */
+export async function isAdmin(): Promise<boolean> {
+  const user = await getSession();
+  return user?.role === 'admin';
+}

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useAdmin } from '@/hooks/use-admin';
 import {
   Link2,
   Lock,
@@ -16,6 +17,7 @@ import {
   Presentation,
   LayoutDashboard,
   Settings,
+  Shield,
 } from 'lucide-react';
 
 const tools = [
@@ -96,6 +98,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   const t = useTranslations('sidebar');
   const tTools = useTranslations('tools');
   const tCommon = useTranslations('common');
+  const { isAdmin } = useAdmin();
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -152,8 +155,23 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         })}
       </nav>
 
-      {/* Settings */}
-      <div className="p-4 border-t">
+      {/* Admin & Settings */}
+      <div className="p-4 border-t space-y-1">
+        {/* Admin Panel Link */}
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors ${
+              collapsed ? 'justify-center' : ''
+            }`}
+            title={collapsed ? t('adminPanel') : undefined}
+          >
+            <Shield className="w-5 h-5" />
+            {!collapsed && <span>{t('adminPanel')}</span>}
+          </Link>
+        )}
+        
+        {/* Settings */}
         <Link
           href="/settings"
           className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${

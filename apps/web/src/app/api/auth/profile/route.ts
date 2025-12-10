@@ -21,7 +21,7 @@ export async function PATCH(request: NextRequest) {
       id: updatedUser.id,
       email: updatedUser.email,
       name: updatedUser.name,
-      role: updatedUser.role,
+      role: user.role, // Utiliser le rôle de la session
     });
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -31,4 +31,3 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
-

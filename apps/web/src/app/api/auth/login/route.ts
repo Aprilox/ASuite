@@ -41,9 +41,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user
+    // Find user with roles
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
+      include: {
+        userRoles: {
+          include: {
+            role: {
+              select: {
+                name: true,
+                isSystem: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!user || !user.password) {
@@ -52,6 +64,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Email ou mot de passe incorrect' },
         { status: 401 }
+      );
+    }
+
+    // Vérifier si l'utilisateur est bloqué
+    if (user.isBlocked) {
+      return NextResponse.json(
+        { error: 'Ce compte a été bloqué. Contactez le support.' },
+        { status: 403 }
       );
     }
 
@@ -105,13 +125,44 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
+    // Synchroniser le cookie locale avec la préférence utilisateur en DB
+    if (user.locale) {
+      cookieStore.set('locale', user.locale, {
+        httpOnly: false, // Accessible côté client pour next-intl
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 365, // 1 an
+        path: '/',
+      });
+    }
+
+    // Déterminer le rôle principal
+    let role = 'user';
+    if (user.userRoles && user.userRoles.length > 0) {
+      const systemRole = user.userRoles.find((ur) => ur.role.isSystem);
+      if (systemRole) {
+        role = systemRole.role.name;
+      } else {
+        role = user.userRoles[0].role.name;
+      }
+    }
+
+    // Mettre à jour la dernière connexion
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastLoginAt: new Date(),
+        lastLoginIp: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
+      },
+    });
+
     return NextResponse.json({
       message: 'Connexion réussie',
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role,
         theme: user.theme,
         locale: user.locale,
       },

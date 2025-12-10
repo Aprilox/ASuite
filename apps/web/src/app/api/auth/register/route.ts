@@ -46,19 +46,17 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hash(password, 12);
 
-    // Create user
+    // Create user (sans rôle par défaut - sera un utilisateur standard)
     const user = await prisma.user.create({
       data: {
         name,
         email: email.toLowerCase(),
         password: hashedPassword,
-        role: 'user',
       },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true,
         createdAt: true,
       },
     });
@@ -75,7 +73,13 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { message: 'Compte créé avec succès', user },
+      { 
+        message: 'Compte créé avec succès', 
+        user: {
+          ...user,
+          role: 'user', // Les nouveaux utilisateurs sont des users par défaut
+        },
+      },
       { status: 201 }
     );
   } catch (error) {
@@ -86,4 +90,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

@@ -36,6 +36,15 @@
 - 👁️ Limite de vues configurable
 - 📋 Dashboard de gestion des notes
 
+### Panel Administration ✅
+- 👥 Gestion complète des utilisateurs (blocage, suppression, réinitialisation mot de passe)
+- 🛡️ Système de rôles avec permissions granulaires (19 permissions, 6 modules)
+- 🎫 Système de tickets de support (création, réponse, notes internes)
+- 📊 Dashboard avec statistiques en temps réel
+- 📋 Logs d'audit pour tracer toutes les actions
+- ⚙️ Paramètres système configurables
+- 🔒 Hiérarchie des rôles avec protections de sécurité
+
 ### Interface utilisateur ✅
 - 🌍 Multi-langue (Français / English) avec détection automatique
 - 🎨 Thèmes clair / sombre / système (synchronisé avec le compte)
@@ -101,11 +110,57 @@ pnpm db:generate
 # Créer les tables dans la base de données
 pnpm db:push
 
+# Initialiser les permissions et rôles par défaut
+pnpm db:seed
+
 # Lancer en développement
 pnpm dev
 ```
 
 Ouvrez [http://localhost:3000](http://localhost:3000) 🎉
+
+## 👑 Administration
+
+### Créer le premier administrateur
+
+Après l'installation, créez votre compte administrateur via le CLI :
+
+```bash
+pnpm db:admin
+```
+
+Suivez les instructions à l'écran :
+1. Entrez l'email de l'administrateur
+2. Entrez le mot de passe (min. 8 caractères)
+3. Confirmez le mot de passe
+
+> ⚠️ Si un administrateur existe déjà, le script mettra à jour son mot de passe.
+
+### Accéder au panel admin
+
+Une fois connecté avec un compte administrateur :
+1. Cliquez sur votre avatar en haut à droite
+2. Sélectionnez **"Administration"**
+3. Ou accédez directement à [http://localhost:3000/admin](http://localhost:3000/admin)
+
+### Permissions disponibles
+
+| Module | Permissions |
+|--------|-------------|
+| **Utilisateurs** | Voir, Modifier, Bloquer, Supprimer, Réinitialiser mot de passe |
+| **Rôles** | Voir, Créer, Modifier, Supprimer, Assigner, Réorganiser |
+| **Tickets** | Voir, Répondre, Fermer, Supprimer |
+| **Paramètres** | Voir, Modifier |
+| **Audit** | Voir les logs d'activité |
+| **Administration** | Accès au dashboard |
+
+### Hiérarchie des rôles
+
+Les rôles sont organisés par priorité (0 = plus important) :
+- Un utilisateur ne peut **pas** modifier un rôle de rang supérieur ou égal
+- Un utilisateur ne peut **pas** agir sur un utilisateur avec un rôle supérieur
+- Un utilisateur ne peut **pas** modifier son propre rôle
+- L'administrateur système (priority 0) ne peut pas être supprimé
 
 ## 🗄️ Base de données
 
@@ -163,6 +218,8 @@ ASuite/
 | `pnpm lint` | Vérification du code |
 | `pnpm db:generate` | Générer le client Prisma |
 | `pnpm db:push` | Appliquer le schéma à la DB |
+| `pnpm db:seed` | Initialiser permissions et rôles par défaut |
+| `pnpm db:admin` | Créer/mettre à jour un compte administrateur |
 | `pnpm db:studio` | Interface graphique pour la DB |
 | `pnpm clean` | Nettoyer les builds et node_modules |
 
@@ -188,7 +245,7 @@ ASuite/
 
 ## 📝 Changelog
 
-**Version actuelle : v1.4.0** - AVault : notes chiffrées de bout en bout
+**Version actuelle : v1.5.0** - Panel Administration complet
 
 > 📋 Voir le [Journal des modifications complet](./CHANGELOG.md)
 

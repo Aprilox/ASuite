@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, AuthState } from '@/types';
+import { useApplyUserLocale } from '@/providers/locale-provider';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { applyUserLocale } = useApplyUserLocale();
 
   // Appliquer le thème de l'utilisateur
   const applyUserTheme = (theme: string) => {
@@ -24,25 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         : theme;
       document.documentElement.classList.remove('light', 'dark');
       document.documentElement.classList.add(resolved);
-    }
-  };
-
-  // Appliquer la locale de l'utilisateur
-  const applyUserLocale = (locale: string, forceReload = false) => {
-    if (typeof window !== 'undefined' && locale) {
-      const currentLocale = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('locale='))
-        ?.split('=')[1];
-      
-      // Si la locale est différente, mettre à jour et recharger
-      if (currentLocale !== locale) {
-        document.cookie = `locale=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
-        if (forceReload) {
-          // Recharger pour appliquer la nouvelle locale
-          window.location.reload();
-        }
-      }
     }
   };
 
@@ -57,10 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.theme) {
           applyUserTheme(data.theme);
         }
-        // Appliquer la locale de l'utilisateur connecté
-        if (data.locale) {
-          applyUserLocale(data.locale);
-        }
+        // Note: On n'applique PAS la locale ici pour éviter d'écraser
+        // les changements de langue faits par l'utilisateur.
+        // La locale est gérée par le cookie et le LocaleProvider.
       } else {
         setUser(null);
       }
@@ -91,9 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.user?.theme) {
           applyUserTheme(data.user.theme);
         }
-        // Appliquer la locale de l'utilisateur après connexion (avec reload si différente)
+        // Appliquer la locale de l'utilisateur après connexion
         if (data.user?.locale) {
-          applyUserLocale(data.user.locale, true);
+          applyUserLocale(data.user.locale);
         }
         return { success: true };
       } else {
@@ -115,12 +97,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('asuite-theme');
         document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
+        
+        // Rediriger vers la page de login
+        window.location.href = '/login';
       }
       // Note: On ne réinitialise pas la locale à la déconnexion
       // car l'utilisateur peut vouloir rester dans sa langue
     } catch (error) {
       console.error('Logout error:', error);
       setUser(null);
+      // Rediriger quand même en cas d'erreur
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
   };
 

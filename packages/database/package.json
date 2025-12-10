@@ -23,17 +23,22 @@
     "generate": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:seed": "tsx scripts/seed-permissions.ts",
+    "admin:create": "tsx scripts/create-admin.ts",
     "studio": "prisma studio",
     "lint": "eslint src/",
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
+    "bcryptjs": "^2.4.3",
     "dotenv": "^17.2.3"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "prisma": "^6.1.0",
     "tsup": "^8.3.5",
+    "tsx": "^4.19.0",
     "typescript": "^5.7.2"
   }
 }

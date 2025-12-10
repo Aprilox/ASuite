@@ -2,6 +2,45 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.5.0] - 2025-12-10
+
+### Nouveautés - Panel Administration
+- Panel d'administration complet accessible via `/admin`
+- Dashboard avec statistiques (utilisateurs, tickets, rôles, connexions)
+- Gestion des utilisateurs (liste, détails, blocage, suppression, réinitialisation mot de passe)
+- Système de rôles avec permissions granulaires (19 permissions)
+- Système de tickets de support (création, réponse, notes internes, statuts)
+- Paramètres système configurables
+- Logs d'audit pour tracer toutes les actions admin
+
+### Rôles et Permissions
+- Rôles prédéfinis : Administrateur (système), Support
+- Création de rôles personnalisés avec couleur et description
+- 6 modules de permissions : Utilisateurs, Rôles, Tickets, Paramètres, Audit, Administration
+- Système de hiérarchie par priorité (0 = plus important)
+- Drag & drop pour réorganiser l'ordre des rôles
+- Mode édition avec confirmation pour éviter les erreurs
+- Protection : impossible de modifier son propre rôle
+
+### Sécurité Admin
+- Vérification des permissions côté serveur sur toutes les routes
+- Hiérarchie des rôles : impossible d'agir sur un utilisateur/rôle de rang supérieur
+- Protection des comptes système (Admin ne peut pas être supprimé)
+- Impossible de se bloquer/supprimer soi-même
+- Impossible d'attribuer un rôle supérieur au sien
+
+### Interface Admin
+- Sidebar responsive avec menu hamburger sur mobile
+- Sélecteur de langue synchronisé avec le site principal
+- Traductions complètes FR/EN pour tout le panel
+- Logs d'activité traduits (20+ types d'actions)
+- UI adaptative : éléments grisés/masqués selon les permissions
+- Pagination et filtres sur les listes
+
+### Scripts CLI
+- `pnpm db:admin` : Créer le premier compte administrateur
+- `pnpm db:seed` : Initialiser les permissions et rôles par défaut
+
 ## [1.4.0] - 2025-01-10
 
 ### Nouveautés
