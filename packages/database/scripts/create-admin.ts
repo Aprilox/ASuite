@@ -1,32 +1,25 @@
 /**
- * Script CLI pour créer un administrateur
- * Usage: pnpm admin:create <email> <password> [name]
+ * Script CLI interactif pour créer un administrateur
+ * Usage: pnpm db:admin
  * 
  * Ce script :
+ * - Demande les informations de manière interactive
  * - Crée ou met à jour l'utilisateur avec le rôle admin
  * - Crée le rôle admin système s'il n'existe pas
  * - Crée toutes les permissions de base
- * - Attribue toutes les permissions au rôle admin
  */
 
 // Charger le fichier .env AVANT tout import Prisma
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import * as readline from 'readline';
 
 const envPath = path.resolve(__dirname, '../../../.env');
-console.log(`📁 Chargement .env depuis: ${envPath}`);
-const result = dotenv.config({ path: envPath });
-
-if (result.error) {
-  console.error('❌ Erreur chargement .env:', result.error.message);
-}
-
-console.log(`🔗 DATABASE_URL: ${process.env.DATABASE_URL ? 'défini' : 'NON DÉFINI'}`);
+dotenv.config({ path: envPath });
 
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
-// Passer explicitement le datasource URL au client Prisma
 const prisma = new PrismaClient({
   datasources: {
     db: {
@@ -34,6 +27,26 @@ const prisma = new PrismaClient({
     },
   },
 });
+
+// Interface readline
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+// Promisify readline question
+function question(prompt: string): Promise<string> {
+  return new Promise((resolve) => {
+    rl.question(prompt, (answer) => {
+      resolve(answer);
+    });
+  });
+}
+
+// Fonction pour lire le mot de passe (affiché en clair)
+function questionPassword(prompt: string): Promise<string> {
+  return question(prompt);
+}
 
 // Liste complète des permissions
 const PERMISSIONS = [
@@ -50,6 +63,7 @@ const PERMISSIONS = [
   { code: 'roles.edit', name: 'Modifier les rôles', module: 'roles', description: 'Modifier les rôles existants' },
   { code: 'roles.delete', name: 'Supprimer les rôles', module: 'roles', description: 'Supprimer des rôles' },
   { code: 'roles.assign', name: 'Assigner des rôles', module: 'roles', description: 'Attribuer des rôles aux utilisateurs' },
+  { code: 'roles.reorder', name: 'Réorganiser les rôles', module: 'roles', description: 'Modifier l\'ordre de priorité des rôles' },
   
   // Tickets
   { code: 'tickets.view', name: 'Voir les tickets', module: 'tickets', description: 'Accéder aux tickets de support' },
@@ -69,7 +83,7 @@ const PERMISSIONS = [
 ];
 
 async function seedPermissions() {
-  console.log('🔑 Création des permissions...');
+  process.stdout.write('🔑 Création des permissions... ');
   
   for (const perm of PERMISSIONS) {
     await prisma.permission.upsert({
@@ -79,13 +93,12 @@ async function seedPermissions() {
     });
   }
   
-  console.log(`   ✅ ${PERMISSIONS.length} permissions créées/mises à jour`);
+  console.log(`✅ ${PERMISSIONS.length} permissions`);
 }
 
 async function createAdminRole() {
-  console.log('👑 Création du rôle administrateur...');
+  process.stdout.write('👑 Création du rôle admin... ');
   
-  // Créer ou récupérer le rôle admin
   const adminRole = await prisma.role.upsert({
     where: { name: 'admin' },
     update: {
@@ -93,7 +106,7 @@ async function createAdminRole() {
       description: 'Accès complet au système',
       color: '#dc2626',
       isSystem: true,
-      priority: 0, // Plus haute priorité
+      priority: 0,
     },
     create: {
       name: 'admin',
@@ -101,19 +114,16 @@ async function createAdminRole() {
       description: 'Accès complet au système',
       color: '#dc2626',
       isSystem: true,
-      priority: 0, // Plus haute priorité
+      priority: 0,
     },
   });
   
-  // Récupérer toutes les permissions
   const permissions = await prisma.permission.findMany();
   
-  // Supprimer les anciennes associations et recréer
   await prisma.rolePermission.deleteMany({
     where: { roleId: adminRole.id },
   });
   
-  // Associer toutes les permissions au rôle admin
   await prisma.rolePermission.createMany({
     data: permissions.map((p) => ({
       roleId: adminRole.id,
@@ -121,13 +131,13 @@ async function createAdminRole() {
     })),
   });
   
-  console.log(`   ✅ Rôle admin créé avec ${permissions.length} permissions`);
+  console.log(`✅ ${permissions.length} permissions`);
   
   return adminRole;
 }
 
 async function createSupportRole() {
-  console.log('🎧 Création du rôle support...');
+  process.stdout.write('🎧 Création du rôle support... ');
   
   const supportRole = await prisma.role.upsert({
     where: { name: 'support' },
@@ -136,6 +146,7 @@ async function createSupportRole() {
       description: 'Accès au support utilisateur',
       color: '#2563eb',
       isSystem: false,
+      priority: 1,
     },
     create: {
       name: 'support',
@@ -143,16 +154,18 @@ async function createSupportRole() {
       description: 'Accès au support utilisateur',
       color: '#2563eb',
       isSystem: false,
+      priority: 1,
     },
   });
   
-  // Permissions pour le support
   const supportPermissions = [
     'users.view',
     'tickets.view',
     'tickets.respond',
     'tickets.close',
     'admin.dashboard',
+    'roles.view',
+    'roles.reorder',
   ];
   
   const permissions = await prisma.permission.findMany({
@@ -170,46 +183,42 @@ async function createSupportRole() {
     })),
   });
   
-  console.log(`   ✅ Rôle support créé avec ${permissions.length} permissions`);
+  console.log(`✅ ${permissions.length} permissions`);
   
   return supportRole;
 }
 
-async function createAdmin(email: string, password: string, name?: string) {
-  console.log(`👤 Création de l'administrateur ${email}...`);
+async function createAdmin(email: string, password: string, name: string) {
+  process.stdout.write('👤 Création de l\'administrateur... ');
   
-  // Hasher le mot de passe
   const hashedPassword = await bcrypt.hash(password, 12);
   
-  // Récupérer le rôle admin
   const adminRole = await prisma.role.findUnique({
     where: { name: 'admin' },
   });
   
   if (!adminRole) {
-    throw new Error('Le rôle admin n\'existe pas. Exécutez d\'abord le seed.');
+    throw new Error('Le rôle admin n\'existe pas.');
   }
   
-  // Créer ou mettre à jour l'utilisateur
   const user = await prisma.user.upsert({
     where: { email },
     update: {
       password: hashedPassword,
-      name: name || 'Administrateur',
+      name: name,
       emailVerified: new Date(),
       isBlocked: false,
     },
     create: {
       email,
       password: hashedPassword,
-      name: name || 'Administrateur',
+      name: name,
       emailVerified: new Date(),
       theme: 'system',
       locale: 'fr',
     },
   });
   
-  // Vérifier si l'utilisateur a déjà le rôle admin
   const existingRole = await prisma.userRole.findUnique({
     where: {
       userId_roleId: {
@@ -228,13 +237,13 @@ async function createAdmin(email: string, password: string, name?: string) {
     });
   }
   
-  console.log(`   ✅ Administrateur créé: ${email}`);
+  console.log('✅');
   
   return user;
 }
 
 async function initTicketCounter() {
-  console.log('🔢 Initialisation du compteur de tickets...');
+  process.stdout.write('🔢 Initialisation du compteur... ');
   
   await prisma.counter.upsert({
     where: { name: 'ticket_number' },
@@ -242,46 +251,65 @@ async function initTicketCounter() {
     create: { name: 'ticket_number', value: 0 },
   });
   
-  console.log('   ✅ Compteur initialisé');
+  console.log('✅');
 }
 
 async function main() {
-  const args = process.argv.slice(2);
+  console.log('\n╔════════════════════════════════════════════════════════════╗');
+  console.log('║          ASuite - Création d\'administrateur                ║');
+  console.log('╚════════════════════════════════════════════════════════════╝\n');
   
-  if (args.length < 2) {
-    console.log(`
-╔═══════════════════════════════════════════════════════════════╗
-║               ASuite - Création d'administrateur              ║
-╠═══════════════════════════════════════════════════════════════╣
-║                                                               ║
-║  Usage:                                                       ║
-║    pnpm admin:create <email> <password> [name]                ║
-║                                                               ║
-║  Exemples:                                                    ║
-║    pnpm admin:create admin@example.com "MonMotDePasse123"     ║
-║    pnpm admin:create admin@example.com "Pass123" "Jean Admin" ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
-    `);
+  // Vérifier la connexion à la base de données
+  try {
+    await prisma.$connect();
+  } catch {
+    console.error('❌ Impossible de se connecter à la base de données.');
+    console.error('   Vérifiez que DATABASE_URL est défini dans .env\n');
     process.exit(1);
   }
   
-  const [email, password, name] = args;
-  
-  // Validation email
+  // Demander l'email
+  let email = '';
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    console.error('❌ Email invalide');
-    process.exit(1);
+  
+  while (!email || !emailRegex.test(email)) {
+    email = await question('📧 Email de l\'administrateur: ');
+    if (!emailRegex.test(email)) {
+      console.log('   ⚠️  Email invalide, réessayez.\n');
+    }
   }
   
-  // Validation mot de passe
-  if (password.length < 8) {
-    console.error('❌ Le mot de passe doit contenir au moins 8 caractères');
-    process.exit(1);
+  // Vérifier si l'utilisateur existe
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) {
+    console.log(`   ℹ️  Utilisateur existant - le mot de passe sera mis à jour.\n`);
   }
   
-  console.log('\n🚀 Initialisation du système d\'administration ASuite\n');
+  // Demander le mot de passe
+  let password = '';
+  let confirmPassword = '';
+  
+  while (password.length < 8) {
+    password = await questionPassword('🔐 Mot de passe (min. 8 caractères): ');
+    if (password.length < 8) {
+      console.log('   ⚠️  Le mot de passe doit contenir au moins 8 caractères.\n');
+    }
+  }
+  
+  // Confirmer le mot de passe
+  while (confirmPassword !== password) {
+    confirmPassword = await questionPassword('🔐 Confirmer le mot de passe: ');
+    if (confirmPassword !== password) {
+      console.log('   ⚠️  Les mots de passe ne correspondent pas.\n');
+    }
+  }
+  
+  // Demander le nom (optionnel)
+  const name = await question('👤 Nom (optionnel, Entrée pour ignorer): ') || 'Administrateur';
+  
+  console.log('\n─────────────────────────────────────────────────────────────\n');
+  
+  rl.close();
   
   try {
     // 1. Créer les permissions
@@ -297,10 +325,12 @@ async function main() {
     // 4. Créer l'administrateur
     await createAdmin(email, password, name);
     
+    console.log('\n─────────────────────────────────────────────────────────────');
     console.log('\n✨ Configuration terminée avec succès!\n');
     console.log(`   📧 Email: ${email}`);
-    console.log(`   🔐 Mot de passe: [défini]`);
-    console.log(`   👑 Rôle: Administrateur (accès complet)\n`);
+    console.log(`   👤 Nom: ${name}`);
+    console.log(`   👑 Rôle: Administrateur (accès complet)`);
+    console.log(`\n   🌐 Connectez-vous sur /admin pour accéder au panel.\n`);
     
   } catch (error) {
     console.error('\n❌ Erreur:', error);

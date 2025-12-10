@@ -2,6 +2,11 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.5.1] - 2025-12-10
+
+### Améliorations
+- Script `pnpm db:admin` maintenant interactif (demande email, mot de passe, nom pas à pas)
+
 ## [1.5.0] - 2025-12-10
 
 ### Nouveautés - Panel Administration

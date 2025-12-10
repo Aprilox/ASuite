@@ -123,16 +123,17 @@ Ouvrez [http://localhost:3000](http://localhost:3000) 🎉
 
 ### Créer le premier administrateur
 
-Après l'installation, créez votre compte administrateur via le CLI :
+Après l'installation, créez votre compte administrateur via le CLI interactif :
 
 ```bash
 pnpm db:admin
 ```
 
-Suivez les instructions à l'écran :
-1. Entrez l'email de l'administrateur
-2. Entrez le mot de passe (min. 8 caractères)
-3. Confirmez le mot de passe
+Le script vous guidera pas à pas :
+1. 📧 Entrez l'email de l'administrateur
+2. 🔐 Entrez le mot de passe (min. 8 caractères, masqué)
+3. 🔐 Confirmez le mot de passe
+4. 👤 Entrez un nom (optionnel)
 
 > ⚠️ Si un administrateur existe déjà, le script mettra à jour son mot de passe.
 
@@ -245,7 +246,7 @@ ASuite/
 
 ## 📝 Changelog
 
-**Version actuelle : v1.5.0** - Panel Administration complet
+**Version actuelle : v1.5.1** - Panel Administration complet
 
 > 📋 Voir le [Journal des modifications complet](./CHANGELOG.md)
 
