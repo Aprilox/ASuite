@@ -13,7 +13,6 @@
   <br />
   
   <p><strong>Une suite d'outils collaboratifs moderne, sécurisée et professionnelle.</strong></p>
-  <p><em>Inspirée de kSuite d'Infomaniak</em></p>
 </div>
 
 <br />
@@ -29,6 +28,14 @@
 - 📱 QR codes personnalisables (couleurs, fond transparent)
 - ✏️ Édition complète des liens
 
+### AVault - Notes chiffrées ✅
+- 🔒 Chiffrement AES-256 côté client (end-to-end)
+- 🔐 Protection par mot de passe optionnelle
+- 🔥 Auto-destruction après lecture (burn after read)
+- ⏰ Date d'expiration configurable
+- 👁️ Limite de vues configurable
+- 📋 Dashboard de gestion des notes
+
 ### Interface utilisateur ✅
 - 🌍 Multi-langue (Français / English) avec détection automatique
 - 🎨 Thèmes clair / sombre / système (synchronisé avec le compte)
@@ -40,7 +47,6 @@
 ### Outils à venir
 | Outil | Description | Status |
 |-------|-------------|--------|
-| **AVault** | Partage de notes chiffrées | 🔜 Bientôt |
 | **ATransfer** | Transfert de fichiers jusqu'à 50 Go | 🔜 Bientôt |
 | **ACalendar** | Gestion d'agenda et événements | 🔜 Bientôt |
 | **AMail** | Messagerie sécurisée | 🔜 Bientôt |
@@ -182,7 +188,7 @@ ASuite/
 
 ## 📝 Changelog
 
-**Version actuelle : v1.3.1** - Corrections d'accessibilité et stabilité
+**Version actuelle : v1.4.0** - AVault : notes chiffrées de bout en bout
 
 > 📋 Voir le [Journal des modifications complet](./CHANGELOG.md)
 

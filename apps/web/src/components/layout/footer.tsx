@@ -14,7 +14,7 @@ import {
 
 const toolLinks = [
   { key: 'alinks', href: '/alinks', icon: Link2, available: true },
-  { key: 'avault', href: '/coming-soon?tool=avault', icon: Lock, available: false },
+  { key: 'avault', href: '/avault', icon: Lock, available: true },
   { key: 'atransfer', href: '/coming-soon?tool=atransfer', icon: Send, available: false },
   { key: 'acalendar', href: '/coming-soon?tool=acalendar', icon: Calendar, available: false },
   { key: 'amail', href: '/coming-soon?tool=amail', icon: Mail, available: false },

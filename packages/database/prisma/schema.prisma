@@ -41,6 +41,9 @@ model User {
   // ALinks
   links         Link[]
   
+  // AVault
+  vaults        Vault[]
+  
   // Timestamps
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -163,6 +166,63 @@ model LinkClick {
   link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
 
   @@index([linkId])
+  @@index([createdAt])
+}
+
+// ==================== AVAULT - Notes chiffrées ====================
+
+model Vault {
+  id            String    @id @default(cuid())
+  code          String    @unique // Code court pour le partage
+  
+  // Contenu chiffré
+  title         String?   // Titre (optionnel, non chiffré pour affichage)
+  content       String    // Contenu chiffré côté client (AES-256)
+  iv            String    // Vecteur d'initialisation pour le déchiffrement
+  encryptionKey String?   // Clé de déchiffrement (stockée uniquement pour utilisateurs connectés)
+  
+  // Propriétaire (optionnel - notes anonymes possibles)
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Sécurité
+  password      String?   // Hash du mot de passe optionnel
+  
+  // Options d'expiration
+  expiresAt     DateTime? // Date d'expiration
+  burnAfterRead Boolean   @default(false) // Auto-destruction après lecture
+  maxViews      Int?      // Nombre max de vues
+  
+  // Statistiques
+  viewCount     Int       @default(0)
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  views         VaultView[]
+
+  @@index([code])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model VaultView {
+  id        String   @id @default(cuid())
+  vaultId   String
+  
+  // Analytics
+  ipAddress String?
+  country   String?
+  device    String?
+  browser   String?
+  
+  createdAt DateTime @default(now())
+
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  @@index([vaultId])
   @@index([createdAt])
 }
 

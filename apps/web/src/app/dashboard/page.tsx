@@ -23,7 +23,7 @@ import {
 
 const toolKeys = [
   { key: 'alinks', icon: Link2, color: 'bg-blue-500', href: '/alinks', status: 'active' },
-  { key: 'avault', icon: Lock, color: 'bg-violet-500', href: '/avault', status: 'coming' },
+  { key: 'avault', icon: Lock, color: 'bg-violet-500', href: '/avault', status: 'active' },
   { key: 'atransfer', icon: Send, color: 'bg-emerald-500', href: '/atransfer', status: 'coming' },
   { key: 'acalendar', icon: Calendar, color: 'bg-amber-500', href: '/acalendar', status: 'coming' },
   { key: 'amail', icon: Mail, color: 'bg-red-500', href: '/amail', status: 'coming' },

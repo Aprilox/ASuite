@@ -2,6 +2,25 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.4.0] - 2025-01-10
+
+### Nouveautés
+- **AVault** : Partage de notes chiffrées de bout en bout (AES-256)
+- AVault : Protection par mot de passe optionnelle
+- AVault : Auto-destruction après lecture (burn after read)
+- AVault : Date d'expiration configurable
+- AVault : Limite de vues configurable
+- AVault : Dashboard de gestion des notes avec bouton copier le lien
+
+### Sécurité
+- Chiffrement AES-256 côté client
+- Clé de déchiffrement stockée de manière sécurisée (accessible uniquement par le propriétaire)
+- Protection contre les doubles appels API (React Strict Mode)
+
+### Améliorations
+- Traductions complètes FR/EN pour AVault
+- Interface de visualisation des notes sécurisées
+
 ## [1.3.1] - 2025-01-09
 
 ### Corrections

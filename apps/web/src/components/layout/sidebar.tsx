@@ -35,7 +35,7 @@ const tools = [
     key: 'avault',
     icon: Lock,
     href: '/avault',
-    status: 'coming' as const,
+    status: 'active' as const,
   },
   {
     key: 'atransfer',
