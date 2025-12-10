@@ -13,7 +13,7 @@
     "db:push": "turbo db:push",
     "db:seed": "pnpm --filter @asuite/database db:seed",
     "db:studio": "pnpm --filter @asuite/database studio",
-    "admin:create": "pnpm --filter @asuite/database admin:create"
+    "db:admin": "pnpm --filter @asuite/database admin:create"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
