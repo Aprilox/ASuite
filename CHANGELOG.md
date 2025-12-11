@@ -2,6 +2,12 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.6.1] - 2025-12-11
+
+### Améliorations
+- ⌨️ Focus automatique sur le champ de message après envoi (tickets)
+- 💾 Sauvegarde des filtres de tickets admin en base de données (statut, priorité, catégorie)
+
 ## [1.6.0] - 2025-12-11
 
 ### Nouveautés - Système de Support (En développement)

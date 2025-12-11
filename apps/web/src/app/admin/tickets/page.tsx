@@ -68,6 +68,12 @@ const statusColors: Record<string, string> = {
   closed: 'text-gray-500',
 };
 
+interface SavedFilters {
+  status: string;
+  priority: string;
+  category: string;
+}
+
 export default function AdminTicketsPage() {
   const router = useRouter();
   const toast = useToast();
@@ -85,10 +91,62 @@ export default function AdminTicketsPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+  // Load saved filters from database on mount
+  useEffect(() => {
+    const loadFilters = async () => {
+      try {
+        const res = await fetch('/api/admin/preferences');
+        if (res.ok) {
+          const data = await res.json();
+          const filters = data.preferences?.ticketFilters as SavedFilters | undefined;
+          if (filters) {
+            setFilterStatus(filters.status || '');
+            setFilterPriority(filters.priority || '');
+            setFilterCategory(filters.category || '');
+          }
+        }
+      } catch {
+        // Ignore errors, use defaults
+      }
+      setFiltersLoaded(true);
+    };
+    loadFilters();
+  }, []);
+
+  // Save filters to database when they change (debounced)
+  useEffect(() => {
+    if (!filtersLoaded) return;
+    
+    const saveFilters = async () => {
+      try {
+        await fetch('/api/admin/preferences', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: 'ticketFilters',
+            value: {
+              status: filterStatus,
+              priority: filterPriority,
+              category: filterCategory,
+            },
+          }),
+        });
+      } catch {
+        // Ignore save errors
+      }
+    };
+    
+    // Debounce to avoid too many requests
+    const timeout = setTimeout(saveFilters, 500);
+    return () => clearTimeout(timeout);
+  }, [filterStatus, filterPriority, filterCategory, filtersLoaded]);
 
   useEffect(() => {
+    if (!filtersLoaded) return;
     fetchTickets();
-  }, [pagination.page, search, filterStatus, filterPriority, filterCategory]);
+  }, [pagination.page, search, filterStatus, filterPriority, filterCategory, filtersLoaded]);
 
   const fetchTickets = async () => {
     setLoading(true);

@@ -68,6 +68,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch ticket (silent = no loading state, for polling)
   const fetchTicket = useCallback(async (silent = false) => {
@@ -106,6 +107,18 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [ticket?.messages.length]);
+
+  // Refocus input after sending is complete
+  const prevSendingRef = useRef(sending);
+  useEffect(() => {
+    if (prevSendingRef.current && !sending) {
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+    }
+    prevSendingRef.current = sending;
+  }, [sending]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -305,6 +318,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
           <form onSubmit={handleSendMessage} className="px-6 py-4">
             <div className="flex gap-3">
               <input
+                ref={inputRef}
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}

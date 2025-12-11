@@ -23,6 +23,7 @@ model User {
   // Préférences
   theme         String    @default("light") // light, dark, system
   locale        String    @default("fr")    // fr, en
+  adminPrefs    String?   // JSON pour préférences admin (filtres, etc.)
   
   // 2FA
   twoFactorEnabled Boolean @default(false)

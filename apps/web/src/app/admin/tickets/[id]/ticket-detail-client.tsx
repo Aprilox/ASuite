@@ -115,6 +115,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   // Reply state
   const [replyContent, setReplyContent] = useState('');
   const [isInternal, setIsInternal] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch ticket (silent = no loading state, for polling)
   const fetchTicket = useCallback(async (silent = false) => {
@@ -159,6 +160,18 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [ticket?.messages.length]);
+
+  // Refocus input after sending is complete
+  const prevSendingRef = useRef(sending);
+  useEffect(() => {
+    if (prevSendingRef.current && !sending) {
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+    }
+    prevSendingRef.current = sending;
+  }, [sending]);
 
   const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -439,6 +452,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                 <div className="flex gap-3">
                   <div className="flex-1">
                     <input
+                      ref={inputRef}
                       type="text"
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
