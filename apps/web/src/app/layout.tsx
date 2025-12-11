@@ -7,20 +7,25 @@ import { ThemeProvider } from '@/providers/theme-provider';
 import { LocaleProvider } from '@/providers/locale-provider';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { ToastProvider } from '@/components/ui/toast';
+import { getSiteSettings } from '@/lib/site-settings';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
-export const metadata: Metadata = {
-  title: 'ASuite - Suite Collaborative Professionnelle',
-  description: 'Communiquez, partagez et donnez vie à vos idées en sécurité avec ASuite.',
-  keywords: ['suite collaborative', 'productivité', 'cloud', 'sécurisé'],
-  icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
-    apple: '/favicon.svg',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  
+  return {
+    title: `${settings.name} - ${settings.description}`,
+    description: settings.description,
+    keywords: ['suite collaborative', 'productivité', 'cloud', 'sécurisé'],
+    icons: {
+      icon: [
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+      ],
+      apple: '/favicon.svg',
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

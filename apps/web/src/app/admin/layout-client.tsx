@@ -314,7 +314,7 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
 
       {/* Main content */}
       <main className="pt-14 sm:pt-16 lg:pl-64 h-screen flex flex-col">
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-auto p-4 sm:p-6">
           {children}
         </div>
       </main>

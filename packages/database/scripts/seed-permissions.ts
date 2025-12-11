@@ -46,26 +46,19 @@ const DEFAULT_SETTINGS = [
   // General
   { key: 'site.name', value: 'ASuite', type: 'string', category: 'general', label: 'Nom du site' },
   { key: 'site.description', value: 'Suite collaborative professionnelle', type: 'string', category: 'general', label: 'Description' },
-  { key: 'site.maintenance', value: 'false', type: 'boolean', category: 'general', label: 'Mode maintenance' },
   
-  // Security
+  // Security - Fonctionnels
   { key: 'security.max_login_attempts', value: '5', type: 'number', category: 'security', label: 'Tentatives de connexion max' },
   { key: 'security.lockout_duration', value: '15', type: 'number', category: 'security', label: 'Durée de blocage (minutes)' },
   { key: 'security.session_duration', value: '7', type: 'number', category: 'security', label: 'Durée de session (jours)' },
-  { key: 'security.require_email_verification', value: 'false', type: 'boolean', category: 'security', label: 'Vérification email requise' },
   
-  // Email
+  // Email - Fonctionnels
   { key: 'email.smtp_host', value: '', type: 'string', category: 'email', label: 'Serveur SMTP' },
   { key: 'email.smtp_port', value: '587', type: 'number', category: 'email', label: 'Port SMTP' },
   { key: 'email.smtp_user', value: '', type: 'string', category: 'email', label: 'Utilisateur SMTP' },
   { key: 'email.smtp_password', value: '', type: 'string', category: 'email', label: 'Mot de passe SMTP' },
   { key: 'email.from_address', value: 'noreply@asuite.local', type: 'string', category: 'email', label: 'Adresse d\'envoi' },
   { key: 'email.from_name', value: 'ASuite', type: 'string', category: 'email', label: 'Nom d\'expéditeur' },
-  
-  // Storage
-  { key: 'storage.type', value: 'local', type: 'string', category: 'storage', label: 'Type de stockage' },
-  { key: 'storage.path', value: './uploads', type: 'string', category: 'storage', label: 'Chemin local' },
-  { key: 'storage.max_file_size', value: '52428800', type: 'number', category: 'storage', label: 'Taille max fichier (bytes)' },
 ];
 
 async function main() {

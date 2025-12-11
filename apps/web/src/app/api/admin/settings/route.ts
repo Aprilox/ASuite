@@ -5,6 +5,7 @@ import {
   getRequestInfo, 
   createAuditLog 
 } from '@/lib/admin-auth';
+import { invalidateSiteSettingsCache } from '@/lib/site-settings';
 
 // GET /api/admin/settings - Liste des paramètres système
 export async function GET(request: Request) {
@@ -37,11 +38,11 @@ export async function GET(request: Request) {
     }
 
     // Liste des catégories disponibles (les noms seront traduits côté client)
+    // Storage retiré car pas encore implémenté
     const categories = [
       { id: 'general', icon: 'settings' },
       { id: 'security', icon: 'shield' },
       { id: 'email', icon: 'mail' },
-      { id: 'storage', icon: 'hard-drive' },
     ];
 
     return NextResponse.json({
@@ -100,6 +101,9 @@ export async function PATCH(request: Request) {
       ipAddress,
       userAgent
     );
+
+    // Invalider le cache des paramètres du site
+    invalidateSiteSettingsCache();
 
     return NextResponse.json({ 
       success: true, 

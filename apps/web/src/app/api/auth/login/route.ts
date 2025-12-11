@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier le rate limit AVANT toute opération coûteuse
-    const rateLimitResult = checkRateLimit(email, clientIp);
+    const rateLimitResult = await checkRateLimit(email, clientIp);
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: rateLimitResult.reason },
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     if (!user || !user.password) {
       // Enregistrer l'échec
-      recordLoginAttempt(email, clientIp, false);
+      await recordLoginAttempt(email, clientIp, false);
       return NextResponse.json(
         { error: 'Email ou mot de passe incorrect' },
         { status: 401 }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     if (!isValidPassword) {
       // Enregistrer l'échec
-      recordLoginAttempt(email, clientIp, false);
+      await recordLoginAttempt(email, clientIp, false);
       return NextResponse.json(
         { error: 'Email ou mot de passe incorrect' },
         { status: 401 }
@@ -88,11 +88,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Enregistrer le succès (réinitialise le compteur email)
-    recordLoginAttempt(email, clientIp, true);
+    await recordLoginAttempt(email, clientIp, true);
+
+    // Récupérer la durée de session depuis les paramètres
+    const sessionDurationSetting = await prisma.systemSetting.findUnique({
+      where: { key: 'security.session_duration' },
+    });
+    const sessionDays = parseInt(sessionDurationSetting?.value || '7', 10);
 
     // Create session
     const sessionToken = createUniqueId();
-    const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const expires = new Date(Date.now() + sessionDays * 24 * 60 * 60 * 1000);
 
     await prisma.session.create({
       data: {

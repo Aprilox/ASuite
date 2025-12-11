@@ -4,6 +4,8 @@
  * TODO: Ajouter CAPTCHA après N tentatives
  */
 
+import { prisma } from '@asuite/database';
+
 interface RateLimitEntry {
   count: number;
   firstAttempt: number;
@@ -11,12 +13,50 @@ interface RateLimitEntry {
   blockedUntil?: number;
 }
 
-// Configuration
-const RATE_LIMIT_CONFIG = {
+// Configuration par défaut (sera surchargée par les paramètres DB)
+let RATE_LIMIT_CONFIG = {
   maxAttemptsByIp: 10,      // Max tentatives par IP en 15 minutes
   windowMs: 15 * 60 * 1000, // Fenêtre de 15 minutes
   blockDurationMs: 15 * 60 * 1000, // Blocage de 15 minutes
 };
+
+// Cache pour les paramètres (évite de requêter la DB à chaque appel)
+let configLastFetched = 0;
+const CONFIG_CACHE_MS = 60 * 1000; // 1 minute
+
+/**
+ * Charge les paramètres de sécurité depuis la base de données
+ */
+async function loadSecurityConfig(): Promise<void> {
+  const now = Date.now();
+  if (now - configLastFetched < CONFIG_CACHE_MS) {
+    return; // Utiliser le cache
+  }
+
+  try {
+    const settings = await prisma.systemSetting.findMany({
+      where: { category: 'security' },
+    });
+
+    const config: Record<string, string> = {};
+    for (const s of settings) {
+      config[s.key] = s.value;
+    }
+
+    const maxAttempts = parseInt(config['security.max_login_attempts'] || '10', 10);
+    const lockoutMinutes = parseInt(config['security.lockout_duration'] || '15', 10);
+
+    RATE_LIMIT_CONFIG = {
+      maxAttemptsByIp: maxAttempts > 0 ? maxAttempts : 10,
+      windowMs: 15 * 60 * 1000,
+      blockDurationMs: lockoutMinutes > 0 ? lockoutMinutes * 60 * 1000 : 15 * 60 * 1000,
+    };
+
+    configLastFetched = now;
+  } catch (error) {
+    console.error('Error loading security config:', error);
+  }
+}
 
 // Stockage en mémoire (par IP uniquement)
 const ipAttempts = new Map<string, RateLimitEntry>();
@@ -70,7 +110,10 @@ export interface RateLimitResult {
 /**
  * Vérifie si une tentative de login est autorisée (basé sur l'IP uniquement)
  */
-export function checkRateLimit(email: string, ip: string): RateLimitResult {
+export async function checkRateLimit(email: string, ip: string): Promise<RateLimitResult> {
+  // Charger la config depuis la DB (avec cache)
+  await loadSecurityConfig();
+  
   const now = Date.now();
   
   // Vérifier le blocage par IP uniquement
@@ -90,7 +133,10 @@ export function checkRateLimit(email: string, ip: string): RateLimitResult {
 /**
  * Enregistre une tentative de login (succès ou échec)
  */
-export function recordLoginAttempt(email: string, ip: string, success: boolean): void {
+export async function recordLoginAttempt(email: string, ip: string, success: boolean): Promise<void> {
+  // Charger la config depuis la DB (avec cache)
+  await loadSecurityConfig();
+  
   const now = Date.now();
   
   // En cas de succès, on ne reset PAS le compteur IP

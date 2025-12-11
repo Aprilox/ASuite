@@ -920,11 +920,32 @@
       "loadError": "Erreur de chargement",
       "noSettings": "Aucun paramètre dans cette catégorie",
       "modified": "Modifié",
+      "settingsPlural": "paramètres",
+      "settingsSingular": "paramètre",
+      "backToCategories": "Retour aux catégories",
       "categories": {
         "general": "Général",
         "security": "Sécurité",
         "email": "Email",
         "storage": "Stockage"
+      },
+      "settingLabels": {
+        "site_name": "Nom du site",
+        "site_description": "Description du site",
+        "site_maintenance": "Mode maintenance (non implémenté)",
+        "security_max_login_attempts": "Tentatives de connexion max",
+        "security_lockout_duration": "Durée de blocage (minutes)",
+        "security_session_duration": "Durée de session (jours)",
+        "security_require_email_verification": "Vérification email (non implémenté)",
+        "email_smtp_host": "Serveur SMTP",
+        "email_smtp_port": "Port SMTP",
+        "email_smtp_user": "Utilisateur SMTP",
+        "email_smtp_password": "Mot de passe SMTP",
+        "email_from_address": "Adresse d'envoi",
+        "email_from_name": "Nom d'expéditeur",
+        "storage_type": "Type de stockage (non implémenté)",
+        "storage_path": "Chemin de stockage (non implémenté)",
+        "storage_max_file_size": "Taille max fichier (non implémenté)"
       }
     }
   }

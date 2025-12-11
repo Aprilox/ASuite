@@ -920,11 +920,32 @@
       "loadError": "Loading error",
       "noSettings": "No settings in this category",
       "modified": "Modified",
+      "settingsPlural": "settings",
+      "settingsSingular": "setting",
+      "backToCategories": "Back to categories",
       "categories": {
         "general": "General",
         "security": "Security",
         "email": "Email",
         "storage": "Storage"
+      },
+      "settingLabels": {
+        "site_name": "Site name",
+        "site_description": "Site description",
+        "site_maintenance": "Maintenance mode (not implemented)",
+        "security_max_login_attempts": "Max login attempts",
+        "security_lockout_duration": "Lockout duration (minutes)",
+        "security_session_duration": "Session duration (days)",
+        "security_require_email_verification": "Email verification (not implemented)",
+        "email_smtp_host": "SMTP server",
+        "email_smtp_port": "SMTP port",
+        "email_smtp_user": "SMTP username",
+        "email_smtp_password": "SMTP password",
+        "email_from_address": "From address",
+        "email_from_name": "From name",
+        "storage_type": "Storage type (not implemented)",
+        "storage_path": "Storage path (not implemented)",
+        "storage_max_file_size": "Max file size (not implemented)"
       }
     }
   }

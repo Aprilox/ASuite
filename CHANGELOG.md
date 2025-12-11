@@ -7,6 +7,16 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 ### Améliorations
 - ⌨️ Focus automatique sur le champ de message après envoi (tickets)
 - 💾 Sauvegarde des filtres de tickets admin en base de données (statut, priorité, catégorie)
+- 🎨 Nouvelle UI pour la page Paramètres admin (navigation par catégories en grille)
+- 📐 Espacement ajouté entre la navbar et le contenu dans l'admin
+- 📐 Espacement corrigé entre titre et boutons sur la page Rôles
+- 🌐 Traductions complètes des labels de paramètres système (FR/EN)
+- ⚙️ Paramètres de sécurité maintenant fonctionnels (rate limit, durée session)
+
+### Corrections
+- 🔧 Rate limiting utilise maintenant les paramètres de la DB (tentatives max, durée blocage)
+- 🔧 Durée de session configurable depuis les paramètres admin
+- 🧹 Retrait des paramètres non implémentés (mode maintenance, stockage)
 
 ## [1.6.0] - 2025-12-11
 
