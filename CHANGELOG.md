@@ -2,6 +2,33 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.6.0] - 2025-12-11
+
+### Nouveautés - Système de Support (En développement)
+- 🎫 Système de tickets côté client (/support)
+- 💬 Création de tickets avec catégorie, priorité et message
+- 📋 Liste des tickets avec statuts et filtres
+- 🗨️ Vue chat pour les conversations (style messagerie)
+- ⚡ Messages en temps réel (optimistic updates + polling 5s)
+- 🔒 Notes internes visibles uniquement par le staff (admin)
+- 🎨 Aura colorée selon le type de message (réponse/note interne)
+- 📱 Menu d'options mobile pour les tickets (sidebar responsive)
+
+> ⚠️ Le système de tickets est fonctionnel mais encore en développement actif. Des fonctionnalités supplémentaires seront ajoutées.
+
+### Interface
+- 📜 Scrollbar personnalisée pour tout le site
+- 📱 Menu mobile avec tous les outils (actifs + "Bientôt")
+- 📱 Sidebar accessible via menu burger sur les pages dashboard/support
+- 🖥️ Layout pleine hauteur pour les pages support, dashboard, alinks, avault
+- 👤 Affichage du nom sur tous les messages (y compris les nôtres)
+- 🏷️ Badge de rôle affiché pour les messages du staff
+
+### Corrections
+- Suppression des doublons dans le menu mobile
+- Polling désactivé pour les tickets fermés (optimisation)
+- Amélioration de la navigation mobile responsive
+
 ## [1.5.1] - 2025-12-10
 
 ### Améliorations

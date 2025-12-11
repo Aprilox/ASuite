@@ -39,9 +39,9 @@ export default function AVaultLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="h-screen flex flex-col bg-muted/30">
       <Header />
-      <div className="flex pt-16 h-[calc(100vh-4rem)]">
+      <div className="flex flex-1 pt-16 overflow-hidden">
         <Sidebar />
         <main className="flex-1 p-8 overflow-y-auto">
           {children}

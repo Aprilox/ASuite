@@ -39,7 +39,8 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "settings": "Settings",
-    "adminPanel": "Admin Panel"
+    "adminPanel": "Admin Panel",
+    "support": "Support"
   },
   "footer": {
     "product": "Product",
@@ -582,6 +583,50 @@
     "contactText": "For any questions about our use of cookies:",
     "lastUpdate": "Last Update",
     "lastUpdateText": "This cookie policy was last updated on {date}."
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Need help? Create a ticket and we'll get back to you quickly.",
+    "newTicket": "New ticket",
+    "noTickets": "No tickets",
+    "noTicketsDesc": "You haven't created any support tickets yet.",
+    "createFirst": "Create my first ticket",
+    "subject": "Subject",
+    "subjectPlaceholder": "Briefly describe your issue",
+    "category": "Category",
+    "priority": "Priority",
+    "message": "Message",
+    "messagePlaceholder": "Describe your issue in detail...",
+    "submit": "Submit",
+    "ticketCreated": "Ticket created successfully",
+    "createError": "Error creating ticket",
+    "ticketNotFound": "Ticket not found",
+    "backToTickets": "Back to tickets",
+    "ticketClosed": "This ticket is closed",
+    "replyPlaceholder": "Write your message...",
+    "send": "Send",
+    "sendError": "Error sending message",
+    "messages": "message(s)",
+    "anonymous": "Anonymous",
+    "categories": {
+      "bug": "Bug",
+      "question": "Question",
+      "feature": "Feature request",
+      "other": "Other"
+    },
+    "priorities": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "statuses": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "pending": "Pending",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    }
   },
   "admin": {
     "sidebar": {

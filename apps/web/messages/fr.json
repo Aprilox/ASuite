@@ -39,7 +39,8 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "settings": "Paramètres",
-    "adminPanel": "Panel Admin"
+    "adminPanel": "Panel Admin",
+    "support": "Support"
   },
   "footer": {
     "product": "Produit",
@@ -582,6 +583,50 @@
     "contactText": "Pour toute question concernant notre utilisation des cookies :",
     "lastUpdate": "Dernière mise à jour",
     "lastUpdateText": "Cette politique de cookies a été mise à jour le {date}."
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Besoin d'aide ? Créez un ticket et nous vous répondrons rapidement.",
+    "newTicket": "Nouveau ticket",
+    "noTickets": "Aucun ticket",
+    "noTicketsDesc": "Vous n'avez pas encore créé de ticket de support.",
+    "createFirst": "Créer mon premier ticket",
+    "subject": "Sujet",
+    "subjectPlaceholder": "Décrivez brièvement votre problème",
+    "category": "Catégorie",
+    "priority": "Priorité",
+    "message": "Message",
+    "messagePlaceholder": "Décrivez votre problème en détail...",
+    "submit": "Envoyer",
+    "ticketCreated": "Ticket créé avec succès",
+    "createError": "Erreur lors de la création",
+    "ticketNotFound": "Ticket non trouvé",
+    "backToTickets": "Retour aux tickets",
+    "ticketClosed": "Ce ticket est fermé",
+    "replyPlaceholder": "Écrivez votre message...",
+    "send": "Envoyer",
+    "sendError": "Erreur lors de l'envoi",
+    "messages": "message(s)",
+    "anonymous": "Anonyme",
+    "categories": {
+      "bug": "Bug",
+      "question": "Question",
+      "feature": "Suggestion",
+      "other": "Autre"
+    },
+    "priorities": {
+      "low": "Basse",
+      "normal": "Normale",
+      "high": "Haute",
+      "urgent": "Urgente"
+    },
+    "statuses": {
+      "open": "Ouvert",
+      "in_progress": "En cours",
+      "pending": "En attente",
+      "resolved": "Résolu",
+      "closed": "Fermé"
+    }
   },
   "admin": {
     "sidebar": {

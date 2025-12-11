@@ -8,7 +8,7 @@ import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Loader2 } from 'lucide-react';
 
-export default function ALinksLayout({
+export default function SupportLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export default function ALinksLayout({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login?redirect=/alinks');
+      router.push('/login?redirect=/support');
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -43,7 +43,7 @@ export default function ALinksLayout({
       <Header />
       <div className="flex flex-1 pt-16 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 flex flex-col overflow-hidden">
           {children}
         </main>
       </div>

@@ -36,10 +36,16 @@
 - 👁️ Limite de vues configurable
 - 📋 Dashboard de gestion des notes
 
+### Support Client ✅ (En développement)
+- 🎫 Création de tickets de support avec catégorie et priorité
+- 💬 Vue chat pour les conversations en temps réel
+- ⚡ Messages instantanés (optimistic updates + polling)
+- 📋 Liste des tickets avec statuts et historique
+
 ### Panel Administration ✅
 - 👥 Gestion complète des utilisateurs (blocage, suppression, réinitialisation mot de passe)
 - 🛡️ Système de rôles avec permissions granulaires (19 permissions, 6 modules)
-- 🎫 Système de tickets de support (création, réponse, notes internes)
+- 🎫 Gestion des tickets (réponse, notes internes, changement de statut)
 - 📊 Dashboard avec statistiques en temps réel
 - 📋 Logs d'audit pour tracer toutes les actions
 - ⚙️ Paramètres système configurables
@@ -246,7 +252,7 @@ ASuite/
 
 ## 📝 Changelog
 
-**Version actuelle : v1.5.1** - Panel Administration complet
+**Version actuelle : v1.6.0** - Système de Support Client
 
 > 📋 Voir le [Journal des modifications complet](./CHANGELOG.md)
 

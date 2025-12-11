@@ -27,7 +27,7 @@ export function LanguageSelector({ variant = 'default' }: LanguageSelectorProps)
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-sm"
         type="button"
       >
-        <FlagIcon locale={locale} className="w-5 h-4 rounded-sm shadow-sm" />
+        <FlagIcon locale={locale} className="w-5 h-4 shadow-sm" />
         {variant === 'default' && (
           <>
             <span>{localeNames[locale]}</span>
@@ -52,7 +52,7 @@ export function LanguageSelector({ variant = 'default' }: LanguageSelectorProps)
                   locale === loc ? 'bg-accent font-medium' : ''
                 }`}
               >
-                <FlagIcon locale={loc} className="w-5 h-4 rounded-sm shadow-sm" />
+                <FlagIcon locale={loc} className="w-5 h-4 shadow-sm" />
                 <span>{localeNames[loc]}</span>
               </button>
             ))}

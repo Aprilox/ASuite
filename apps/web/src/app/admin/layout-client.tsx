@@ -180,8 +180,7 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
                 className="h-9 px-2 sm:px-3 rounded-lg flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                 title={t('header.language')}
               >
-                <FlagIcon code={currentLang.code} className="w-5 h-4 rounded-sm" />
-                <span className="hidden sm:inline text-sm">{currentLang.code.toUpperCase()}</span>
+                <FlagIcon code={currentLang.code} className="w-5 h-4" />
               </button>
               
               {langOpen && (
@@ -194,7 +193,7 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
                         locale === lang.code ? 'bg-accent' : ''
                       }`}
                     >
-                      <FlagIcon code={lang.code} className="w-5 h-4 rounded-sm" />
+                      <FlagIcon code={lang.code} className="w-5 h-4" />
                       <span>{lang.label}</span>
                     </button>
                   ))}
@@ -314,8 +313,8 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
       </aside>
 
       {/* Main content */}
-      <main className="pt-14 sm:pt-16 lg:pl-64">
-        <div className="p-4 sm:p-6">
+      <main className="pt-14 sm:pt-16 lg:pl-64 h-screen flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {children}
         </div>
       </main>
