@@ -2,6 +2,34 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.6.3] - 2025-12-11
+
+### Nouveautés - Interface Admin
+- 👁️ Icônes contextuelles : crayon (éditer) si droits suffisants, œil (voir) sinon
+- 👤 Nom de l'utilisateur affiché dans la navbar admin (comme dans le dashboard)
+- 🔒 Paramètres non implémentés automatiquement grisés et désactivés
+
+### Améliorations - Logs d'audit
+- 📝 Traductions complètes de tous les types d'activités (26 actions)
+- 👥 Affichage des noms des utilisateurs/rôles au lieu des IDs dans les logs
+- ✅ Enrichissement automatique des logs avec les noms depuis la base de données
+
+### Améliorations - Gestion des erreurs
+- 🚫 Gestion des erreurs 403 dans toutes les pages admin (users, roles, dashboard)
+- 🔄 Actualisation automatique de la page en cas de perte de permissions
+- 💬 Message clair et temporisé avant actualisation (1,5 secondes)
+
+### Corrections
+- 🔧 Endpoint `/api/admin/preferences` corrigé (utilise `requireAdminAccess`)
+- 📋 Traduction manquante `view` ajoutée dans admin.roles (FR/EN)
+- 🌍 Traductions ajoutées pour `actionSettingsSmtpTest` et `actionPasswordChange`
+- ✨ Cohérence des traductions entre dashboard et panel admin
+
+### Technique
+- 🛡️ Protection contre les appels API sans permissions appropriées
+- 💾 Sauvegarde des préférences admin fonctionnelle (filtres tickets)
+- 📊 Amélioration de la lisibilité des logs d'activité
+
 ## [1.6.2] - 2025-12-11
 
 ### Nouveautés - Configuration SMTP

@@ -44,11 +44,20 @@ const ACTION_TRANSLATIONS: Record<string, string> = {
   'admin.settings.view': 'actionSettingsView',
   'admin.settings.update': 'actionSettingsUpdate',
   'admin.settings.create': 'actionSettingsCreate',
+  'admin.settings.smtp_test': 'actionSettingsSmtpTest',
   // Auth
   'auth.login': 'actionLogin',
   'auth.logout': 'actionLogout',
   'auth.register': 'actionRegister',
   'auth.password.change': 'actionPasswordChange',
+  // Password reset
+  'password_reset_request': 'actionPasswordResetRequest',
+  'password_reset_complete': 'actionPasswordResetComplete',
+  // Alias sans préfixe (pour compatibilité avec les anciens logs)
+  'login': 'actionLogin',
+  'logout': 'actionLogout',
+  'register': 'actionRegister',
+  'password_change': 'actionPasswordChange',
 };
 
 interface Stats {
@@ -93,6 +102,16 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       const res = await fetch('/api/admin/stats');
+
+      // Gérer les erreurs de permissions
+      if (res.status === 403) {
+        setError('Permissions insuffisantes. Actualisation de la page...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        return;
+      }
+
       if (!res.ok) throw new Error('Erreur lors du chargement');
       const data = await res.json();
       setStats(data);

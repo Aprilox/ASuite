@@ -48,7 +48,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
   const tSidebar = useTranslations('sidebar');
   const tTools = useTranslations('tools');
   const tCommon = useTranslations('common');
-  
+
   // Sidebar links for mobile
   const sidebarLinks = [
     { href: '/dashboard', icon: LayoutDashboard, label: tSidebar('dashboard'), coming: false },
@@ -64,10 +64,10 @@ export function Header({ variant = 'default' }: HeaderProps) {
     { href: '/aslides', icon: Presentation, label: tTools('aslides.name'), coming: true },
     { href: '/support', icon: MessageSquare, label: tSidebar('support'), coming: false },
   ];
-  
-  const isDashboardPage = pathname.startsWith('/dashboard') || 
-    pathname.startsWith('/alinks') || 
-    pathname.startsWith('/avault') || 
+
+  const isDashboardPage = pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/alinks') ||
+    pathname.startsWith('/avault') ||
     pathname.startsWith('/support') ||
     pathname.startsWith('/settings');
 
@@ -85,15 +85,29 @@ export function Header({ variant = 'default' }: HeaderProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 border-b transition-colors ${
-        variant === 'transparent'
+      className={`fixed top-0 left-0 right-0 z-50 border-b transition-colors ${variant === 'transparent'
           ? 'bg-background/80 backdrop-blur-sm'
           : 'bg-background'
-      }`}
+        }`}
     >
       <div className="container mx-auto px-4 h-16 flex items-center">
-        {/* Logo - Left */}
-        <div className="flex-1 flex items-center">
+        {/* Left side - Burger + Logo */}
+        <div className="flex-1 flex items-center gap-2">
+          {/* Mobile/Tablet Menu Button - Visible when sidebar is hidden (below lg) */}
+          {isDashboardPage && isAuthenticated && (
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
+          )}
+
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center">
               <span className="text-white font-bold text-lg">A</span>
@@ -103,7 +117,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
         </div>
 
         {/* Desktop Navigation - Center */}
-        <nav className="hidden md:flex items-center justify-center gap-6">
+        <nav className="hidden lg:flex items-center justify-center gap-6">
           {isHomePage &&
             navLinks.map((link) => (
               <Link
@@ -117,7 +131,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
         </nav>
 
         {/* Desktop Auth - Right */}
-        <div className="flex-1 hidden md:flex items-center justify-end gap-3">
+        <div className="flex-1 hidden lg:flex items-center justify-end gap-3">
           {/* Language Switcher */}
           <div className="relative">
             <button
@@ -141,9 +155,8 @@ export function Header({ variant = 'default' }: HeaderProps) {
                         setLangMenuOpen(false);
                         setLocale(loc);
                       }}
-                      className={`flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-accent transition-colors w-full text-left ${
-                        locale === loc ? 'bg-accent font-medium' : ''
-                      }`}
+                      className={`flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-accent transition-colors w-full text-left ${locale === loc ? 'bg-accent font-medium' : ''
+                        }`}
                     >
                       <FlagIcon locale={loc} className="w-5 h-4 shadow-sm" />
                       <span>{localeNames[loc]}</span>
@@ -231,22 +244,24 @@ export function Header({ variant = 'default' }: HeaderProps) {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 hover:bg-accent rounded-lg transition-colors"
-        >
-          {mobileMenuOpen ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Menu className="w-5 h-5" />
-          )}
-        </button>
+        {/* Mobile Menu Button - For non-dashboard pages (right side) */}
+        {(!isDashboardPage || !isAuthenticated) && (
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <div className="lg:hidden border-t bg-background max-h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="container mx-auto px-4 py-4 space-y-4">
             {isHomePage && (
               <nav className="space-y-2">
@@ -271,10 +286,10 @@ export function Header({ variant = 'default' }: HeaderProps) {
                 </p>
                 {sidebarLinks.map((link) => {
                   const Icon = link.icon;
-                  const isActivePath = link.href === '/dashboard' 
+                  const isActivePath = link.href === '/dashboard'
                     ? pathname === '/dashboard'
                     : pathname.startsWith(link.href);
-                  
+
                   if (link.coming) {
                     return (
                       <div
@@ -289,17 +304,16 @@ export function Header({ variant = 'default' }: HeaderProps) {
                       </div>
                     );
                   }
-                  
+
                   return (
                     <Link
                       key={link.href}
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        isActivePath
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActivePath
                           ? 'bg-primary text-primary-foreground'
                           : 'text-foreground hover:bg-accent'
-                      }`}
+                        }`}
                     >
                       <Icon className="w-5 h-5" />
                       {link.label}
@@ -321,11 +335,10 @@ export function Header({ variant = 'default' }: HeaderProps) {
                   <Link
                     href="/settings"
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                      pathname.startsWith('/settings')
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith('/settings')
                         ? 'bg-primary text-primary-foreground'
                         : 'text-foreground hover:bg-accent'
-                    }`}
+                      }`}
                   >
                     <Settings className="w-5 h-5" />
                     {tSidebar('settings')}
@@ -356,9 +369,8 @@ export function Header({ variant = 'default' }: HeaderProps) {
                         <button
                           key={loc}
                           onClick={() => setLocale(loc)}
-                          className={`p-1.5 rounded-md transition-colors ${
-                            locale === loc ? 'bg-primary' : 'bg-muted hover:bg-accent'
-                          }`}
+                          className={`p-1.5 rounded-md transition-colors ${locale === loc ? 'bg-primary' : 'bg-muted hover:bg-accent'
+                            }`}
                         >
                           <FlagIcon locale={loc} className="w-5 h-4" />
                         </button>

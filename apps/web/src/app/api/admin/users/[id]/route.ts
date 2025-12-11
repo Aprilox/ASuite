@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@asuite/database';
-import { 
-  requireAdminPermission, 
-  getRequestInfo, 
+import {
+  requireAdminPermission,
+  getRequestInfo,
   createAuditLog,
   isTargetUserProtected,
   isSystemAdmin,
@@ -83,9 +83,41 @@ export async function GET(
       },
     });
 
+    // Enrichir les logs avec les noms des ressources
+    const enrichedAuditLogs = await Promise.all(
+      auditLogs.map(async (log) => {
+        let resourceName = null;
+
+        if (log.resourceId) {
+          if (log.resource === 'user') {
+            const targetUser = await prisma.user.findUnique({
+              where: { id: log.resourceId },
+              select: { name: true, email: true },
+            });
+            if (targetUser) {
+              resourceName = targetUser.name || targetUser.email;
+            }
+          } else if (log.resource === 'role') {
+            const targetRole = await prisma.role.findUnique({
+              where: { id: log.resourceId },
+              select: { displayName: true },
+            });
+            if (targetRole) {
+              resourceName = targetRole.displayName;
+            }
+          }
+        }
+
+        return {
+          ...log,
+          resourceName,
+        };
+      })
+    );
+
     // Récupérer les sessions actives
     const sessions = await prisma.session.findMany({
-      where: { 
+      where: {
         userId: id,
         expires: { gt: new Date() },
       },
@@ -105,18 +137,18 @@ export async function GET(
         stats: user._count,
         _count: undefined,
       },
-      auditLogs,
+      auditLogs: enrichedAuditLogs,
       sessions,
     });
   } catch (error) {
     console.error('Admin user detail error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -189,7 +221,7 @@ export async function PATCH(
       const systemRoles = existingRoles.filter((ur) => ur.role.isSystem);
 
       await prisma.userRole.deleteMany({
-        where: { 
+        where: {
           userId: id,
           role: { isSystem: false },
         },
@@ -197,7 +229,7 @@ export async function PATCH(
 
       // Ajouter les nouveaux rôles (seulement ceux non-système et que l'utilisateur peut attribuer)
       const rolesToAdd = await prisma.role.findMany({
-        where: { 
+        where: {
           id: { in: roles },
           isSystem: false,
         },
@@ -218,7 +250,7 @@ export async function PATCH(
         'admin.user.roles_updated',
         'user',
         id,
-        { 
+        {
           targetEmail: user.email,
           roles: rolesToAdd.map((r) => r.name),
           keptSystemRoles: systemRoles.map((ur) => ur.role.name),
@@ -241,13 +273,13 @@ export async function PATCH(
     return NextResponse.json({ success: true, user });
   } catch (error) {
     console.error('Admin user edit error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@asuite/database';
-import { requireAdminPermission } from '@/lib/admin-auth';
+import { requireAdminAccess } from '@/lib/admin-auth';
 
 // GET /api/admin/preferences - Récupérer les préférences admin
 export async function GET() {
   try {
-    const admin = await requireAdminPermission();
-    
+    const admin = await requireAdminAccess();
+
     const user = await prisma.user.findUnique({
       where: { id: admin.id },
       select: { adminPrefs: true },
@@ -26,6 +26,7 @@ export async function GET() {
     if (error instanceof Error && error.message === 'Non autorisé') {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
+    console.error('Error getting admin preferences:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -33,7 +34,7 @@ export async function GET() {
 // PATCH /api/admin/preferences - Mettre à jour les préférences admin
 export async function PATCH(request: Request) {
   try {
-    const admin = await requireAdminPermission();
+    const admin = await requireAdminAccess();
     const body = await request.json();
     const { key, value } = body;
 
@@ -74,4 +75,3 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
-

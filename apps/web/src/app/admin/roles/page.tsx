@@ -13,6 +13,8 @@ import {
   Trash2,
   Loader2,
   ChevronRight,
+  Eye,
+  Pencil,
   GripVertical,
   ArrowUp,
   ArrowDown,
@@ -37,7 +39,7 @@ export default function AdminRolesPage() {
   const confirm = useConfirm();
   const t = useTranslations('admin.roles');
   const { hasPermission, highestPriority, canActOnRole, roles: userRoles } = useAdmin();
-  
+
   // Permissions
   const canCreate = hasPermission('roles.create');
   const canEdit = hasPermission('roles.edit');
@@ -69,9 +71,21 @@ export default function AdminRolesPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/roles');
+
+      // Gérer les erreurs de permissions
+      if (res.status === 403) {
+        toast.error('Permissions insuffisantes. Actualisation de la page...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        return;
+      }
+
       if (res.ok) {
         const data = await res.json();
         setRoles(data.roles);
+      } else {
+        toast.error(t('loadError'));
       }
     } catch (error) {
       toast.error(t('loadError'));
@@ -90,6 +104,16 @@ export default function AdminRolesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRole),
       });
+
+      // Gérer les erreurs de permissions
+      if (res.status === 403) {
+        const data = await res.json();
+        toast.error(data.error || 'Permissions insuffisantes. Actualisation de la page...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        return;
+      }
 
       if (res.ok) {
         toast.success(t('createSuccess'));
@@ -122,6 +146,16 @@ export default function AdminRolesPage() {
       const res = await fetch(`/api/admin/roles/${role.id}`, {
         method: 'DELETE',
       });
+
+      // Gérer les erreurs de permissions
+      if (res.status === 403) {
+        const data = await res.json();
+        toast.error(data.error || 'Permissions insuffisantes. Actualisation de la page...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        return;
+      }
 
       if (res.ok) {
         toast.success(t('deleteSuccess'));
@@ -178,8 +212,8 @@ export default function AdminRolesPage() {
     }
 
     // Vérifier les droits de hiérarchie
-    if (!canActOnRole(draggedRoleData.id, draggedRoleData.priority) || 
-        !canActOnRole(targetRoleData.id, targetRoleData.priority)) {
+    if (!canActOnRole(draggedRoleData.id, draggedRoleData.priority) ||
+      !canActOnRole(targetRoleData.id, targetRoleData.priority)) {
       toast.error(t('cannotReorderHigherRole'));
       setDraggedRole(null);
       setDragOverRole(null);
@@ -202,17 +236,17 @@ export default function AdminRolesPage() {
     const newRoles = [...roles];
     const draggedIndex = newRoles.findIndex(r => r.id === draggedId);
     const targetIndex = newRoles.findIndex(r => r.id === targetId);
-    
+
     if (draggedIndex === -1 || targetIndex === -1) return;
-    
+
     // Retirer l'élément dragged et l'insérer à la position target
     const [removed] = newRoles.splice(draggedIndex, 1);
     newRoles.splice(targetIndex, 0, removed);
-    
+
     // Ne PAS recalculer les priorités localement
     // On garde les priorités originales, seul l'ordre visuel change
     // L'API calculera les vraies priorités lors de l'enregistrement
-    
+
     setRoles(newRoles);
     setHasChanges(true);
   };
@@ -226,18 +260,28 @@ export default function AdminRolesPage() {
       const newOrder = roles
         .filter(r => !r.isSystem && r.priority > highestPriority)
         .map(r => r.id);
-      
+
       if (newOrder.length === 0) {
         toast.error(t('noRolesToReorder'));
         setSaving(false);
         return;
       }
-      
+
       const res = await fetch('/api/admin/roles/reorder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newOrder }),
       });
+
+      // Gérer les erreurs de permissions
+      if (res.status === 403) {
+        const data = await res.json();
+        toast.error(data.error || 'Permissions insuffisantes. Actualisation de la page...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        return;
+      }
 
       if (res.ok) {
         toast.success(t('reorderSuccess'));
@@ -285,7 +329,7 @@ export default function AdminRolesPage() {
     if (roleIndex === -1) return;
 
     const role = roles[roleIndex];
-    
+
     // Trouver le rôle cible (en sautant les rôles système)
     let targetIndex = direction === 'up' ? roleIndex - 1 : roleIndex + 1;
     while (targetIndex >= 0 && targetIndex < roles.length && roles[targetIndex].isSystem) {
@@ -330,7 +374,7 @@ export default function AdminRolesPage() {
               {t('editPriority')}
             </button>
           )}
-          
+
           {/* Bouton créer - nécessite roles.create */}
           {canCreate && (
             <button
@@ -343,7 +387,7 @@ export default function AdminRolesPage() {
           )}
         </div>
       </div>
-      
+
       {/* Bannière mode édition */}
       {editPriorityMode && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -421,9 +465,8 @@ export default function AdminRolesPage() {
                       key={color}
                       type="button"
                       onClick={() => setNewRole({ ...newRole, color })}
-                      className={`w-8 h-8 rounded-lg border-2 transition-all ${
-                        newRole.color === color ? 'border-foreground scale-110' : 'border-transparent'
-                      }`}
+                      className={`w-8 h-8 rounded-lg border-2 transition-all ${newRole.color === color ? 'border-foreground scale-110' : 'border-transparent'
+                        }`}
                       style={{ backgroundColor: color }}
                     />
                   ))}
@@ -466,110 +509,112 @@ export default function AdminRolesPage() {
             const canReorderThisRole = canReorder && editPriorityMode && !role.isSystem && !isOwnRole && canActOnRole(role.id, role.priority);
             const isFirst = index === 0 || (index === 1 && roles[0].isSystem);
             const isLast = index === roles.length - 1;
-            
+
             return (
-            <div
-              key={role.id}
-              draggable={canReorderThisRole}
-              onDragStart={(e) => canReorderThisRole && handleDragStart(e, role.id)}
-              onDragOver={(e) => handleDragOver(e, role.id)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, role.id)}
-              onDragEnd={handleDragEnd}
-              className={`bg-card rounded-xl border p-5 transition-all ${
-                draggedRole === role.id ? 'opacity-50 scale-95' : ''
-              } ${
-                dragOverRole === role.id ? 'border-primary border-2 bg-primary/5' : 'hover:border-primary/50'
-              } ${canReorderThisRole ? 'cursor-grab active:cursor-grabbing' : ''} ${
-                isOwnRole ? 'opacity-60 ring-2 ring-primary/30' : ''
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                {/* Poignée de drag */}
-                {canReorderThisRole && (
-                  <div className="hidden sm:flex flex-col items-center gap-1">
-                    <GripVertical className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-[10px] text-muted-foreground font-medium">
-                      #{role.priority}
-                    </span>
-                  </div>
-                )}
-                {/* Boutons flèches pour mobile */}
-                {canReorderThisRole && (
-                  <div className="flex sm:hidden flex-col gap-1">
-                    <button
-                      onClick={() => moveRole(role.id, 'up')}
-                      disabled={isFirst || saving}
-                      className="p-1 rounded hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ArrowUp className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => moveRole(role.id, 'down')}
-                      disabled={isLast || saving}
-                      className="p-1 rounded hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ArrowDown className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: `${role.color}20` }}
-                >
-                  <Shield className="w-6 h-6" style={{ color: role.color }} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold">{role.displayName}</h3>
-                    {role.isSystem && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                        {t('systemRole')}
+              <div
+                key={role.id}
+                draggable={canReorderThisRole}
+                onDragStart={(e) => canReorderThisRole && handleDragStart(e, role.id)}
+                onDragOver={(e) => handleDragOver(e, role.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, role.id)}
+                onDragEnd={handleDragEnd}
+                className={`bg-card rounded-xl border p-5 transition-all ${draggedRole === role.id ? 'opacity-50 scale-95' : ''
+                  } ${dragOverRole === role.id ? 'border-primary border-2 bg-primary/5' : 'hover:border-primary/50'
+                  } ${canReorderThisRole ? 'cursor-grab active:cursor-grabbing' : ''} ${isOwnRole ? 'opacity-60 ring-2 ring-primary/30' : ''
+                  }`}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Poignée de drag */}
+                  {canReorderThisRole && (
+                    <div className="hidden sm:flex flex-col items-center gap-1">
+                      <GripVertical className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        #{role.priority}
                       </span>
-                    )}
-                    {isOwnRole && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30">
-                        {t('ownRoleDisabled')}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {role.description || t('noDescription')}
-                  </p>
-                  <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      <span>{role.userCount} {t('users')}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Shield className="w-4 h-4" />
-                      <span>{role.permissions.length} {t('permissions')}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* Supprimer - nécessite roles.delete, pas système et pas propre rôle */}
-                  {canDelete && !role.isSystem && !isOwnRole && (
-                    <button
-                      onClick={() => handleDelete(role)}
-                      disabled={role.userCount > 0}
-                      className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={role.userCount > 0 ? t('cannotDeleteWithUsers') : t('delete')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   )}
-                  {/* Voir les détails - toujours visible */}
-                  <button
-                    onClick={() => router.push(`/admin/roles/${role.id}`)}
-                    className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground"
+                  {/* Boutons flèches pour mobile */}
+                  {canReorderThisRole && (
+                    <div className="flex sm:hidden flex-col gap-1">
+                      <button
+                        onClick={() => moveRole(role.id, 'up')}
+                        disabled={isFirst || saving}
+                        className="p-1 rounded hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ArrowUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => moveRole(role.id, 'down')}
+                        disabled={isLast || saving}
+                        className="p-1 rounded hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ArrowDown className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: `${role.color}20` }}
                   >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                    <Shield className="w-6 h-6" style={{ color: role.color }} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold">{role.displayName}</h3>
+                      {role.isSystem && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                          {t('systemRole')}
+                        </span>
+                      )}
+                      {isOwnRole && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30">
+                          {t('ownRoleDisabled')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {role.description || t('noDescription')}
+                    </p>
+                    <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        <span>{role.userCount} {t('users')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Shield className="w-4 h-4" />
+                        <span>{role.permissions.length} {t('permissions')}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Supprimer - nécessite roles.delete, pas système et pas propre rôle */}
+                    {canDelete && !role.isSystem && !isOwnRole && (
+                      <button
+                        onClick={() => handleDelete(role)}
+                        disabled={role.userCount > 0}
+                        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={role.userCount > 0 ? t('cannotDeleteWithUsers') : t('delete')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                    {/* Voir les détails - toujours visible */}
+                    <button
+                      onClick={() => router.push(`/admin/roles/${role.id}`)}
+                      className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground"
+                      title={canEdit && !role.isSystem && canActOnRole(role.id, role.priority) ? t('edit') : t('view')}
+                    >
+                      {canEdit && !role.isSystem && canActOnRole(role.id, role.priority) ? (
+                        <Pencil className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
+            );
           })
         )}
       </div>

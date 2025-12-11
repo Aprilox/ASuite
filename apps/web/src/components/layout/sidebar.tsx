@@ -115,9 +115,8 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col border-r bg-card h-[calc(100vh-4rem)] sticky top-16 flex-shrink-0 transition-all ${
-        collapsed ? 'w-16' : 'w-64'
-      }`}
+      className={`hidden lg:flex flex-col border-r bg-card h-[calc(100vh-4rem)] sticky top-16 flex-shrink-0 transition-all ${collapsed ? 'w-16' : 'w-64'
+        }`}
     >
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {tools.map((tool) => {
@@ -131,13 +130,12 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
               key={tool.key}
               href={disabled ? '#' : tool.href}
               onClick={(e) => disabled && e.preventDefault()}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                active
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active
                   ? 'bg-primary text-primary-foreground'
                   : disabled
-                  ? 'text-muted-foreground/50 cursor-not-allowed'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-              } ${collapsed ? 'justify-center' : ''}`}
+                    ? 'text-muted-foreground/50 cursor-not-allowed'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                } ${collapsed ? 'justify-center' : ''}`}
               title={collapsed ? toolName : undefined}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -161,11 +159,10 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         {/* Support */}
         <Link
           href="/support"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-            pathname.startsWith('/support')
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith('/support')
               ? 'bg-primary text-primary-foreground'
               : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-          } ${collapsed ? 'justify-center' : ''}`}
+            } ${collapsed ? 'justify-center' : ''}`}
           title={collapsed ? t('support') : undefined}
         >
           <MessageSquare className="w-5 h-5" />
@@ -176,22 +173,20 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         {isAdmin && (
           <Link
             href="/admin"
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors ${
-              collapsed ? 'justify-center' : ''
-            }`}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors ${collapsed ? 'justify-center' : ''
+              }`}
             title={collapsed ? t('adminPanel') : undefined}
           >
             <Shield className="w-5 h-5" />
             {!collapsed && <span>{t('adminPanel')}</span>}
           </Link>
         )}
-        
+
         {/* Settings */}
         <Link
           href="/settings"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${
-            collapsed ? 'justify-center' : ''
-          }`}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${collapsed ? 'justify-center' : ''
+            }`}
           title={collapsed ? t('settings') : undefined}
         >
           <Settings className="w-5 h-5" />

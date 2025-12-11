@@ -4,8 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
-import { Header } from '@/components/layout/header';
-import { Sidebar } from '@/components/layout/sidebar';
+import { DashboardLayoutClient } from '@/app/dashboard/layout-client';
 import { Loader2 } from 'lucide-react';
 
 export default function AVaultLayout({
@@ -38,15 +37,5 @@ export default function AVaultLayout({
     return null;
   }
 
-  return (
-    <div className="h-screen flex flex-col bg-muted/30">
-      <Header />
-      <div className="flex flex-1 pt-16 overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
+  return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
 }

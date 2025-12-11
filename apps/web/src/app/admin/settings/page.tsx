@@ -171,15 +171,31 @@ export default function AdminSettingsPage() {
   const renderInput = (setting: SystemSetting) => {
     const value = getValue(setting);
 
+    // Détecter si le paramètre n'est pas implémenté (basé sur le label)
+    const settingKey = setting.key.replace(/\./g, '_');
+    let displayLabel = setting.label || setting.key;
+    try {
+      const translated = t(`settingLabels.${settingKey}`);
+      if (translated && !translated.startsWith('settingLabels.')) {
+        displayLabel = translated;
+      }
+    } catch {
+      // Use fallback
+    }
+
+    const isNotImplemented = displayLabel.includes('(non implémenté)') ||
+      displayLabel.includes('(not implemented)');
+    const isDisabled = !canEdit || isNotImplemented;
+
     switch (setting.type) {
       case 'boolean':
         return (
-          <label className={`relative inline-flex items-center ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+          <label className={`relative inline-flex items-center ${isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
             <input
               type="checkbox"
               checked={value === 'true'}
-              onChange={(e) => handleChange(setting.key, e.target.checked ? 'true' : 'false')}
-              disabled={!canEdit}
+              onChange={(e) => !isNotImplemented && handleChange(setting.key, e.target.checked ? 'true' : 'false')}
+              disabled={isDisabled}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-disabled:opacity-50"></div>
@@ -191,8 +207,8 @@ export default function AdminSettingsPage() {
           <input
             type="number"
             value={value}
-            onChange={(e) => handleChange(setting.key, e.target.value)}
-            disabled={!canEdit}
+            onChange={(e) => !isNotImplemented && handleChange(setting.key, e.target.value)}
+            disabled={isDisabled}
             className="w-full h-11 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           />
         );
@@ -203,8 +219,8 @@ export default function AdminSettingsPage() {
             <input
               type="password"
               value={value}
-              onChange={(e) => handleChange(setting.key, e.target.value)}
-              disabled={!canEdit}
+              onChange={(e) => !isNotImplemented && handleChange(setting.key, e.target.value)}
+              disabled={isDisabled}
               placeholder="••••••••"
               className="w-full h-11 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             />
@@ -214,8 +230,8 @@ export default function AdminSettingsPage() {
           <input
             type="text"
             value={value}
-            onChange={(e) => handleChange(setting.key, e.target.value)}
-            disabled={!canEdit}
+            onChange={(e) => !isNotImplemented && handleChange(setting.key, e.target.value)}
+            disabled={isDisabled}
             className="w-full h-11 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           />
         );

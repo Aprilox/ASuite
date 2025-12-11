@@ -31,20 +31,20 @@ function FlagIcon({ code, className }: { code: string; className?: string }) {
   if (code === 'fr') {
     return (
       <svg className={className} viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
-        <path fill="#fff" d="M0 0h640v480H0z"/>
-        <path fill="#002654" d="M0 0h213.3v480H0z"/>
-        <path fill="#ce1126" d="M426.7 0H640v480H426.7z"/>
+        <path fill="#fff" d="M0 0h640v480H0z" />
+        <path fill="#002654" d="M0 0h213.3v480H0z" />
+        <path fill="#ce1126" d="M426.7 0H640v480H426.7z" />
       </svg>
     );
   }
   if (code === 'en') {
     return (
       <svg className={className} viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
-        <path fill="#012169" d="M0 0h640v480H0z"/>
-        <path fill="#FFF" d="m75 0 244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0z"/>
-        <path fill="#C8102E" d="m424 281 216 159v40L369 281zm-184 20 6 35L54 480H0zM640 0v3L391 191l2-44L590 0zM0 0l239 176h-60L0 42z"/>
-        <path fill="#FFF" d="M241 0v480h160V0zM0 160v160h640V160z"/>
-        <path fill="#C8102E" d="M0 193v96h640v-96zM273 0v480h96V0z"/>
+        <path fill="#012169" d="M0 0h640v480H0z" />
+        <path fill="#FFF" d="m75 0 244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0z" />
+        <path fill="#C8102E" d="m424 281 216 159v40L369 281zm-184 20 6 35L54 480H0zM640 0v3L391 191l2-44L590 0zM0 0l239 176h-60L0 42z" />
+        <path fill="#FFF" d="M241 0v480h160V0zM0 160v160h640V160z" />
+        <path fill="#C8102E" d="M0 193v96h640v-96zM273 0v480h96V0z" />
       </svg>
     );
   }
@@ -91,7 +91,7 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
   const handleLanguageChange = (langCode: string) => {
     setLangOpen(false);
     if (langCode === locale) return;
-    
+
     // Le setLocale du provider gère:
     // 1. Mise à jour du cookie
     // 2. Sauvegarde en DB
@@ -182,16 +182,15 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
               >
                 <FlagIcon code={currentLang.code} className="w-5 h-4" />
               </button>
-              
+
               {langOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-card border rounded-lg shadow-lg overflow-hidden z-50">
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent transition-colors ${
-                        locale === lang.code ? 'bg-accent' : ''
-                      }`}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent transition-colors ${locale === lang.code ? 'bg-accent' : ''
+                        }`}
                     >
                       <FlagIcon code={lang.code} className="w-5 h-4" />
                       <span>{lang.label}</span>
@@ -224,12 +223,15 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
               <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                 <User className="w-4 h-4 text-muted-foreground" />
               </div>
+              <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">
+                {user?.name || user?.email.split('@')[0]}
+              </span>
               <button
                 onClick={() => logout()}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                 title={t('header.logout')}
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -246,9 +248,8 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-card border-r z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:top-16 lg:h-[calc(100vh-4rem)] ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 h-full w-64 bg-card border-r z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:top-16 lg:h-[calc(100vh-4rem)] ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Mobile header in sidebar */}
         <div className="lg:hidden h-14 border-b flex items-center justify-between px-4">
@@ -285,11 +286,10 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
                 key={item.key}
                 href={item.href}
                 onClick={closeSidebar}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  active
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${active
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 <span className="flex-1">{t(`sidebar.${item.key}`)}</span>

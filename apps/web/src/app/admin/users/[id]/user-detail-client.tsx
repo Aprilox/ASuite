@@ -37,15 +37,20 @@ const ACTION_TRANSLATIONS: Record<string, string> = {
   'admin.settings.view': 'actionSettingsView',
   'admin.settings.update': 'actionSettingsUpdate',
   'admin.settings.create': 'actionSettingsCreate',
+  'admin.settings.smtp_test': 'actionSettingsSmtpTest',
   // Auth
   'auth.login': 'actionLogin',
   'auth.logout': 'actionLogout',
   'auth.register': 'actionRegister',
   'auth.password.change': 'actionPasswordChange',
+  // Password reset
+  'password_reset_request': 'actionPasswordResetRequest',
+  'password_reset_complete': 'actionPasswordResetComplete',
   // Alias sans préfixe (pour compatibilité avec les anciens logs)
   'login': 'actionLogin',
   'logout': 'actionLogout',
   'register': 'actionRegister',
+  'password_change': 'actionPasswordChange',
 };
 import {
   ArrowLeft,
@@ -106,6 +111,7 @@ interface AuditLog {
   action: string;
   resource: string | null;
   resourceId: string | null;
+  resourceName?: string | null;
   ipAddress: string | null;
   createdAt: string;
 }
@@ -128,14 +134,14 @@ export function UserDetailClient({ id }: UserDetailClientProps) {
   const t = useTranslations('admin.users');
   const tActions = useTranslations('admin.dashboard');
   const { hasPermission, canActOnUser: checkCanActOnUser, userId: currentUserId } = useAdmin();
-  
+
   // Permissions de l'utilisateur
   const canBlock = hasPermission('users.block');
   const canDelete = hasPermission('users.delete');
   const canResetPassword = hasPermission('users.reset_password');
   const canEdit = hasPermission('users.edit');
   const canAssignRoles = hasPermission('roles.assign');
-  
+
   const [user, setUser] = useState<UserDetail | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -154,7 +160,7 @@ export function UserDetailClient({ id }: UserDetailClientProps) {
     const priorities = u.roles.map(r => (r as { priority?: number }).priority ?? 100);
     return Math.min(...priorities);
   };
-  
+
   const canActOnThisUser = user ? checkCanActOnUser(user.id, getUserPriority(user)) : false;
 
   useEffect(() => {
@@ -376,7 +382,7 @@ export function UserDetailClient({ id }: UserDetailClientProps) {
           {/* Profile Card */}
           <div className="bg-card rounded-xl border p-6">
             <h2 className="text-lg font-semibold mb-4">{t('profile')}</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">{t('displayName')}</label>
@@ -407,11 +413,10 @@ export function UserDetailClient({ id }: UserDetailClientProps) {
                     {allRoles.map((role) => (
                       <label
                         key={role.id}
-                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
-                          selectedRoles.includes(role.id)
-                            ? 'border-primary bg-primary/10'
-                            : 'border-input hover:bg-accent'
-                        }`}
+                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${selectedRoles.includes(role.id)
+                          ? 'border-primary bg-primary/10'
+                          : 'border-input hover:bg-accent'
+                          }`}
                       >
                         <input
                           type="checkbox"
@@ -464,14 +469,29 @@ export function UserDetailClient({ id }: UserDetailClientProps) {
                 {auditLogs.map((log) => {
                   const actionKey = ACTION_TRANSLATIONS[log.action];
                   const actionText = actionKey ? tActions(actionKey) : log.action;
+
+                  // Construire l'affichage de la ressource
+                  let resourceDisplay = null;
+                  if (log.resource) {
+                    if (log.resourceName) {
+                      // Si on a le nom, l'afficher
+                      resourceDisplay = `${log.resource}: ${log.resourceName}`;
+                    } else if (log.resourceId) {
+                      // Sinon, afficher l'ID raccourci
+                      resourceDisplay = `${log.resource} (${log.resourceId.slice(0, 8)}...)`;
+                    } else {
+                      resourceDisplay = log.resource;
+                    }
+                  }
+
                   return (
                     <div key={log.id} className="flex items-start gap-3 text-sm">
                       <div className="w-2 h-2 rounded-full bg-primary mt-2" />
                       <div className="flex-1">
                         <p className="font-medium">{actionText}</p>
-                        {log.resource && (
+                        {resourceDisplay && (
                           <p className="text-muted-foreground">
-                            {log.resource} {log.resourceId && `(${log.resourceId.slice(0, 8)}...)`}
+                            {resourceDisplay}
                           </p>
                         )}
                       </div>

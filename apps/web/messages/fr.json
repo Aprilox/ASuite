@@ -722,10 +722,13 @@
       "actionSettingsView": "a consulté les paramètres",
       "actionSettingsUpdate": "a modifié les paramètres",
       "actionSettingsCreate": "a créé un paramètre",
+      "actionSettingsSmtpTest": "a testé la configuration SMTP",
       "actionLogin": "s'est connecté",
       "actionLogout": "s'est déconnecté",
       "actionRegister": "s'est inscrit",
-      "actionPasswordChange": "a changé son mot de passe"
+      "actionPasswordChange": "a changé son mot de passe",
+      "actionPasswordResetRequest": "a demandé une réinit. de mot de passe",
+      "actionPasswordResetComplete": "a réinitialisé son mot de passe"
     },
     "users": {
       "title": "Gestion des utilisateurs",
@@ -791,6 +794,7 @@
       "create": "Créer",
       "cancel": "Annuler",
       "edit": "Modifier",
+      "view": "Voir",
       "delete": "Supprimer",
       "save": "Enregistrer",
       "noRoles": "Aucun rôle",
@@ -852,10 +856,11 @@
         "settings_view": "Accéder aux paramètres système",
         "settings_edit": "Modifier les paramètres système",
         "audit_view": "Accéder aux logs d'audit",
-        "admin_dashboard": "Accéder au dashboard d'administration"
+        "admin_dashboard": "Accéder au dashboard d'administration",
+        "admin_view": "Accéder à la section administration"
       },
       "deleteConfirm": "Êtes-vous sûr de vouloir supprimer le rôle \"{name}\" ?",
-      "cannotDeleteWithUsers": "Impossible de supprimer un rôle attribué à des utilisateurs",
+      "cannotDeleteWithUsers": "Impossible de supprimer un rôle avec des utilisateurs",
       "createSuccess": "Rôle créé avec succès",
       "createError": "Erreur lors de la création",
       "updateSuccess": "Rôle mis à jour",

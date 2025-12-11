@@ -118,7 +118,7 @@ export default function AdminTicketsPage() {
   // Save filters to database when they change (debounced)
   useEffect(() => {
     if (!filtersLoaded) return;
-    
+
     const saveFilters = async () => {
       try {
         await fetch('/api/admin/preferences', {
@@ -137,7 +137,7 @@ export default function AdminTicketsPage() {
         // Ignore save errors
       }
     };
-    
+
     // Debounce to avoid too many requests
     const timeout = setTimeout(saveFilters, 500);
     return () => clearTimeout(timeout);

@@ -722,10 +722,13 @@
       "actionSettingsView": "viewed settings",
       "actionSettingsUpdate": "updated settings",
       "actionSettingsCreate": "created a setting",
+      "actionSettingsSmtpTest": "tested SMTP configuration",
       "actionLogin": "logged in",
       "actionLogout": "logged out",
       "actionRegister": "registered",
-      "actionPasswordChange": "changed password"
+      "actionPasswordChange": "changed password",
+      "actionPasswordResetRequest": "requested password reset",
+      "actionPasswordResetComplete": "reset password"
     },
     "users": {
       "title": "User Management",
@@ -791,6 +794,7 @@
       "create": "Create",
       "cancel": "Cancel",
       "edit": "Edit",
+      "view": "View",
       "delete": "Delete",
       "save": "Save",
       "noRoles": "No roles",

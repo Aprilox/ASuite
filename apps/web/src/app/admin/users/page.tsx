@@ -14,6 +14,7 @@ import {
   Mail,
   Trash2,
   Eye,
+  Pencil,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -65,7 +66,7 @@ export default function AdminUsersPage() {
   const confirm = useConfirm();
   const t = useTranslations('admin.users');
   const { hasPermission, canActOnUser, userId: currentUserId } = useAdmin();
-  
+
   // Permissions de l'utilisateur
   const canBlock = hasPermission('users.block');
   const canDelete = hasPermission('users.delete');
@@ -120,6 +121,16 @@ export default function AdminUsersPage() {
       if (filterBlocked) params.set('blocked', filterBlocked);
 
       const res = await fetch(`/api/admin/users?${params}`);
+
+      // Gérer les erreurs de permissions
+      if (res.status === 403) {
+        toast.error('Permissions insuffisantes. Actualisation de la page...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        return;
+      }
+
       if (res.ok) {
         const data = await res.json();
         setUsers(data.users);
@@ -128,6 +139,8 @@ export default function AdminUsersPage() {
           total: data.pagination.total,
           totalPages: data.pagination.totalPages,
         }));
+      } else {
+        toast.error(t('loadError'));
       }
     } catch (error) {
       toast.error(t('loadError'));
@@ -147,6 +160,16 @@ export default function AdminUsersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, userId, reason }),
       });
+
+      // Gérer les erreurs de permissions
+      if (res.status === 403) {
+        const data = await res.json();
+        toast.error(data.error || 'Permissions insuffisantes. Actualisation de la page...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        return;
+      }
 
       const data = await res.json();
 
@@ -231,10 +254,10 @@ export default function AdminUsersPage() {
       const menuWidth = 208;
       const spaceBelow = window.innerHeight - rect.bottom;
       const spaceRight = window.innerWidth - rect.right;
-      
+
       const openAbove = spaceBelow < menuHeight && rect.top > menuHeight;
       const openLeft = spaceRight < menuWidth;
-      
+
       setMenuPosition({
         top: openAbove ? rect.top - menuHeight : rect.bottom + 4,
         left: openLeft ? rect.left - menuWidth + rect.width : rect.left,
@@ -243,32 +266,41 @@ export default function AdminUsersPage() {
     }
   };
 
-  const renderUserActions = (user: User) => (
-    <div className="flex items-center gap-1">
-      <button
-        onClick={() => router.push(`/admin/users/${user.id}`)}
-        className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-        title={t('viewDetails')}
-      >
-        <Eye className="w-4 h-4" />
-      </button>
+  const renderUserActions = (user: User) => {
+    // Déterminer si on peut éditer cet utilisateur
+    const canEditThisUser = !isProtected(user) && canActOnUser(user.id, user.highestPriority) && canEdit;
 
-      {/* Menu 3 points - visible seulement si au moins une action est disponible ET qu'on peut agir sur cet utilisateur */}
-      {!isProtected(user) && canActOnUser(user.id, user.highestPriority) && (canBlock || canDelete || canResetPassword) && (
+    return (
+      <div className="flex items-center gap-1">
         <button
-          onClick={(e) => openContextMenu(e, user.id)}
-          disabled={actionLoading === user.id}
-          className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          onClick={() => router.push(`/admin/users/${user.id}`)}
+          className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          title={canEditThisUser ? t('edit') : t('viewDetails')}
         >
-          {actionLoading === user.id ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+          {canEditThisUser ? (
+            <Pencil className="w-4 h-4" />
           ) : (
-            <MoreVertical className="w-4 h-4" />
+            <Eye className="w-4 h-4" />
           )}
         </button>
-      )}
-    </div>
-  );
+
+        {/* Menu 3 points - visible seulement si au moins une action est disponible ET qu'on peut agir sur cet utilisateur */}
+        {!isProtected(user) && canActOnUser(user.id, user.highestPriority) && (canBlock || canDelete || canResetPassword) && (
+          <button
+            onClick={(e) => openContextMenu(e, user.id)}
+            disabled={actionLoading === user.id}
+            className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          >
+            {actionLoading === user.id ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <MoreVertical className="w-4 h-4" />
+            )}
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -525,7 +557,7 @@ export default function AdminUsersPage() {
                       <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                     </div>
                   </div>
-                  
+
                   {/* Actions */}
                   {renderUserActions(user)}
                 </div>
@@ -594,10 +626,10 @@ export default function AdminUsersPage() {
             {(() => {
               const user = users.find((u) => u.id === openMenu);
               if (!user) return null;
-              
+
               // Vérifier si l'utilisateur a des actions disponibles
               const hasAnyAction = canBlock || canResetPassword || canDelete;
-              
+
               if (!hasAnyAction) {
                 return (
                   <p className="px-4 py-3 text-sm text-muted-foreground">
@@ -605,7 +637,7 @@ export default function AdminUsersPage() {
                   </p>
                 );
               }
-              
+
               return (
                 <>
                   {/* Bloquer/Débloquer - nécessite users.block */}
@@ -628,7 +660,7 @@ export default function AdminUsersPage() {
                       </button>
                     )
                   )}
-                  
+
                   {/* Réinitialiser mot de passe - nécessite users.reset_password */}
                   {canResetPassword && (
                     <button
@@ -639,7 +671,7 @@ export default function AdminUsersPage() {
                       {t('resetPassword')}
                     </button>
                   )}
-                  
+
                   {/* Supprimer - nécessite users.delete */}
                   {canDelete && (
                     <>
@@ -666,13 +698,13 @@ export default function AdminUsersPage() {
           <p className="text-sm text-muted-foreground text-center sm:text-left">
             {pagination.total > 0
               ? t('showing', {
-                  from: (pagination.page - 1) * pagination.limit + 1,
-                  to: Math.min(pagination.page * pagination.limit, pagination.total),
-                  total: pagination.total,
-                })
+                from: (pagination.page - 1) * pagination.limit + 1,
+                to: Math.min(pagination.page * pagination.limit, pagination.total),
+                total: pagination.total,
+              })
               : t('noUsers')}
           </p>
-          
+
           {pagination.totalPages > 1 && (
             <div className="flex items-center gap-1 sm:gap-2">
               <button
@@ -689,7 +721,7 @@ export default function AdminUsersPage() {
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              
+
               {/* Page numbers - simplified on mobile */}
               <div className="flex items-center gap-1">
                 <span className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg">
@@ -697,7 +729,7 @@ export default function AdminUsersPage() {
                 </span>
                 <span className="text-sm text-muted-foreground">/ {pagination.totalPages}</span>
               </div>
-              
+
               <button
                 onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
                 disabled={pagination.page === pagination.totalPages}
