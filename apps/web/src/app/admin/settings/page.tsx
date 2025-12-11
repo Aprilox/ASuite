@@ -8,11 +8,13 @@ import {
   Settings,
   Shield,
   Mail,
+  HardDrive,
   Loader2,
   Save,
   RotateCcw,
   ChevronRight,
   AlertCircle,
+  Send,
 } from 'lucide-react';
 
 interface SystemSetting {
@@ -27,25 +29,28 @@ interface SystemSetting {
 interface Category {
   id: string;
   icon: string;
+  comingSoon?: boolean;
 }
 
 const categoryIcons: Record<string, typeof Settings> = {
   general: Settings,
   security: Shield,
   email: Mail,
+  storage: HardDrive,
 };
 
 const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
   general: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/30' },
   security: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/30' },
   email: { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/30' },
+  storage: { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/30' },
 };
 
 export default function AdminSettingsPage() {
   const toast = useToast();
   const t = useTranslations('admin.settings');
   const { hasPermission } = useAdmin();
-  
+
   const canEdit = hasPermission('settings.edit');
 
   const [settings, setSettings] = useState<SystemSetting[]>([]);
@@ -54,6 +59,8 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [changes, setChanges] = useState<Record<string, string>>({});
+  const [testingSmtp, setTestingSmtp] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
 
   useEffect(() => {
     fetchSettings();
@@ -117,7 +124,36 @@ export default function AdminSettingsPage() {
     setChanges({});
   };
 
-  const categorySettings = activeCategory 
+  const handleTestSmtp = async () => {
+    if (!testEmail) {
+      toast.error(t('smtp.emailRequired'));
+      return;
+    }
+
+    setTestingSmtp(true);
+    try {
+      const res = await fetch('/api/admin/settings/test-smtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testEmail }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        toast.success(data.message || t('smtp.testSuccess'));
+        setTestEmail('');
+      } else {
+        toast.error(data.error || t('smtp.testError'));
+      }
+    } catch (error) {
+      toast.error(t('smtp.testError'));
+    } finally {
+      setTestingSmtp(false);
+    }
+  };
+
+  const categorySettings = activeCategory
     ? settings.filter((s) => s.category === activeCategory)
     : [];
   const hasChanges = Object.keys(changes).length > 0;
@@ -246,22 +282,34 @@ export default function AdminSettingsPage() {
             const colors = categoryColors[category.id] || categoryColors.general;
             const settingsCount = getSettingsCount(category.id);
             const changesCount = getCategoryChangesCount(category.id);
+            const isComingSoon = category.comingSoon;
 
             return (
               <button
                 key={category.id}
-                onClick={() => setActiveCategory(category.id)}
-                className={`group relative flex items-center gap-4 p-5 rounded-xl border bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all text-left`}
+                onClick={() => !isComingSoon && setActiveCategory(category.id)}
+                disabled={isComingSoon}
+                className={`group relative flex items-center gap-4 p-5 rounded-xl border bg-card transition-all text-left ${isComingSoon
+                  ? 'opacity-60 cursor-not-allowed'
+                  : 'hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5'
+                  }`}
               >
                 <div className={`w-12 h-12 rounded-xl ${colors.bg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-6 h-6 ${colors.text}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {t(`categories.${category.id}`)}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className={`font-semibold transition-colors ${isComingSoon ? 'text-muted-foreground' : 'text-foreground group-hover:text-primary'}`}>
+                      {t(`categories.${category.id}`)}
+                    </h3>
+                    {isComingSoon && (
+                      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground">
+                        {t('comingSoon')}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {settingsCount} {settingsCount > 1 ? t('settingsPlural') : t('settingsSingular')}
+                    {isComingSoon ? t('comingSoonDesc') : `${settingsCount} ${settingsCount > 1 ? t('settingsPlural') : t('settingsSingular')}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -270,7 +318,9 @@ export default function AdminSettingsPage() {
                       {changesCount}
                     </span>
                   )}
-                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  {!isComingSoon && (
+                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  )}
                 </div>
               </button>
             );
@@ -328,7 +378,7 @@ export default function AdminSettingsPage() {
                 } catch {
                   // Use fallback
                 }
-                
+
                 return (
                   <div key={setting.id} className="p-5">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -353,6 +403,35 @@ export default function AdminSettingsPage() {
               })
             )}
           </div>
+
+          {/* SMTP Test Section - Only for email category */}
+          {activeCategory === 'email' && canEdit && (
+            <div className="bg-card rounded-xl border p-5">
+              <h3 className="font-semibold mb-3">{t('smtp.testTitle')}</h3>
+              <p className="text-sm text-muted-foreground mb-4">{t('smtp.testDescription')}</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  placeholder={t('smtp.emailPlaceholder')}
+                  className="flex-1 h-11 px-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+                <button
+                  onClick={handleTestSmtp}
+                  disabled={testingSmtp || !testEmail}
+                  className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {testingSmtp ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  {testingSmtp ? t('smtp.testing') : t('smtp.testButton')}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

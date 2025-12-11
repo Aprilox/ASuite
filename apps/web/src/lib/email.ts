@@ -124,52 +124,97 @@ export async function deletePasswordResetToken(token: string): Promise<void> {
 }
 
 /**
+ * Traductions pour les emails
+ */
+const emailTranslations = {
+  fr: {
+    passwordReset: {
+      subject: 'Réinitialisation de votre mot de passe - ASuite',
+      greeting: (name: string | null) => `Bonjour ${name || 'cher utilisateur'},`,
+      title: 'Réinitialisation de votre mot de passe',
+      body: 'Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.',
+      button: 'Réinitialiser mon mot de passe',
+      expiry: 'Ce lien expire dans 1 heure. Si vous n\'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.',
+      footer: 'Tous droits réservés',
+      plainText: (name: string | null, resetUrl: string) =>
+        `Bonjour ${name || 'cher utilisateur'},\n\nVous avez demandé une réinitialisation de mot de passe.\n\nCliquez sur ce lien pour créer un nouveau mot de passe :\n${resetUrl}\n\nCe lien expire dans 1 heure.\n\nSi vous n'avez pas demandé cette réinitialisation, ignorez cet email.\n\nASuite`,
+    },
+  },
+  en: {
+    passwordReset: {
+      subject: 'Reset your password - ASuite',
+      greeting: (name: string | null) => `Hello ${name || 'dear user'},`,
+      title: 'Reset your password',
+      body: 'We received a request to reset the password for your account. Click the button below to create a new password.',
+      button: 'Reset my password',
+      expiry: 'This link expires in 1 hour. If you did not request this reset, you can ignore this email.',
+      footer: 'All rights reserved',
+      plainText: (name: string | null, resetUrl: string) =>
+        `Hello ${name || 'dear user'},\n\nYou have requested a password reset.\n\nClick this link to create a new password:\n${resetUrl}\n\nThis link expires in 1 hour.\n\nIf you did not request this reset, ignore this email.\n\nASuite`,
+    },
+  },
+};
+
+type SupportedLocale = keyof typeof emailTranslations;
+
+function getEmailTranslations(locale: string) {
+  const supportedLocale = (locale === 'en' ? 'en' : 'fr') as SupportedLocale;
+  return emailTranslations[supportedLocale];
+}
+
+/**
  * Envoie un email de réinitialisation de mot de passe
- * Note: En développement, affiche simplement le lien dans la console
+ * Utilise nodemailer pour l'envoi réel via SMTP
  */
 export async function sendPasswordResetEmail(
   email: string,
   userName: string | null,
-  resetToken: string
+  resetToken: string,
+  locale: string = 'fr'
 ): Promise<boolean> {
   const config = await getEmailConfig();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const resetUrl = `${appUrl}/reset-password?token=${resetToken}`;
+  const t = getEmailTranslations(locale).passwordReset;
 
-  // En développement ou si pas de config email, afficher dans la console
-  if (!config || process.env.NODE_ENV === 'development') {
-    console.log('\n📧 ========== EMAIL DE RÉINITIALISATION ==========');
+  // Si pas de config email, afficher dans la console (mode debug)
+  if (!config) {
+    console.log(`\n📧 ========== EMAIL DE RÉINITIALISATION (${locale.toUpperCase()}) ==========`);
     console.log(`   Destinataire: ${email}`);
     console.log(`   Nom: ${userName || 'Utilisateur'}`);
     console.log(`   Lien: ${resetUrl}`);
+    console.log(`   Langue: ${locale}`);
     console.log('   (Valide 1 heure)');
+    console.log('   ⚠️ SMTP non configuré - email non envoyé');
     console.log('=================================================\n');
-    return true;
+    return true; // Retourner true pour ne pas révéler si l'email existe
   }
 
-  // TODO: Implémenter l'envoi réel via nodemailer
-  // Pour l'instant, on simule le succès
   try {
-    // Import dynamique de nodemailer si disponible
-    // const nodemailer = await import('nodemailer');
-    // const transporter = nodemailer.createTransport({
-    //   host: config.host,
-    //   port: config.port,
-    //   secure: config.port === 465,
-    //   auth: {
-    //     user: config.user,
-    //     pass: config.password,
-    //   },
-    // });
-    // 
-    // await transporter.sendMail({
-    //   from: `"${config.fromName}" <${config.fromAddress}>`,
-    //   to: email,
-    //   subject: 'Réinitialisation de votre mot de passe - ASuite',
-    //   html: getPasswordResetEmailTemplate(userName, resetUrl),
-    // });
+    const nodemailer = await import('nodemailer');
 
-    console.log(`📧 Email de réinitialisation envoyé à ${email}`);
+    const transporter = nodemailer.default.createTransport({
+      host: config.host,
+      port: config.port,
+      secure: config.port === 465,
+      auth: {
+        user: config.user,
+        pass: config.password,
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
+    });
+
+    await transporter.sendMail({
+      from: `"${config.fromName}" <${config.fromAddress}>`,
+      to: email,
+      subject: t.subject,
+      html: getPasswordResetEmailTemplate(userName, resetUrl, locale),
+      text: t.plainText(userName, resetUrl),
+    });
+
+    console.log(`📧 Email de réinitialisation envoyé à ${email} (${locale})`);
     return true;
   } catch (error) {
     console.error('Error sending password reset email:', error);
@@ -180,14 +225,17 @@ export async function sendPasswordResetEmail(
 /**
  * Template HTML pour l'email de réinitialisation
  */
-export function getPasswordResetEmailTemplate(userName: string | null, resetUrl: string): string {
+export function getPasswordResetEmailTemplate(userName: string | null, resetUrl: string, locale: string = 'fr'): string {
+  const t = getEmailTranslations(locale).passwordReset;
+  const lang = locale === 'en' ? 'en' : 'fr';
+
   return `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="${lang}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Réinitialisation de mot de passe</title>
+  <title>${t.title}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; background-color: #f4f4f5;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
@@ -202,29 +250,29 @@ export function getPasswordResetEmailTemplate(userName: string | null, resetUrl:
           <tr>
             <td>
               <h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #18181b;">
-                Réinitialisation de votre mot de passe
+                ${t.title}
               </h2>
               <p style="margin: 0 0 16px 0; font-size: 16px; color: #52525b; line-height: 1.5;">
-                Bonjour ${userName || 'cher utilisateur'},
+                ${t.greeting(userName)}
               </p>
               <p style="margin: 0 0 24px 0; font-size: 16px; color: #52525b; line-height: 1.5;">
-                Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
+                ${t.body}
               </p>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                   <td style="text-align: center; padding: 16px 0;">
                     <a href="${resetUrl}" style="display: inline-block; padding: 14px 28px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600;">
-                      Réinitialiser mon mot de passe
+                      ${t.button}
                     </a>
                   </td>
                 </tr>
               </table>
               <p style="margin: 24px 0 0 0; font-size: 14px; color: #71717a; line-height: 1.5;">
-                Ce lien expire dans 1 heure. Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.
+                ${t.expiry}
               </p>
               <hr style="margin: 24px 0; border: none; border-top: 1px solid #e4e4e7;">
               <p style="margin: 0; font-size: 12px; color: #a1a1aa; text-align: center;">
-                © ${new Date().getFullYear()} ASuite - Tous droits réservés
+                © ${new Date().getFullYear()} ASuite - ${t.footer}
               </p>
             </td>
           </tr>

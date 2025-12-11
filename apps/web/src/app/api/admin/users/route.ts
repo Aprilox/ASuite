@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@asuite/database';
-import { 
-  requireAdminPermission, 
-  getRequestInfo, 
+import {
+  requireAdminPermission,
+  getRequestInfo,
   createAuditLog,
   isTargetUserProtected,
   canActOnUser
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
           (ur) => (ur.role as { priority?: number }).priority ?? 100
         );
         const highestPriority = priorities.length > 0 ? Math.min(...priorities) : 999;
-        
+
         return {
           ...user,
           roles: user.userRoles.map((ur) => ({
@@ -110,13 +110,13 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Admin users list error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -136,7 +136,11 @@ export async function POST(request: Request) {
     // Vérifier si l'utilisateur cible existe
     const targetUser = await prisma.user.findUnique({
       where: { id: userId },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        locale: true,
         userRoles: {
           include: { role: true },
         },
@@ -168,7 +172,7 @@ export async function POST(request: Request) {
     switch (action) {
       case 'block': {
         await requireAdminPermission('users.block');
-        
+
         await prisma.user.update({
           where: { id: userId },
           data: {
@@ -199,7 +203,7 @@ export async function POST(request: Request) {
 
       case 'unblock': {
         await requireAdminPermission('users.block');
-        
+
         await prisma.user.update({
           where: { id: userId },
           data: {
@@ -225,7 +229,7 @@ export async function POST(request: Request) {
 
       case 'reset_password': {
         await requireAdminPermission('users.reset_password');
-        
+
         const token = await generatePasswordResetToken(userId);
         if (!token) {
           return NextResponse.json(
@@ -234,7 +238,8 @@ export async function POST(request: Request) {
           );
         }
 
-        await sendPasswordResetEmail(targetUser.email, targetUser.name, token);
+        // Envoyer l'email dans la langue du client (pas celle de l'admin)
+        await sendPasswordResetEmail(targetUser.email, targetUser.name, token, targetUser.locale || 'fr');
 
         await createAuditLog(
           admin.id,
@@ -246,15 +251,15 @@ export async function POST(request: Request) {
           userAgent
         );
 
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Email de réinitialisation envoyé' 
+        return NextResponse.json({
+          success: true,
+          message: 'Email de réinitialisation envoyé'
         });
       }
 
       case 'delete': {
         await requireAdminPermission('users.delete');
-        
+
         // Supprimer l'utilisateur (cascade configurée dans Prisma)
         await prisma.user.delete({
           where: { id: userId },
@@ -278,13 +283,13 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error('Admin users action error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

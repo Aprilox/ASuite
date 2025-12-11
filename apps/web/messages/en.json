@@ -376,9 +376,33 @@
   },
   "forgotPassword": {
     "title": "Forgot password",
-    "subtitle": "This feature is coming soon",
-    "description": "Password recovery will be available soon.",
-    "backToLogin": "Back to login"
+    "subtitle": "Enter your email to receive a reset link",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "your@email.com",
+    "sendButton": "Send reset link",
+    "sending": "Sending...",
+    "successTitle": "Email sent!",
+    "successDescription": "If an account exists with this email, you will receive instructions to reset your password.",
+    "backToLogin": "Back to login",
+    "error": "An error occurred"
+  },
+  "resetPassword": {
+    "title": "New password",
+    "subtitle": "Create a new secure password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordsMatch": "Passwords match",
+    "passwordsDontMatch": "Passwords don't match",
+    "resetButton": "Reset password",
+    "resetting": "Resetting...",
+    "successTitle": "Password reset!",
+    "successDescription": "Your password has been changed successfully. You will be redirected to login.",
+    "goToLogin": "Sign in",
+    "invalidTitle": "Invalid link",
+    "invalidDescription": "This reset link is invalid or has expired. Please request a new link.",
+    "requestNew": "Request a new link",
+    "backToLogin": "Back to login",
+    "error": "An error occurred"
   },
   "legal": {
     "title": "Legal Notice",
@@ -923,6 +947,8 @@
       "settingsPlural": "settings",
       "settingsSingular": "setting",
       "backToCategories": "Back to categories",
+      "comingSoon": "Soon",
+      "comingSoonDesc": "This feature is coming soon",
       "categories": {
         "general": "General",
         "security": "Security",
@@ -946,6 +972,16 @@
         "storage_type": "Storage type (not implemented)",
         "storage_path": "Storage path (not implemented)",
         "storage_max_file_size": "Max file size (not implemented)"
+      },
+      "smtp": {
+        "testTitle": "Test SMTP Configuration",
+        "testDescription": "Send a test email to verify your SMTP server is correctly configured.",
+        "emailPlaceholder": "your@email.com",
+        "testButton": "Send test",
+        "testing": "Sending...",
+        "testSuccess": "Test email sent successfully",
+        "testError": "SMTP test failed",
+        "emailRequired": "Please enter an email address"
       }
     }
   }

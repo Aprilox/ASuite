@@ -2,6 +2,39 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.6.2] - 2025-12-11
+
+### Nouveautés - Configuration SMTP
+- 📧 Configuration SMTP complète dans les paramètres admin (hôte, port, utilisateur, mot de passe)
+- 🧪 Bouton "Tester la connexion SMTP" pour vérifier la configuration
+- 📨 Email de test envoyé à l'administrateur connecté
+- 🔒 Mot de passe SMTP masqué dans l'interface (affiché en `••••••••`)
+
+### Nouveautés - Emails multilingues
+- 🌍 Emails de réinitialisation de mot de passe en FR/EN selon la langue de l'utilisateur
+- 🌍 Email de test SMTP dans la langue de l'admin
+- 📝 Locale utilisateur stockée en base de données et utilisée pour les emails
+
+### Sécurité - Système de réinitialisation de mot de passe
+- 🔐 Tokens cryptographiques sécurisés (32 bytes aléatoires)
+- ⏰ Expiration automatique des tokens après 1 heure
+- 🔄 Un seul token valide par utilisateur (les anciens sont supprimés)
+- 🚫 Rate limiting pour les utilisateurs : max 3 demandes par email par heure
+- 🔒 Invalidation de toutes les sessions après changement de mot de passe
+- ✅ Vérification de la force du mot de passe (score minimum requis)
+- 📋 Logs d'audit complets pour toutes les actions
+- 🛡️ Envoi des emails via Nodemailer
+
+### Panel Admin
+- 👑 Réinitialisation de mot de passe sans rate limit pour les admins (confiance + traçabilité)
+- 📊 Logs d'audit avec IP et user-agent pour chaque action admin
+
+### Corrections
+- 🔗 Lien "Support" du footer redirige maintenant vers `/support` (au lieu de coming-soon)
+- 🔐 Mot de passe SMTP non écrasé lors de la sauvegarde si non modifié (valeur `••••••••` ignorée)
+
+---
+
 ## [1.6.1] - 2025-12-11
 
 ### Améliorations

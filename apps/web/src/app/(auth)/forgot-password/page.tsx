@@ -1,14 +1,45 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, Mail, Construction } from 'lucide-react';
+import { ArrowLeft, Mail, Loader2, CheckCircle } from 'lucide-react';
 import { LanguageSelector } from '@/components/ui/language-selector';
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('forgotPassword');
-  const tCommon = useTranslations('common');
   const tFooter = useTranslations('footer');
+
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setSuccess(true);
+      } else {
+        setError(data.error || t('error'));
+      }
+    } catch {
+      setError(t('error'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 relative">
@@ -30,36 +61,88 @@ export default function ForgotPasswordPage() {
 
         {/* Card */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4">
-              <Construction className="w-8 h-8 text-amber-600 dark:text-amber-400" />
-            </div>
-            
-            <h1 className="text-2xl font-bold mb-2">{t('title')}</h1>
-            
-            <span className="inline-block px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-sm font-medium mb-4">
-              {tCommon('comingSoon')}
-            </span>
-            
-            <p className="text-muted-foreground mb-6">
-              {t('description')}
-            </p>
+          {success ? (
+            // Success state
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+              </div>
 
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 mb-6">
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Mail className="w-5 h-5 text-primary" />
-                <span>contact@aprilox.fr</span>
+              <h1 className="text-2xl font-bold mb-2">{t('successTitle')}</h1>
+
+              <p className="text-muted-foreground mb-6">
+                {t('successDescription')}
+              </p>
+
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {t('backToLogin')}
+              </Link>
+            </div>
+          ) : (
+            // Form state
+            <div>
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+
+                <h1 className="text-2xl font-bold mb-2">{t('title')}</h1>
+                <p className="text-muted-foreground">{t('subtitle')}</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-2">
+                    {t('emailLabel')}
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t('emailPlaceholder')}
+                    required
+                    className="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+
+                {error && (
+                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading || !email}
+                  className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      {t('sending')}
+                    </>
+                  ) : (
+                    t('sendButton')
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  {t('backToLogin')}
+                </Link>
               </div>
             </div>
-
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {t('backToLogin')}
-            </Link>
-          </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -70,4 +153,3 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
-

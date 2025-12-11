@@ -252,7 +252,7 @@ ASuite/
 
 ## 📝 Changelog
 
-**Version actuelle : v1.6.0** - Système de Support Client
+**Version actuelle : v1.6.2** - Système de réinitialisation de mot de passe sécurisé
 
 > 📋 Voir le [Journal des modifications complet](./CHANGELOG.md)
 

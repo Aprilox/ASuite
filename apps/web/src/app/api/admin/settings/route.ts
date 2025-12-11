@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@asuite/database';
-import { 
-  requireAdminPermission, 
-  getRequestInfo, 
-  createAuditLog 
+import {
+  requireAdminPermission,
+  getRequestInfo,
+  createAuditLog
 } from '@/lib/admin-auth';
 import { invalidateSiteSettingsCache } from '@/lib/site-settings';
 
@@ -28,9 +28,20 @@ export async function GET(request: Request) {
       ],
     });
 
+    // Masquer les valeurs sensibles (mots de passe, secrets)
+    const sanitizedSettings = settings.map(setting => {
+      if (setting.key.includes('password') || setting.key.includes('secret')) {
+        return {
+          ...setting,
+          value: setting.value ? '••••••••' : '', // Masquer si une valeur existe
+        };
+      }
+      return setting;
+    });
+
     // Grouper par catégorie
-    const grouped: Record<string, typeof settings> = {};
-    for (const setting of settings) {
+    const grouped: Record<string, typeof sanitizedSettings> = {};
+    for (const setting of sanitizedSettings) {
       if (!grouped[setting.category]) {
         grouped[setting.category] = [];
       }
@@ -38,27 +49,27 @@ export async function GET(request: Request) {
     }
 
     // Liste des catégories disponibles (les noms seront traduits côté client)
-    // Storage retiré car pas encore implémenté
     const categories = [
       { id: 'general', icon: 'settings' },
       { id: 'security', icon: 'shield' },
       { id: 'email', icon: 'mail' },
+      { id: 'storage', icon: 'hard-drive', comingSoon: true },
     ];
 
     return NextResponse.json({
-      settings,
+      settings: sanitizedSettings,
       byCategory: grouped,
       categories,
     });
   } catch (error) {
     console.error('Admin settings list error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -79,6 +90,11 @@ export async function PATCH(request: Request) {
     const updated: string[] = [];
 
     for (const [key, value] of Object.entries(settings)) {
+      // Ignorer les mots de passe/secrets si la valeur est le placeholder masqué
+      if ((key.includes('password') || key.includes('secret')) && String(value) === '••••••••') {
+        continue; // Ne pas mettre à jour - c'est juste le placeholder
+      }
+
       const existing = await prisma.systemSetting.findUnique({
         where: { key },
       });
@@ -105,20 +121,20 @@ export async function PATCH(request: Request) {
     // Invalider le cache des paramètres du site
     invalidateSiteSettingsCache();
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: `${updated.length} paramètre(s) mis à jour`,
       updated,
     });
   } catch (error) {
     console.error('Admin settings update error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -168,13 +184,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, setting });
   } catch (error) {
     console.error('Admin settings create error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

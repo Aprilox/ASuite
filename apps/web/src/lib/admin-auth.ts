@@ -14,6 +14,7 @@ export interface AdminUser {
   id: string;
   email: string;
   name: string | null;
+  locale: string | null;
   isBlocked: boolean;
   roles: AdminRole[];
   permissions: string[];
@@ -77,8 +78,8 @@ export async function getAdminSession(): Promise<AdminUser | null> {
     }));
 
     // Calculer la plus haute priorité (plus bas = plus important)
-    const highestPriority = roles.length > 0 
-      ? Math.min(...roles.map(r => r.priority)) 
+    const highestPriority = roles.length > 0
+      ? Math.min(...roles.map(r => r.priority))
       : 999;
 
     // Extraire les permissions uniques
@@ -93,6 +94,7 @@ export async function getAdminSession(): Promise<AdminUser | null> {
       id: user.id,
       email: user.email,
       name: user.name,
+      locale: user.locale,
       isBlocked: user.isBlocked,
       roles,
       permissions: Array.from(permissionSet),
@@ -119,12 +121,12 @@ export async function hasAdminAccess(): Promise<boolean> {
 export async function hasPermission(permission: string): Promise<boolean> {
   const user = await getAdminSession();
   if (!user) return false;
-  
+
   // Les admins système ont toutes les permissions
   if (user.roles.some((r) => r.isSystem)) {
     return true;
   }
-  
+
   return user.permissions.includes(permission);
 }
 
@@ -134,12 +136,12 @@ export async function hasPermission(permission: string): Promise<boolean> {
 export async function hasAnyPermission(permissions: string[]): Promise<boolean> {
   const user = await getAdminSession();
   if (!user) return false;
-  
+
   // Les admins système ont toutes les permissions
   if (user.roles.some((r) => r.isSystem)) {
     return true;
   }
-  
+
   return permissions.some((p) => user.permissions.includes(p));
 }
 
@@ -149,12 +151,12 @@ export async function hasAnyPermission(permissions: string[]): Promise<boolean> 
 export async function hasAllPermissions(permissions: string[]): Promise<boolean> {
   const user = await getAdminSession();
   if (!user) return false;
-  
+
   // Les admins système ont toutes les permissions
   if (user.roles.some((r) => r.isSystem)) {
     return true;
   }
-  
+
   return permissions.every((p) => user.permissions.includes(p));
 }
 
@@ -202,7 +204,7 @@ export async function getTargetUserPriority(targetUserId: string): Promise<numbe
   });
 
   if (!targetUser || targetUser.userRoles.length === 0) return 999;
-  
+
   const priorities = targetUser.userRoles.map(
     (ur) => (ur.role as { priority?: number }).priority ?? 100
   );
@@ -302,20 +304,20 @@ export async function canAssignRole(roleId: string): Promise<{ allowed: boolean;
  */
 export async function requireAdminPermission(permission: string): Promise<AdminUser> {
   const user = await getAdminSession();
-  
+
   if (!user) {
     throw new Error('Non autorisé');
   }
-  
+
   // Les admins système ont toutes les permissions
   if (user.roles.some((r) => r.isSystem)) {
     return user;
   }
-  
+
   if (!user.permissions.includes(permission)) {
     throw new Error('Permission insuffisante');
   }
-  
+
   return user;
 }
 
@@ -359,9 +361,9 @@ export async function createAuditLog(
  * Récupère les headers de la requête pour l'audit
  */
 export function getRequestInfo(request: Request): { ipAddress: string; userAgent: string } {
-  const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown';
+  const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    request.headers.get('x-real-ip') ||
+    'unknown';
   const userAgent = request.headers.get('user-agent') || 'unknown';
   return { ipAddress, userAgent };
 }

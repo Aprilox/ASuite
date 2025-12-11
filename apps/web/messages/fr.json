@@ -376,9 +376,33 @@
   },
   "forgotPassword": {
     "title": "Mot de passe oublié",
-    "subtitle": "Cette fonctionnalité arrive bientôt",
-    "description": "La récupération de mot de passe sera disponible prochainement.",
-    "backToLogin": "Retour à la connexion"
+    "subtitle": "Entrez votre email pour recevoir un lien de réinitialisation",
+    "emailLabel": "Adresse email",
+    "emailPlaceholder": "votre@email.com",
+    "sendButton": "Envoyer le lien",
+    "sending": "Envoi en cours...",
+    "successTitle": "Email envoyé !",
+    "successDescription": "Si un compte existe avec cette adresse, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.",
+    "backToLogin": "Retour à la connexion",
+    "error": "Une erreur est survenue"
+  },
+  "resetPassword": {
+    "title": "Nouveau mot de passe",
+    "subtitle": "Créez un nouveau mot de passe sécurisé",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordsMatch": "Les mots de passe correspondent",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas",
+    "resetButton": "Réinitialiser le mot de passe",
+    "resetting": "Réinitialisation...",
+    "successTitle": "Mot de passe réinitialisé !",
+    "successDescription": "Votre mot de passe a été modifié avec succès. Vous allez être redirigé vers la connexion.",
+    "goToLogin": "Se connecter",
+    "invalidTitle": "Lien invalide",
+    "invalidDescription": "Ce lien de réinitialisation est invalide ou a expiré. Veuillez demander un nouveau lien.",
+    "requestNew": "Demander un nouveau lien",
+    "backToLogin": "Retour à la connexion",
+    "error": "Une erreur est survenue"
   },
   "legal": {
     "title": "Mentions légales",
@@ -923,6 +947,8 @@
       "settingsPlural": "paramètres",
       "settingsSingular": "paramètre",
       "backToCategories": "Retour aux catégories",
+      "comingSoon": "Bientôt",
+      "comingSoonDesc": "Cette fonctionnalité arrive bientôt",
       "categories": {
         "general": "Général",
         "security": "Sécurité",
@@ -946,6 +972,16 @@
         "storage_type": "Type de stockage (non implémenté)",
         "storage_path": "Chemin de stockage (non implémenté)",
         "storage_max_file_size": "Taille max fichier (non implémenté)"
+      },
+      "smtp": {
+        "testTitle": "Tester la configuration SMTP",
+        "testDescription": "Envoyez un email de test pour vérifier que votre serveur SMTP est correctement configuré.",
+        "emailPlaceholder": "votre@email.com",
+        "testButton": "Envoyer un test",
+        "testing": "Envoi en cours...",
+        "testSuccess": "Email de test envoyé avec succès",
+        "testError": "Erreur lors du test SMTP",
+        "emailRequired": "Veuillez entrer une adresse email"
       }
     }
   }

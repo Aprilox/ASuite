@@ -90,7 +90,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/coming-soon?tool=support"
+                  href="/support"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {t('support')}
