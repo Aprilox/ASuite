@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const user = await getSession();
-    
+
     if (!user?.id) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
@@ -17,7 +17,7 @@ export async function GET(
     const { id } = await params;
 
     const ticket = await prisma.ticket.findFirst({
-      where: { 
+      where: {
         id,
         userId: user.id, // S'assurer que c'est bien son ticket
       },
@@ -67,7 +67,7 @@ export async function POST(
 ) {
   try {
     const user = await getSession();
-    
+
     if (!user?.id) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
@@ -82,7 +82,7 @@ export async function POST(
 
     // Vérifier que le ticket appartient à l'utilisateur
     const ticket = await prisma.ticket.findFirst({
-      where: { 
+      where: {
         id,
         userId: user.id,
       },
@@ -97,7 +97,7 @@ export async function POST(
       return NextResponse.json({ error: 'Ce ticket est fermé' }, { status: 400 });
     }
 
-    // Ajouter le message
+    // Créer le message
     const newMessage = await prisma.ticketMessage.create({
       data: {
         ticketId: id,
@@ -116,12 +116,74 @@ export async function POST(
       },
     });
 
+    // Mettre à jour explicitement le ticket pour que updatedAt change et qu'il remonte en haut
+    await prisma.ticket.update({
+      where: { id },
+      data: {
+        updatedAt: new Date(), // Force la mise à jour pour que le ticket remonte en haut de la liste
+      },
+    });
+
     // Mettre à jour le statut si nécessaire (passe en "open" si était "resolved" ou "pending")
     if (['resolved', 'pending'].includes(ticket.status)) {
       await prisma.ticket.update({
         where: { id },
         data: { status: 'open' },
       });
+    }
+
+    // Importer les helpers de notification
+    const { notifyUser, notifyAdminsWithPermission, NotificationTypes, getUsersWithPermission } = await import('@/lib/notification-helpers');
+    const { hasPermission } = await import('@/lib/admin-auth');
+    const notificationManager = (await import('@/lib/notification-manager')).default;
+
+    // Vérifier si l'auteur du message est un admin
+    const isAdmin = await hasPermission('tickets.respond');
+
+    if (isAdmin) {
+      // Admin a répondu → notifier le client propriétaire du ticket
+      const notification = await notifyUser(
+        ticket.userId,
+        NotificationTypes.TICKET_RESPONSE_ADMIN,
+        ticket.id,
+        ticket.number
+      );
+
+      // Envoyer en temps réel au client avec le vrai ID
+      notificationManager.sendToUser(ticket.userId, {
+        id: notification?.id, // Vrai ID de la base de données
+        type: 'ticket_response_admin',
+        ticketId: ticket.id,
+        ticketNumber: ticket.number,
+        title: `Réponse sur le ticket #${ticket.number}`,
+        message: 'Un administrateur a répondu à votre ticket',
+        createdAt: new Date().toISOString(),
+      });
+    } else {
+      // Client a répondu → notifier tous les admins avec tickets.respond
+      const createdNotifications = await notifyAdminsWithPermission(
+        'tickets.respond',
+        NotificationTypes.TICKET_RESPONSE_CLIENT,
+        ticket.id,
+        ticket.number,
+        ticket.subject
+      );
+
+      // Envoyer en temps réel aux admins avec les vrais IDs
+      const adminIds = await getUsersWithPermission('tickets.respond');
+      for (const adminId of adminIds) {
+        const notification = createdNotifications.find((n: any) => n.userId === adminId);
+
+        notificationManager.sendToUser(adminId, {
+          id: notification?.id, // Vrai ID de la base de données
+          type: 'ticket_response_client',
+          ticketId: ticket.id,
+          ticketNumber: ticket.number,
+          title: `Réponse client sur le ticket #${ticket.number}`,
+          message: 'Le client a répondu au ticket',
+          createdAt: new Date().toISOString(),
+        });
+      }
     }
 
     return NextResponse.json({ message: newMessage });

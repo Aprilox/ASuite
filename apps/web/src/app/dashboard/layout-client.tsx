@@ -7,6 +7,8 @@ import { useTranslations } from 'next-intl';
 import { useLocale as useLocaleProvider } from '@/providers/locale-provider';
 import { useAuth } from '@/hooks/use-auth';
 import { useAdmin } from '@/hooks/use-admin';
+import { useNotifications } from '@/hooks/use-notifications';
+import { ClientNotificationBell } from '@/components/notifications/client-notification-bell';
 import {
     User,
     LogOut,
@@ -87,6 +89,7 @@ export function DashboardLayoutClient({ children }: DashboardLayoutClientProps) 
     const pathname = usePathname();
     const { user, logout } = useAuth();
     const { isAdmin } = useAdmin();
+    const { unreadCount } = useNotifications();
     const t = useTranslations('sidebar');
     const tTools = useTranslations('tools');
     const tCommon = useTranslations('common');
@@ -154,6 +157,9 @@ export function DashboardLayoutClient({ children }: DashboardLayoutClientProps) 
 
                     {/* Right side */}
                     <div className="flex items-center gap-2 sm:gap-4">
+                        {/* Notification Bell */}
+                        <ClientNotificationBell />
+
                         {/* Language selector */}
                         <div ref={langRef} className="relative">
                             <button
@@ -322,7 +328,12 @@ export function DashboardLayoutClient({ children }: DashboardLayoutClientProps) 
                             }`}
                     >
                         <MessageSquare className="w-5 h-5" />
-                        <span>{t('support')}</span>
+                        <span className="flex-1">{t('support')}</span>
+                        {unreadCount > 0 && (
+                            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold">
+                                {unreadCount > 99 ? '99+' : unreadCount}
+                            </span>
+                        )}
                     </Link>
 
                     {/* Admin Panel Link */}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAdmin } from '@/hooks/use-admin';
+import { useNotifications } from '@/hooks/use-notifications';
 import {
   Link2,
   Lock,
@@ -100,6 +101,9 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   const tTools = useTranslations('tools');
   const tCommon = useTranslations('common');
   const { isAdmin } = useAdmin();
+  const { unreadCount } = useNotifications();
+
+  console.log('[Sidebar] unreadCount:', unreadCount);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -131,10 +135,10 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
               href={disabled ? '#' : tool.href}
               onClick={(e) => disabled && e.preventDefault()}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active
-                  ? 'bg-primary text-primary-foreground'
-                  : disabled
-                    ? 'text-muted-foreground/50 cursor-not-allowed'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                ? 'bg-primary text-primary-foreground'
+                : disabled
+                  ? 'text-muted-foreground/50 cursor-not-allowed'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                 } ${collapsed ? 'justify-center' : ''}`}
               title={collapsed ? toolName : undefined}
             >
@@ -160,13 +164,22 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         <Link
           href="/support"
           className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith('/support')
-              ? 'bg-primary text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+            ? 'bg-primary text-primary-foreground'
+            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
             } ${collapsed ? 'justify-center' : ''}`}
           title={collapsed ? t('support') : undefined}
         >
           <MessageSquare className="w-5 h-5" />
-          {!collapsed && <span>{t('support')}</span>}
+          {!collapsed && (
+            <>
+              <span className="flex-1">{t('support')}</span>
+              {unreadCount > 0 && (
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </>
+          )}
         </Link>
 
         {/* Admin Panel Link */}

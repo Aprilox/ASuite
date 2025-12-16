@@ -2,6 +2,31 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.7.0] - 2025-12-16
+
+### Nouveautés - Notifications Admin
+- 🔔 Notifications temps réel SSE sans rechargement de page
+- 🔔 Cloche de notifications dans la navbar avec dropdown et badge
+- 📊 Auto-refresh de la liste des tickets lors de nouvelles notifications
+- 🔴 Cercles rouges sur les tickets non lus dans la liste
+- ⬆️ Tri intelligent : tickets avec nouvelle activité remontent automatiquement en haut
+- 🎨 Badge sur le menu "Tickets" affichant le nombre de notifications
+- ✅ Marquage automatique comme lu à l'ouverture d'un ticket
+
+### Nouveautés - Notifications Client
+- 🔔 Cloche de notifications dans le header du dashboard
+- 🎨 Badge sur le menu "Support" affichant le nombre de notifications
+- 🔴 Cercles rouges sur les tickets avec réponses admin
+- 🔄 Notifications mises à jour au rafraîchissement (optimisé pour scalabilité)
+
+### Améliorations
+- ⚡ État des notifications partagé globalement entre tous les composants
+- 📡 Architecture SSE uniquement pour admins (scalable pour milliers de clients)
+- 🎯 Utilisation des IDs réels de base de données
+- 🔄 Gestion améliorée de la suppression de tickets
+
+---
+
 ## [1.6.3] - 2025-12-11
 
 ### Nouveautés - Interface Admin

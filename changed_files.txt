@@ -1,0 +1,17 @@
+﻿CHANGELOG.md
+apps/web/src/app/admin/layout-client.tsx
+apps/web/src/app/admin/layout.tsx
+apps/web/src/app/admin/tickets/[id]/ticket-detail-client.tsx
+apps/web/src/app/admin/tickets/page.tsx
+apps/web/src/app/api/admin/tickets/[id]/route.ts
+apps/web/src/app/api/admin/tickets/route.ts
+apps/web/src/app/api/tickets/[id]/route.ts
+apps/web/src/app/api/tickets/route.ts
+apps/web/src/app/dashboard/layout-client.tsx
+apps/web/src/app/layout.tsx
+apps/web/src/app/support/[id]/ticket-detail-client.tsx
+apps/web/src/app/support/page.tsx
+apps/web/src/components/layout/header.tsx
+apps/web/src/components/layout/sidebar.tsx
+package.json
+packages/database/prisma/schema.prisma

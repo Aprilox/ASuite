@@ -3,17 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { 
-  MessageSquare, 
-  Plus, 
-  Clock, 
-  CheckCircle2, 
+import {
+  MessageSquare,
+  Plus,
+  Clock,
+  CheckCircle2,
   AlertCircle,
   Loader2,
   ChevronRight,
   X
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import { useNotifications } from '@/hooks/use-notifications';
 
 interface Ticket {
   id: string;
@@ -49,12 +50,13 @@ export default function SupportPage() {
   const t = useTranslations('support');
   const tCommon = useTranslations('common');
   const toast = useToast();
-  
+  const { notifications } = useNotifications();
+
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewTicket, setShowNewTicket] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  
+
   // Form state
   const [subject, setSubject] = useState('');
   const [category, setCategory] = useState('question');
@@ -160,7 +162,7 @@ export default function SupportPage() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <form onSubmit={handleSubmit} className="p-4 space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">{t('subject')}</label>
@@ -266,10 +268,13 @@ export default function SupportPage() {
                   <div className="flex-shrink-0">
                     {statusIcons[ticket.status]}
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs text-muted-foreground">#{ticket.number}</span>
+                      {notifications.some((n: any) => n.ticketId === ticket.id && !n.read) && (
+                        <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                      )}
                       <span className={`text-xs px-2 py-0.5 rounded-full ${priorityColors[ticket.priority]}`}>
                         {t(`priorities.${ticket.priority}`)}
                       </span>
@@ -284,13 +289,12 @@ export default function SupportPage() {
                   </div>
 
                   <div className="flex-shrink-0 flex items-center gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      ticket.status === 'open' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                      ticket.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                      ticket.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-                    }`}>
+                    <span className={`text-xs px-2 py-1 rounded-full ${ticket.status === 'open' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                        ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                          ticket.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                            ticket.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                              'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                      }`}>
                       {t(`statuses.${ticket.status}`)}
                     </span>
                     <ChevronRight className="w-4 h-4 text-muted-foreground" />

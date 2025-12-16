@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
 import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useAdmin } from '@/hooks/use-admin';
+import { useNotifications } from '@/hooks/use-notifications';
 import {
   ArrowLeft,
   Loader2,
@@ -99,7 +100,9 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   const t = useTranslations('admin.tickets');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { hasPermission } = useAdmin();
-  
+  const { notifications, markAsRead } = useNotifications();
+  const markedTicketsRef = useRef<Set<string>>(new Set());
+
   // Permissions
   const canRespond = hasPermission('tickets.respond');
   const canClose = hasPermission('tickets.close');
@@ -111,14 +114,16 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   const [sending, setSending] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Reply state
   const [replyContent, setReplyContent] = useState('');
   const [isInternal, setIsInternal] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch ticket (silent = no loading state, for polling)
   const fetchTicket = useCallback(async (silent = false) => {
+    if (isDeleting) return; // Ne pas recharger si en cours de suppression
     if (!silent) setLoading(true);
     try {
       const res = await fetch(`/api/admin/tickets/${id}`);
@@ -139,17 +144,29 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [id, router, t, toast]);
+  }, [id, router, t, toast, isDeleting]);
 
   // Initial fetch
   useEffect(() => {
     fetchTicket();
   }, [fetchTicket]);
 
+  // Mark notifications as read when opening this ticket
+  useEffect(() => {
+    const unreadNotifications = notifications.filter(
+      n => n.ticketId === id && !n.read
+    );
+
+    // Mark all unread notifications for this ticket as read
+    unreadNotifications.forEach(notification => {
+      markAsRead(notification.id);
+    });
+  }, [id, notifications, markAsRead]);
+
   // Polling for new messages (every 5 seconds, only if ticket is not closed)
   useEffect(() => {
     if (ticket?.status === 'closed') return;
-    
+
     const interval = setInterval(() => {
       fetchTicket(true);
     }, 5000);
@@ -179,7 +196,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
 
     const messageContent = replyContent;
     const messageIsInternal = isInternal;
-    
+
     // Clear input immediately
     setReplyContent('');
     setIsInternal(false);
@@ -200,7 +217,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
         role: null,
       },
     };
-    
+
     setTicket(prev => prev ? {
       ...prev,
       messages: [...prev.messages, optimisticMessage],
@@ -242,9 +259,9 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
 
   const handleUpdateStatus = async (status: string) => {
     if (!ticket) return;
-    
+
     const previousStatus = ticket.status;
-    
+
     // Optimistic update
     setTicket(prev => prev ? { ...prev, status } : null);
     setUpdating(true);
@@ -283,6 +300,8 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
     });
 
     if (!confirmed) return;
+
+    setIsDeleting(true); // Empêcher les rechargements pendant la suppression
 
     try {
       const res = await fetch(`/api/admin/tickets/${id}`, {
@@ -389,18 +408,17 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                 // Message du client (créateur du ticket) = gauche, Staff = droite
                 const isTicketOwner = message.author.id === ticket.user.id;
                 const isStaff = message.author.isStaff;
-                
+
                 return (
                   <div
                     key={message.id}
                     className={`flex gap-3 ${!isTicketOwner ? 'flex-row-reverse' : ''}`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-medium ${
-                      isStaff ? 'bg-primary text-primary-foreground' : 'bg-accent'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-medium ${isStaff ? 'bg-primary text-primary-foreground' : 'bg-accent'
+                      }`}>
                       {message.author.name?.[0]?.toUpperCase() || message.author.email[0].toUpperCase()}
                     </div>
-                    
+
                     <div className={`max-w-[75%] ${!isTicketOwner ? 'text-right' : ''}`}>
                       <div className={`flex items-center gap-2 mb-1 flex-wrap ${!isTicketOwner ? 'justify-end' : ''}`}>
                         <span className="font-medium text-sm">
@@ -428,13 +446,12 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                           {formatDate(message.createdAt)}
                         </span>
                       </div>
-                      <div className={`inline-block p-3 rounded-2xl text-left ${
-                        message.isInternal
-                          ? 'bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800'
-                          : isStaff
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-accent'
-                      }`}>
+                      <div className={`inline-block p-3 rounded-2xl text-left ${message.isInternal
+                        ? 'bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800'
+                        : isStaff
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-accent'
+                        }`}>
                         <p className="whitespace-pre-wrap text-sm">{message.content}</p>
                       </div>
                     </div>
@@ -457,22 +474,20 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
                       placeholder={isInternal ? t('internalNotePlaceholder') : t('replyPlaceholder')}
-                      className={`w-full px-4 py-2.5 rounded-xl border-2 bg-background transition-all duration-200 ${
-                        isInternal
-                          ? 'border-amber-400 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.3)]'
-                          : 'border-primary/30 focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-[0_0_15px_rgba(59,130,246,0.2)]'
-                      }`}
+                      className={`w-full px-4 py-2.5 rounded-xl border-2 bg-background transition-all duration-200 ${isInternal
+                        ? 'border-amber-400 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.3)]'
+                        : 'border-primary/30 focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+                        }`}
                       disabled={sending}
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={sending || !replyContent.trim()}
-                    className={`px-4 py-2.5 rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-2 ${
-                      isInternal
-                        ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                        : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    }`}
+                    className={`px-4 py-2.5 rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-2 ${isInternal
+                      ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      }`}
                   >
                     {sending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -502,9 +517,8 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
         </div>
 
         {/* Sidebar */}
-        <div className={`fixed top-0 right-0 h-full w-80 bg-card border-l z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto lg:relative lg:translate-x-0 lg:z-auto ${
-          sidebarOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}>
+        <div className={`fixed top-0 right-0 h-full w-80 bg-card border-l z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto lg:relative lg:translate-x-0 lg:z-auto ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}>
           {/* Mobile close button */}
           <div className="lg:hidden flex items-center justify-between p-4 border-b">
             <span className="font-semibold">Options</span>
@@ -518,7 +532,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
           <div className="p-4 space-y-4">
             {/* Status */}
             <div className="bg-muted/50 rounded-xl p-4">
-              <h3 className="font-medium mb-3 text-sm">{t('status')}</h3>
+              <h3 className="font-medium mb-3 text-sm">Statut</h3>
               {canClose ? (
                 <div className="grid grid-cols-1 gap-1.5">
                   {statuses.map((status) => {
@@ -531,11 +545,10 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                           setSidebarOpen(false);
                         }}
                         disabled={updating || ticket.status === status}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                          ticket.status === status
-                            ? 'bg-primary text-primary-foreground'
-                            : 'hover:bg-accent'
-                        } disabled:opacity-50`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${ticket.status === status
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-accent'
+                          } disabled:opacity-50`}
                       >
                         <Icon className="w-4 h-4" />
                         {t(`status.${status}`)}
@@ -572,7 +585,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
               </div>
             </div>
 
-          {/* Details */}
+            {/* Details */}
             <div className="bg-muted/50 rounded-xl p-4">
               <h3 className="font-medium mb-3 text-sm">{t('details')}</h3>
               <div className="space-y-2 text-sm">

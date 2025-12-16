@@ -15,7 +15,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <AdminLayoutClient 
+    <AdminLayoutClient
       permissions={admin.permissions}
       roles={admin.roles}
     >
@@ -23,7 +23,3 @@ export default async function AdminLayout({
     </AdminLayoutClient>
   );
 }
-
-
-
-

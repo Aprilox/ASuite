@@ -6,7 +6,7 @@ import { getSession } from '@/lib/auth';
 export async function GET() {
   try {
     const user = await getSession();
-    
+
     if (!user?.id) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
@@ -32,7 +32,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await getSession();
-    
+
     if (!user?.id) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
@@ -87,6 +87,38 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    // Importer les helpers de notification (dynamique pour éviter les erreurs de build)
+    const { notifyAdminsWithPermission, NotificationTypes } = await import('@/lib/notification-helpers');
+    const notificationManager = (await import('@/lib/notification-manager')).default;
+
+    // Notifier tous les admins avec la permission de voir les tickets
+    const createdNotifications = await notifyAdminsWithPermission(
+      'tickets.view',
+      NotificationTypes.TICKET_NEW,
+      ticket.id,
+      ticket.number,
+      ticket.subject
+    );
+
+    // Envoyer la notification en temps réel via SSE avec les vrais IDs
+    const { getUsersWithPermission } = await import('@/lib/notification-helpers');
+    const adminIds = await getUsersWithPermission('tickets.view');
+
+    for (const adminId of adminIds) {
+      // Trouver la notification créée pour cet admin
+      const notification = createdNotifications.find((n: any) => n.userId === adminId);
+
+      notificationManager.sendToUser(adminId, {
+        id: notification?.id, // Vrai ID de la base de données
+        type: 'ticket_new',
+        ticketId: ticket.id,
+        ticketNumber: ticket.number,
+        title: `Nouveau ticket #${ticket.number}`,
+        message: ticket.subject,
+        createdAt: new Date().toISOString(),
+      });
+    }
 
     return NextResponse.json({ ticket }, { status: 201 });
   } catch (error) {

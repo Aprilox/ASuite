@@ -1,0 +1,26 @@
+  // Initial fetch
+  useEffect(() => {
+    fetchTicket();
+  }, [fetchTicket]);
+
+  // Mark notifications as read when opening this ticket
+  useEffect(() => {
+    // Only mark if we haven't already processed this ticket
+    if (markedTicketsRef.current.has(id)) return;
+    
+    const unreadNotifications = notifications.filter(
+      (n: any) => n.ticketId === id && !n.read
+    );
+    
+    if (unreadNotifications.length > 0) {
+      // Mark this ticket as processed
+      markedTicketsRef.current.add(id);
+      
+      // Mark all unread notifications for this ticket as read
+      unreadNotifications.forEach((notification: any) => {
+        markAsRead(notification.id);
+      });
+    }
+  }, [id, notifications, markAsRead]);
+
+  // Polling for new messages (every 5 seconds, only if ticket is not closed)

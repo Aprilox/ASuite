@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@asuite/database';
-import { 
-  requireAdminPermission, 
-  getRequestInfo, 
-  createAuditLog 
+import {
+  requireAdminPermission,
+  getRequestInfo,
+  createAuditLog
 } from '@/lib/admin-auth';
 
 // GET /api/admin/tickets - Liste des tickets
@@ -48,7 +48,9 @@ export async function GET(request: Request) {
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { [sortBy]: sortOrder },
+        orderBy: {
+          updatedAt: 'desc', // Trier par dernière activité pour que les tickets avec nouvelles réponses apparaissent en haut
+        },
         include: {
           user: {
             select: {
@@ -81,13 +83,13 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Admin tickets list error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -131,9 +133,9 @@ export async function POST(request: Request) {
           userAgent
         );
 
-        return NextResponse.json({ 
-          success: true, 
-          message: `${ticketIds.length} ticket(s) mis à jour` 
+        return NextResponse.json({
+          success: true,
+          message: `${ticketIds.length} ticket(s) mis à jour`
         });
       }
 
@@ -154,9 +156,9 @@ export async function POST(request: Request) {
           userAgent
         );
 
-        return NextResponse.json({ 
-          success: true, 
-          message: `${ticketIds.length} ticket(s) supprimé(s)` 
+        return NextResponse.json({
+          success: true,
+          message: `${ticketIds.length} ticket(s) supprimé(s)`
         });
       }
 
@@ -165,13 +167,13 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error('Admin tickets action error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

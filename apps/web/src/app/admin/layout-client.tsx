@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useNotifications } from '@/hooks/use-notifications';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -8,7 +9,6 @@ import { useLocale as useLocaleProvider } from '@/providers/locale-provider';
 import { useAuth } from '@/hooks/use-auth';
 import {
   Shield,
-  Bell,
   User,
   LogOut,
   Menu,
@@ -20,6 +20,7 @@ import {
   ChevronRight,
   ArrowLeft,
 } from 'lucide-react';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 const languages = [
   { code: 'fr', label: 'Français' },
@@ -73,6 +74,7 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
   const { user, logout } = useAuth();
   const t = useTranslations('admin');
   const { locale, setLocale } = useLocaleProvider();
+  const { unreadCount } = useNotifications();
 
   const currentLang = languages.find((l) => l.code === locale) || languages[0];
   const primaryRole = roles[0];
@@ -201,9 +203,7 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
             </div>
 
             {/* Notifications */}
-            <button className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-              <Bell className="w-5 h-5" />
-            </button>
+            <NotificationBell />
 
             {/* Role badge - hidden on very small screens */}
             {primaryRole && (
@@ -287,12 +287,17 @@ export function AdminLayoutClient({ children, permissions, roles }: AdminLayoutC
                 href={item.href}
                 onClick={closeSidebar}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${active
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                   }`}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 <span className="flex-1">{t(`sidebar.${item.key}`)}</span>
+                {item.key === 'tickets' && unreadCount > 0 && (
+                  <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
                 {active && <ChevronRight className="w-4 h-4" />}
               </Link>
             );

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
+import { useNotifications } from '@/hooks/use-notifications';
 import {
   Search,
   Filter,
@@ -78,6 +79,7 @@ export default function AdminTicketsPage() {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('admin.tickets');
+  const { notifications } = useNotifications();
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
@@ -91,7 +93,53 @@ export default function AdminTicketsPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [filterUnread, setFilterUnread] = useState(''); // '' = all, 'unread' = non vues
   const [filtersLoaded, setFiltersLoaded] = useState(false);
+  const [lastNotificationId, setLastNotificationId] = useState<string | null>(null);
+
+  // Auto-refresh tickets when new ticket notification arrives
+  useEffect(() => {
+    if (!filtersLoaded || notifications.length === 0) return;
+
+    const latestNotification = notifications[0]; // Les notifications sont triées par date décroissante
+
+    // Vérifier si c'est une nouvelle notification liée aux tickets
+    if (
+      latestNotification.id !== lastNotificationId &&
+      lastNotificationId !== null &&
+      (latestNotification.type === 'ticket_new' ||
+        latestNotification.type === 'ticket_response_client')
+    ) {
+      console.log('[Admin Tickets] New ticket notification, refreshing list...');
+      // Nouvelle notification de ticket, rafraîchir la liste
+      const refetchTickets = async () => {
+        try {
+          const params = new URLSearchParams({
+            page: pagination.page.toString(),
+            limit: pagination.limit.toString(),
+          });
+          if (search) params.set('search', search);
+          if (filterStatus) params.set('status', filterStatus);
+          if (filterPriority) params.set('priority', filterPriority);
+          if (filterCategory) params.set('category', filterCategory);
+
+          const res = await fetch(`/api/admin/tickets?${params}`);
+          if (res.ok) {
+            const data = await res.json();
+            setTickets(data.tickets);
+            setPagination(data.pagination);
+          }
+        } catch (error) {
+          console.error('Error refetching tickets:', error);
+        }
+      };
+      refetchTickets();
+    }
+
+    if (latestNotification) {
+      setLastNotificationId(latestNotification.id);
+    }
+  }, [notifications, filtersLoaded, pagination.page, pagination.limit, search, filterStatus, filterPriority, filterCategory]);
 
   // Load saved filters from database on mount
   useEffect(() => {
@@ -258,19 +306,26 @@ export default function AdminTicketsPage() {
           <div className="divide-y">
             {tickets.map((ticket) => {
               const StatusIcon = statusIcons[ticket.status] || AlertCircle;
+              const hasUnreadNotifications = notifications.some(
+                (n: any) => n.ticketId === ticket.id && !n.read
+              );
+
               return (
                 <div
                   key={ticket.id}
                   onClick={() => router.push(`/admin/tickets/${ticket.id}`)}
-                  className="p-4 hover:bg-muted/30 cursor-pointer transition-colors"
+                  className="p-4 hover:bg-accent/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`mt-1 ${statusColors[ticket.status]}`}>
+                    <div className="flex-shrink-0 pt-1">
                       <StatusIcon className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm text-muted-foreground">#{ticket.number}</span>
+                        {hasUnreadNotifications && (
+                          <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                        )}
                         <h3 className="font-medium truncate">{ticket.subject}</h3>
                       </div>
                       <div className="flex items-center gap-3 mt-2 text-sm">

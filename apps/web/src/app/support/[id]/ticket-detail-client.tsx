@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
-import { 
+import { useNotifications } from '@/hooks/use-notifications';
+import {
   ArrowLeft,
   Send,
   Loader2,
@@ -62,41 +63,61 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   const { user } = useAuth();
   const t = useTranslations('support');
   const toast = useToast();
-  
+  const { notifications, markAsRead } = useNotifications();
+
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [hasShownNotFound, setHasShownNotFound] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const markedTicketsRef = useRef<Set<string>>(new Set());
 
   // Fetch ticket (silent = no loading state, for polling)
   const fetchTicket = useCallback(async (silent = false) => {
+    if (hasShownNotFound) return; // Éviter de recharger si ticket supprimé
+
     try {
       const res = await fetch(`/api/tickets/${id}`);
       if (res.ok) {
         const data = await res.json();
         setTicket(data.ticket);
-      } else if (res.status === 404 && !silent) {
+      } else if (res.status === 404 && !hasShownNotFound) {
+        setHasShownNotFound(true);
         toast.error(t('ticketNotFound'));
         router.push('/support');
       }
     } catch (error) {
-      if (!silent) console.error('Error fetching ticket:', error);
+      if (!silent && !hasShownNotFound) {
+        console.error('Error loading ticket:', error);
+      }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [id, router, t, toast]);
+  }, [id, router, toast, t, hasShownNotFound]);
 
   // Initial fetch
   useEffect(() => {
     fetchTicket();
   }, [fetchTicket]);
 
+  // Mark notifications as read when opening this ticket
+  useEffect(() => {
+    const unreadNotifications = notifications.filter(
+      n => n.ticketId === id && !n.read
+    );
+
+    // Mark all unread notifications for this ticket as read
+    unreadNotifications.forEach(notification => {
+      markAsRead(notification.id);
+    });
+  }, [id, notifications, markAsRead]);
+
   // Polling for new messages (every 5 seconds, only if ticket is not closed)
   useEffect(() => {
     if (ticket?.status === 'closed') return;
-    
+
     const interval = setInterval(() => {
       fetchTicket(true);
     }, 5000);
@@ -125,7 +146,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
     if (!newMessage.trim() || sending || !ticket || !user) return;
 
     const messageContent = newMessage;
-    
+
     // Clear input immediately
     setNewMessage('');
     setSending(true);
@@ -218,19 +239,18 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
             <ArrowLeft className="w-4 h-4" />
             {t('backToTickets')}
           </button>
-          
+
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm text-muted-foreground">#{ticket.number}</span>
                 {statusIcons[ticket.status]}
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  ticket.status === 'open' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                <span className={`text-xs px-2 py-0.5 rounded-full ${ticket.status === 'open' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                   ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                  ticket.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                  ticket.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                  'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-                }`}>
+                    ticket.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                      ticket.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                  }`}>
                   {t(`statuses.${ticket.status}`)}
                 </span>
               </div>
@@ -249,37 +269,36 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
           {ticket.messages.map((message) => {
             const isOwn = message.author.id === user?.id;
             const staff = isStaff(message);
-            
+
             return (
               <div
                 key={message.id}
                 className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  staff ? 'bg-primary text-primary-foreground' : 'bg-accent'
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${staff ? 'bg-primary text-primary-foreground' : 'bg-accent'
+                  }`}>
                   {message.author.image ? (
-                    <img 
-                      src={message.author.image} 
-                      alt="" 
+                    <img
+                      src={message.author.image}
+                      alt=""
                       className="w-8 h-8 rounded-full"
                     />
                   ) : (
                     <User className="w-4 h-4" />
                   )}
                 </div>
-                
+
                 <div className={`flex-1 max-w-[80%] ${isOwn ? 'text-right' : ''}`}>
                   <div className={`flex items-center gap-2 mb-1 flex-wrap ${isOwn ? 'justify-end' : ''}`}>
                     <span className="font-medium text-sm">
                       {message.author.name || t('anonymous')}
                     </span>
                     {staff && message.author.userRoles?.[0] && (
-                      <span 
+                      <span
                         className="text-xs px-1.5 py-0.5 rounded"
-                        style={{ 
+                        style={{
                           backgroundColor: message.author.userRoles[0].role.color + '20',
-                          color: message.author.userRoles[0].role.color 
+                          color: message.author.userRoles[0].role.color
                         }}
                       >
                         {message.author.userRoles[0].role.displayName}
@@ -289,13 +308,12 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                       {formatDate(message.createdAt)}
                     </span>
                   </div>
-                  <div className={`inline-block p-3 rounded-xl ${
-                    isOwn 
-                      ? 'bg-primary text-primary-foreground' 
-                      : staff 
-                        ? 'bg-accent border-2 border-primary/20' 
-                        : 'bg-accent'
-                  }`}>
+                  <div className={`inline-block p-3 rounded-xl ${isOwn
+                    ? 'bg-primary text-primary-foreground'
+                    : staff
+                      ? 'bg-accent border-2 border-primary/20'
+                      : 'bg-accent'
+                    }`}>
                     <p className="whitespace-pre-wrap text-left">{message.content}</p>
                   </div>
                 </div>

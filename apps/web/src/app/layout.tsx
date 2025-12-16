@@ -5,6 +5,7 @@ import './globals.css';
 import { AuthProvider } from '@/providers/auth-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { LocaleProvider } from '@/providers/locale-provider';
+import { NotificationsProvider } from '@/providers/notifications-provider';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { ToastProvider } from '@/components/ui/toast';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -13,7 +14,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  
+
   return {
     title: `${settings.name} - ${settings.description}`,
     description: settings.description,
@@ -40,11 +41,13 @@ export default async function RootLayout({
         <ThemeProvider>
           <LocaleProvider initialLocale={locale as 'fr' | 'en'}>
             <AuthProvider>
-              <ConfirmProvider>
-                <ToastProvider>
-                  {children}
-                </ToastProvider>
-              </ConfirmProvider>
+              <NotificationsProvider>
+                <ConfirmProvider>
+                  <ToastProvider>
+                    {children}
+                  </ToastProvider>
+                </ConfirmProvider>
+              </NotificationsProvider>
             </AuthProvider>
           </LocaleProvider>
         </ThemeProvider>

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@asuite/database';
-import { 
-  requireAdminPermission, 
-  getRequestInfo, 
+import {
+  requireAdminPermission,
+  getRequestInfo,
   createAuditLog,
   getAdminSession
 } from '@/lib/admin-auth';
@@ -80,13 +80,13 @@ export async function GET(
     });
   } catch (error) {
     console.error('Admin ticket detail error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -147,13 +147,13 @@ export async function PATCH(
     return NextResponse.json({ success: true, ticket: updatedTicket });
   } catch (error) {
     console.error('Admin ticket update error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -203,6 +203,19 @@ export async function POST(
       },
     });
 
+    // Si c'est une réponse publique, notifier le client propriétaire du ticket
+    if (!isInternal) {
+      const { notifyUser, NotificationTypes } = await import('@/lib/notification-helpers');
+      await notifyUser(
+        ticket.userId,
+        NotificationTypes.TICKET_RESPONSE_ADMIN,
+        ticket.id,
+        ticket.number,
+        ticket.subject
+      );
+      console.log(`[Admin Response] Created notification for client ${ticket.userId} on ticket #${ticket.number}`);
+    }
+
     // Si c'est une réponse publique, mettre le ticket en "in_progress" s'il était "open"
     if (!isInternal && ticket.status === 'open') {
       await prisma.ticket.update({
@@ -221,8 +234,8 @@ export async function POST(
       userAgent
     );
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: {
         id: message.id,
         content: message.content,
@@ -233,13 +246,13 @@ export async function POST(
     });
   } catch (error) {
     console.error('Admin ticket respond error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -262,6 +275,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Ticket non trouvé' }, { status: 404 });
     }
 
+    // Supprimer d'abord toutes les notifications liées à ce ticket pour éviter les 404
+    await prisma.notification.deleteMany({
+      where: { ticketId: id },
+    });
+
+    // Ensuite supprimer le ticket (les messages seront supprimés en cascade)
     await prisma.ticket.delete({
       where: { id },
     });
@@ -279,13 +298,13 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin ticket delete error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message === 'Non autorisé' || error.message === 'Permission insuffisante') {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
