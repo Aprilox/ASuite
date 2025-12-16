@@ -2,6 +2,37 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.8.0] - 2025-12-16
+
+### Nouveautés - Sécurité des Tickets
+- 🔒 Validation serveur des longueurs (sujet: 200 chars, message: 10,000 chars)
+- 🧹 Sanitization HTML automatique de tout le contenu utilisateur
+- ⏱️ Rate limiting: maximum 3 tickets par heure par utilisateur
+- ⚙️ Limites configurables depuis l'interface admin
+
+### Nouveautés - Expérience Utilisateur
+- 📊 Compteurs de caractères temps réel avec feedback visuel
+  - Affichage des caractères restants (ex: "195/200 caractères")
+  - 🟠 Orange quand proche de la limite (90%)
+  - 🔴 Rouge au dépassement
+- 🎨 Limites dynamiques récupérées depuis les paramètres admin
+- 📱 Interface responsive complète pour la liste des tickets admin
+- ✂️ Limitation à 2 lignes max pour les sujets dans les listes
+- 🔄 Retour à la ligne automatique pour texte long sans espaces
+
+### Améliorations Techniques
+- 🌐 Nouvel endpoint `/api/settings/public` pour paramètres non-sensibles
+- 💻 Classes CSS `overflow-wrap-anywhere` pour gestion du texte
+- 📋 Sélection de texte visible sur tous les arrière-plans
+- 🎯 Structure responsive identique entre interfaces client et admin
+
+### Corrections
+- 🐛 Texte débordant des bulles de message corrigé
+- 🐛 Sujets de tickets dépassant de la zone d'affichage corrigés
+- 🐛 Layout admin tickets ne s'adaptant pas aux petits écrans corrigé
+
+---
+
 ## [1.7.0] - 2025-12-16
 
 ### Nouveautés - Notifications Admin

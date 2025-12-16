@@ -76,9 +76,27 @@ export async function POST(
     const body = await request.json();
     const { message } = body;
 
+    // Importer les helpers
+    const { sanitizeText, validateTextLength } = await import('@/lib/sanitize');
+
+    // Récupérer la longueur max depuis les paramètres
+    const messageLengthSetting = await prisma.systemSetting.findUnique({
+      where: { key: 'support.messageMaxLength' }
+    });
+    const messageMaxLength = parseInt(messageLengthSetting?.value || '10000');
+
     if (!message || message.trim().length < 2) {
       return NextResponse.json({ error: 'Message trop court' }, { status: 400 });
     }
+
+    // Validation longueur maximale
+    const messageError = validateTextLength(message, messageMaxLength, 'Message');
+    if (messageError) {
+      return NextResponse.json({ error: messageError }, { status: 400 });
+    }
+
+    // Sanitization HTML
+    const sanitizedMessage = sanitizeText(message);
 
     // Vérifier que le ticket appartient à l'utilisateur
     const ticket = await prisma.ticket.findFirst({
@@ -97,12 +115,12 @@ export async function POST(
       return NextResponse.json({ error: 'Ce ticket est fermé' }, { status: 400 });
     }
 
-    // Créer le message
+    // Créer le message (utiliser le message sanitized)
     const newMessage = await prisma.ticketMessage.create({
       data: {
         ticketId: id,
         authorId: user.id,
-        content: message.trim(),
+        content: sanitizedMessage,
         isInternal: false,
       },
       include: {

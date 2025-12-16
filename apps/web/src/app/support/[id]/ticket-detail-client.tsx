@@ -254,7 +254,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                   {t(`statuses.${ticket.status}`)}
                 </span>
               </div>
-              <h1 className="text-xl font-bold">{ticket.subject}</h1>
+              <h1 className="text-xl font-bold break-words overflow-wrap-anywhere">{ticket.subject}</h1>
               <p className="text-sm text-muted-foreground mt-1">
                 {t(`categories.${ticket.category}`)} · {t(`priorities.${ticket.priority}`)} · {formatDate(ticket.createdAt)}
               </p>
@@ -298,7 +298,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                         className="text-xs px-1.5 py-0.5 rounded"
                         style={{
                           backgroundColor: message.author.userRoles[0].role.color + '20',
-                          color: message.author.userRoles[0].role.color
+                          color: message.author.userRoles[0].role.color,
                         }}
                       >
                         {message.author.userRoles[0].role.displayName}
@@ -308,13 +308,13 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                       {formatDate(message.createdAt)}
                     </span>
                   </div>
-                  <div className={`inline-block p-3 rounded-xl ${isOwn
+                  <div className={`inline-block p-3 rounded-xl max-w-full ${isOwn
                     ? 'bg-primary text-primary-foreground'
                     : staff
                       ? 'bg-accent border-2 border-primary/20'
                       : 'bg-accent'
                     }`}>
-                    <p className="whitespace-pre-wrap text-left">{message.content}</p>
+                    <p className="whitespace-pre-wrap text-left break-words overflow-wrap-anywhere">{message.content}</p>
                   </div>
                 </div>
               </div>

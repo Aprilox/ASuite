@@ -8,6 +8,7 @@ import {
   Settings,
   Shield,
   Mail,
+  MessageSquare,
   HardDrive,
   Loader2,
   Save,
@@ -36,6 +37,7 @@ const categoryIcons: Record<string, typeof Settings> = {
   general: Settings,
   security: Shield,
   email: Mail,
+  support: MessageSquare,
   storage: HardDrive,
 };
 
@@ -43,6 +45,7 @@ const categoryColors: Record<string, { bg: string; text: string; border: string 
   general: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/30' },
   security: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/30' },
   email: { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/30' },
+  support: { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/30' },
   storage: { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/30' },
 };
 

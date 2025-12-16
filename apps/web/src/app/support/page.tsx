@@ -57,15 +57,37 @@ export default function SupportPage() {
   const [showNewTicket, setShowNewTicket] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form state
+  // Form fields
   const [subject, setSubject] = useState('');
   const [category, setCategory] = useState('question');
   const [priority, setPriority] = useState('normal');
   const [message, setMessage] = useState('');
 
+  // Dynamic limits from settings
+  const [subjectMaxLength, setSubjectMaxLength] = useState(200);
+  const [messageMaxLength, setMessageMaxLength] = useState(10000);
+
   useEffect(() => {
     fetchTickets();
+    fetchSettings();
   }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch('/api/settings/public');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.support?.subjectMaxLength) {
+          setSubjectMaxLength(parseInt(data.support.subjectMaxLength));
+        }
+        if (data.support?.messageMaxLength) {
+          setMessageMaxLength(parseInt(data.support.messageMaxLength));
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    }
+  };
 
   const fetchTickets = async () => {
     try {
@@ -165,12 +187,21 @@ export default function SupportPage() {
 
               <form onSubmit={handleSubmit} className="p-4 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">{t('subject')}</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium">{t('subject')}</label>
+                    <span className={`text-xs ${subject.length > subjectMaxLength ? 'text-red-500 font-semibold' :
+                        subject.length > subjectMaxLength * 0.9 ? 'text-orange-500' :
+                          'text-muted-foreground'
+                      }`}>
+                      {subjectMaxLength - subject.length}/{subjectMaxLength} caractères
+                    </span>
+                  </div>
                   <input
                     type="text"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder={t('subjectPlaceholder')}
+                    maxLength={subjectMaxLength}
                     className="w-full px-3 py-2 border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                     required
                     minLength={5}
@@ -208,11 +239,20 @@ export default function SupportPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">{t('message')}</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium">{t('message')}</label>
+                    <span className={`text-xs ${message.length > messageMaxLength ? 'text-red-500 font-semibold' :
+                        message.length > messageMaxLength * 0.95 ? 'text-orange-500' :
+                          'text-muted-foreground'
+                      }`}>
+                      {(messageMaxLength - message.length).toLocaleString()}/{messageMaxLength.toLocaleString()} caractères
+                    </span>
+                  </div>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={t('messagePlaceholder')}
+                    maxLength={messageMaxLength}
                     rows={5}
                     className="w-full px-3 py-2 border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                     required
@@ -282,7 +322,7 @@ export default function SupportPage() {
                         {t(`categories.${ticket.category}`)}
                       </span>
                     </div>
-                    <h3 className="font-medium truncate">{ticket.subject}</h3>
+                    <h3 className="font-medium line-clamp-2 break-words">{ticket.subject}</h3>
                     <p className="text-sm text-muted-foreground">
                       {formatDate(ticket.createdAt)} · {ticket._count.messages} {t('messages')}
                     </p>
@@ -290,10 +330,10 @@ export default function SupportPage() {
 
                   <div className="flex-shrink-0 flex items-center gap-2">
                     <span className={`text-xs px-2 py-1 rounded-full ${ticket.status === 'open' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                        ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                          ticket.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                            ticket.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                              'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                      ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                        ticket.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                          ticket.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                            'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
                       }`}>
                       {t(`statuses.${ticket.status}`)}
                     </span>

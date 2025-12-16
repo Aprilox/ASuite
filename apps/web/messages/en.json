@@ -957,6 +957,7 @@
         "general": "General",
         "security": "Security",
         "email": "Email",
+        "support": "Support",
         "storage": "Storage"
       },
       "settingLabels": {
@@ -973,6 +974,10 @@
         "email_smtp_password": "SMTP password",
         "email_from_address": "From address",
         "email_from_name": "From name",
+        "support_ticketRateLimit": "Max tickets per hour (per user)",
+        "support_subjectMaxLength": "Max ticket subject length",
+        "support_messageMaxLength": "Max ticket message length",
+        "support_creationEnabled": "Enable ticket creation",
         "storage_type": "Storage type (not implemented)",
         "storage_path": "Storage path (not implemented)",
         "storage_max_file_size": "Max file size (not implemented)"

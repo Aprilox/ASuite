@@ -40,7 +40,47 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { subject, category, priority, message } = body;
 
-    // Validation
+    // Importer les helpers
+    const { sanitizeText, validateTextLength } = await import('@/lib/sanitize');
+
+    // Récupérer les paramètres support
+    const settings = await prisma.systemSetting.findMany({
+      where: {
+        key: {
+          in: ['support.creationEnabled', 'support.subjectMaxLength', 'support.messageMaxLength', 'support.ticketRateLimit']
+        }
+      }
+    });
+
+    const settingsMap = Object.fromEntries(settings.map(s => [s.key, s.value]));
+    const creationEnabled = settingsMap['support.creationEnabled'] === 'true';
+    const subjectMaxLength = parseInt(settingsMap['support.subjectMaxLength'] || '200');
+    const messageMaxLength = parseInt(settingsMap['support.messageMaxLength'] || '10000');
+    const rateLimit = parseInt(settingsMap['support.ticketRateLimit'] || '3');
+
+    // Vérifier si création tickets activée
+    if (!creationEnabled) {
+      return NextResponse.json({ error: 'La création de tickets est temporairement désactivée' }, { status: 503 });
+    }
+
+    // Rate limiting - vérifier nombre de tickets créés dans la dernière heure
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentTicketsCount = await prisma.ticket.count({
+      where: {
+        userId: user.id,
+        createdAt: {
+          gte: oneHourAgo
+        }
+      }
+    });
+
+    if (recentTicketsCount >= rateLimit) {
+      return NextResponse.json({
+        error: `Vous avez atteint la limite de ${rateLimit} tickets par heure. Veuillez réessayer plus tard.`
+      }, { status: 429 });
+    }
+
+    // Validation minimale
     if (!subject || subject.trim().length < 5) {
       return NextResponse.json({ error: 'Sujet trop court (min. 5 caractères)' }, { status: 400 });
     }
@@ -48,6 +88,21 @@ export async function POST(request: Request) {
     if (!message || message.trim().length < 10) {
       return NextResponse.json({ error: 'Message trop court (min. 10 caractères)' }, { status: 400 });
     }
+
+    // Validation longueur maximale
+    const subjectError = validateTextLength(subject, subjectMaxLength, 'Sujet');
+    if (subjectError) {
+      return NextResponse.json({ error: subjectError }, { status: 400 });
+    }
+
+    const messageError = validateTextLength(message, messageMaxLength, 'Message');
+    if (messageError) {
+      return NextResponse.json({ error: messageError }, { status: 400 });
+    }
+
+    // Sanitization HTML
+    const sanitizedSubject = sanitizeText(subject);
+    const sanitizedMessage = sanitizeText(message);
 
     const validCategories = ['bug', 'question', 'feature', 'other'];
     if (!validCategories.includes(category)) {
@@ -63,18 +118,18 @@ export async function POST(request: Request) {
       data: { value: { increment: 1 } },
     });
 
-    // Créer le ticket avec le premier message
+    // Créer le ticket avec le premier message (utiliser les textes sanitized)
     const ticket = await prisma.ticket.create({
       data: {
         number: counter.value,
-        subject: subject.trim(),
+        subject: sanitizedSubject,
         category,
         priority: ticketPriority,
         status: 'open',
         userId: user.id,
         messages: {
           create: {
-            content: message.trim(),
+            content: sanitizedMessage,
             authorId: user.id,
             isInternal: false,
           },
@@ -126,4 +181,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
-

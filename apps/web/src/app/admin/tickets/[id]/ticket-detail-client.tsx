@@ -367,7 +367,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                 {t(`category.${ticket.category}`)}
               </span>
             </div>
-            <h1 className="text-xl font-bold truncate">{ticket.subject}</h1>
+            <h1 className="text-xl font-bold break-words overflow-wrap-anywhere">{ticket.subject}</h1>
           </div>
           {canDelete && (
             <button
@@ -446,13 +446,13 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                           {formatDate(message.createdAt)}
                         </span>
                       </div>
-                      <div className={`inline-block p-3 rounded-2xl text-left ${message.isInternal
+                      <div className={`inline-block p-3 rounded-2xl text-left max-w-full ${message.isInternal
                         ? 'bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800'
                         : isStaff
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-accent'
                         }`}>
-                        <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                        <p className="whitespace-pre-wrap text-sm break-words overflow-wrap-anywhere">{message.content}</p>
                       </div>
                     </div>
                   </div>

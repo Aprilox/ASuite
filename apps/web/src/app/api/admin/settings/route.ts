@@ -53,6 +53,7 @@ export async function GET(request: Request) {
       { id: 'general', icon: 'settings' },
       { id: 'security', icon: 'shield' },
       { id: 'email', icon: 'mail' },
+      { id: 'support', icon: 'message-square' },
       { id: 'storage', icon: 'hard-drive', comingSoon: true },
     ];
 

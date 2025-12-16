@@ -311,44 +311,48 @@ export default function AdminTicketsPage() {
               );
 
               return (
-                <div
+                <button
                   key={ticket.id}
                   onClick={() => router.push(`/admin/tickets/${ticket.id}`)}
-                  className="p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+                  className="w-full p-4 hover:bg-accent/50 transition-colors text-left"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 pt-1">
+                    <div className="flex-shrink-0">
                       <StatusIcon className="w-5 h-5" />
                     </div>
+
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="text-sm text-muted-foreground">#{ticket.number}</span>
                         {hasUnreadNotifications && (
                           <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
                         )}
-                        <h3 className="font-medium truncate">{ticket.subject}</h3>
-                      </div>
-                      <div className="flex items-center gap-3 mt-2 text-sm">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityColors[ticket.priority]}`}>
                           {t(`priority.${ticket.priority}`)}
                         </span>
-                        <span className="text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           {t(`category.${ticket.category}`)}
                         </span>
-                        <span className="text-muted-foreground flex items-center gap-1">
-                          <MessageSquare className="w-4 h-4" />
-                          {ticket.messageCount}
-                        </span>
                       </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm">{ticket.user.name || ticket.user.email}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(ticket.createdAt).toLocaleDateString()}
+                      <h3 className="font-medium line-clamp-2 break-words overflow-wrap-anywhere">{ticket.subject}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {ticket.user.name || ticket.user.email} · {new Date(ticket.createdAt).toLocaleDateString()} · {ticket.messageCount} message(s)
                       </p>
                     </div>
+
+                    <div className="flex-shrink-0 flex items-center gap-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${ticket.status === 'open' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                        ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                          ticket.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                            ticket.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                              'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                        }`}>
+                        {t(`status.${ticket.status}`)}
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
