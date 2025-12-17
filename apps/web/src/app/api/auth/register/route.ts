@@ -2,9 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { prisma } from '@asuite/database';
 import { isValidEmail, checkPasswordStrength } from '@asuite/utils';
+import { checkGlobalRateLimit, getClientIp } from '@/lib/global-rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request);
+
+    // Rate limiting - Vérifier avant toute opération coûteuse
+    const rateLimitResult = await checkGlobalRateLimit('register', clientIp);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: rateLimitResult.reason },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.retryAfter || 900),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
     const { name, email, password } = body;
 
@@ -16,6 +33,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validation de longueur pour prévenir les abus
+    if (name.length > 20) {
+      return NextResponse.json(
+        { error: 'Le nom est trop long (max 20 caractères)' },
+        { status: 400 }
+      );
+    }
+
+    if (email.length > 64) {
+      return NextResponse.json(
+        { error: 'L\'email est trop long (max 64 caractères)' },
+        { status: 400 }
+      );
+    }
+
+    if (password.length > 64) {
+      return NextResponse.json(
+        { error: 'Le mot de passe est trop long (max 64 caractères)' },
+        { status: 400 }
+      );
+    }
+
     if (!isValidEmail(email)) {
       return NextResponse.json(
         { error: 'Email invalide' },
@@ -23,10 +62,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const passwordCheck = checkPasswordStrength(password);
-    if (passwordCheck.score < 3) {
+    const passwordValidation = checkPasswordStrength(password);
+    if (passwordValidation.score < 3) {
       return NextResponse.json(
-        { error: 'Mot de passe trop faible', feedback: passwordCheck.feedback },
+        { error: 'Mot de passe trop faible', feedback: passwordValidation.feedback },
         { status: 400 }
       );
     }
@@ -73,8 +112,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { 
-        message: 'Compte créé avec succès', 
+      {
+        message: 'Compte créé avec succès',
         user: {
           ...user,
           role: 'user', // Les nouveaux utilisateurs sont des users par défaut

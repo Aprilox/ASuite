@@ -248,6 +248,40 @@ export function Header({ variant = 'default' }: HeaderProps) {
           )}
         </div>
 
+        {/* Mobile Language Selector - Visible on small screens */}
+        <div className="lg:hidden relative">
+          <button
+            onClick={() => setLangMenuOpen(!langMenuOpen)}
+            className="flex items-center gap-1 px-2 h-9 rounded-lg hover:bg-accent transition-colors"
+          >
+            <FlagIcon locale={locale} className="w-5 h-4 shadow-sm" />
+          </button>
+          {langMenuOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setLangMenuOpen(false)}
+              />
+              <div className="absolute right-0 top-full mt-2 w-40 bg-popover border rounded-lg shadow-lg py-1 z-50">
+                {locales.map((loc) => (
+                  <button
+                    key={loc}
+                    onClick={() => {
+                      setLangMenuOpen(false);
+                      setLocale(loc);
+                    }}
+                    className={`flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-accent transition-colors w-full text-left ${locale === loc ? 'bg-accent font-medium' : ''
+                      }`}
+                  >
+                    <FlagIcon locale={loc} className="w-5 h-4 shadow-sm" />
+                    <span>{localeNames[loc]}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
         {/* Mobile Menu Button - For non-dashboard pages (right side) */}
         {(!isDashboardPage || !isAuthenticated) && (
           <button

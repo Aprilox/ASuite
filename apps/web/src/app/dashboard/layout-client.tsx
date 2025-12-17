@@ -89,7 +89,7 @@ export function DashboardLayoutClient({ children }: DashboardLayoutClientProps) 
     const pathname = usePathname();
     const { user, logout } = useAuth();
     const { isAdmin } = useAdmin();
-    const { unreadCount } = useNotifications();
+    const { ticketUnreadCount } = useNotifications();
     const t = useTranslations('sidebar');
     const tTools = useTranslations('tools');
     const tCommon = useTranslations('common');
@@ -329,9 +329,9 @@ export function DashboardLayoutClient({ children }: DashboardLayoutClientProps) 
                     >
                         <MessageSquare className="w-5 h-5" />
                         <span className="flex-1">{t('support')}</span>
-                        {unreadCount > 0 && (
+                        {ticketUnreadCount > 0 && (
                             <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold">
-                                {unreadCount > 99 ? '99+' : unreadCount}
+                                {ticketUnreadCount > 99 ? '99+' : ticketUnreadCount}
                             </span>
                         )}
                     </Link>

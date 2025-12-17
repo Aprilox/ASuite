@@ -2,6 +2,112 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.9.0] - 2025-12-17
+
+### Nouveautés - Sécurité
+
+- 🛡️ Protection CSRF complète
+  - Nouveau middleware CSRF global pour toutes les requêtes modifiant la base de données
+  - Endpoint `/api/csrf` pour générer les tokens
+  - Configuration Next.js avec exemptions pour routes publiques (webhooks, API externes)
+  - Headers CSRF requis pour toutes les requêtes POST/PUT/DELETE/PATCH
+
+- 🔒 Validation des longueurs d'entrée
+  - Nom d'utilisateur : max 20 caractères (frontend + backend)
+  - Email : max 64 caractères (frontend + backend)
+  - Mot de passe : max 64 caractères (frontend + backend)
+  - Indices visuels de limite de caractères sur les formulaires d'inscription
+
+- ⚙️ Rate Limiting administratif configurable
+  - Nouvelle page `/admin/settings/ratelimit` avec interface complète
+  - Configuration de 6 endpoints (login, register, forgot password, admin actions, alinks, vault)
+  - Option "Illimité" (∞) pour les actions administratives
+  - Validation serveur : max 999,999 tentatives
+  - Traductions complètes FR/EN de toute l'interface
+
+### Nouveautés - Fonctionnalités Utilisateur
+
+- ✅ Clôture de tickets par les clients
+  - Bouton "Clore le ticket" sur la page de détail du ticket
+  - Dialogue de confirmation personnalisé et traduit (remplace `confirm()` natif)
+  - Endpoint API `/api/tickets/[id]/close` avec vérification de propriété
+  - Messages de succès/erreur localisés
+  - Désactivation automatique si ticket déjà fermé
+
+- 🔔 Amélioration des notifications
+  - Séparation des compteurs de notifications :
+    - `unreadCount` : toutes les notifications
+    - `ticketUnreadCount` : uniquement les réponses sur tickets de l'utilisateur
+  - Filtrage intelligent pour les admins :
+    - Badge "Support" : uniquement notifications `ticket_response_admin` (leurs propres tickets)
+    - Nouveaux tickets clients (`ticket_new`) : visibles dans cloche + panel admin seulement
+  - Mise à jour optimiste avec revert en cas d'erreur réseau
+
+### Améliorations - Interface
+
+- 🌍 Internationalisation complète du Rate Limiting
+  - Toutes les sections traduites (FR/EN) :
+    - Titres, sous-titres, labels (Tentatives max, Fenêtre, Blocage)
+    - Descriptions d'endpoints (6 types de rate limits)
+    - Bannière d'information avec explication du fonctionnement
+    - Textes de résumé avec interpolation dynamique des valeurs
+  - Section Rate Limiting traduite dans `/admin/settings`
+
+- 🎨 Amélioration de la sélection de texte
+  - Thème clair : surbrillance bleue semi-transparente (`rgba(59, 130, 246, 0.3)`)
+  - Thème sombre : surbrillance bleue plus claire (`rgba(96, 165, 250, 0.4)`)
+  - Texte visible sur tous les arrière-plans (fini le blanc sur blanc !)
+
+- 📱 Sélecteur de langue sur mobile
+  - Ajouté dans la navbar principale (visible sans ouvrir le menu)
+  - Drapeaux FR/EN accessibles facilement depuis la landing page
+
+### Corrections
+
+- 🐛 Correction de l'erreur JSDOM lors de la création de tickets
+  - Remplacement de `isomorphic-dompurify` par `dompurify` + `jsdom`
+  - Configuration manuelle de l'instance JSDOM pour éviter le chargement du CSS
+  - Installation des dépendances : `dompurify`, `jsdom`, `@types/dompurify`
+  - Résolution de l'erreur `ENOENT: default-stylesheet.css`
+
+- 🔧 Optimisation du chargement des notifications
+  - Vérification de l'authentification avant l'appel API
+  - Prévention des erreurs 401 sur les pages publiques (landing page)
+  - Gestion silencieuse des erreurs réseau
+
+- 🧹 Nettoyage du code
+  - Suppression des appels redondants à `recordRateLimitAttempt`
+  - Logique de rate limiting centralisée dans `checkGlobalRateLimit`
+  - Correction des types TypeScript (`HTMLTextAreaElement` → `HTMLInputElement`)
+
+### Technique
+
+- 📊 Statistiques des changements
+  - 20 fichiers modifiés (messages, configs, API routes, components, providers)
+  - 614 lignes ajoutées (nouveautés, traductions, sanitization)
+  - 157 lignes supprimées (nettoyage code redondant)
+  - 7 nouveaux fichiers/dossiers créés (CSRF, rate limiting, endpoints)
+  - Ratio net : +457 lignes de code fonctionnel
+
+- 🗂️ Nouveaux fichiers et modules
+  - `apps/web/src/lib/csrf.ts` - Middleware et utilitaires de protection CSRF
+  - `apps/web/src/lib/global-rate-limit.ts` - Système centralisé de rate limiting global
+  - `apps/web/src/app/api/csrf/route.ts` - Endpoint public de génération de tokens CSRF
+  - `apps/web/src/app/api/tickets/[id]/close/route.ts` - API de clôture de tickets clients
+  - `apps/web/src/app/admin/settings/ratelimit/page.tsx` - Interface admin rate limiting
+  - `apps/web/src/app/api/admin/settings/ratelimit/route.ts` - API configuration rate limiting
+  - `packages/database/prisma/migrations/` - Migrations base de données pour nouvelles features
+
+- 🔄 Mises à jour dépendances et Next.js
+  - ✅ Ajout de `dompurify` (^3.2.2) - Sanitization HTML côté serveur
+  - ✅ Ajout de `jsdom` (^25.0.1) - Environnement DOM pour Node.js
+  - ✅ Ajout de `@types/dompurify` (^3.2.0) - Types TypeScript pour DOMPurify
+  - 📦 Mise à jour de `pnpm-lock.yaml` - Résolution des dépendances
+  - ⚙️ Configuration Next.js avec exemptions CSRF pour routes publiques
+  - 🔒 Aucune vulnérabilité de sécurité introduite
+
+---
+
 ## [1.8.0] - 2025-12-16
 
 ### Nouveautés - Sécurité des Tickets

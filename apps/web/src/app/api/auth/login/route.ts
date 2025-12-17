@@ -4,7 +4,7 @@ import { prisma } from '@asuite/database';
 import { isValidEmail } from '@asuite/utils';
 import { cookies } from 'next/headers';
 import { createUniqueId } from '@asuite/utils';
-import { checkRateLimit, recordLoginAttempt, getClientIp } from '@/lib/rate-limit';
+import { checkGlobalRateLimit, getClientIp } from '@/lib/global-rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,11 +28,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier le rate limit AVANT toute opération coûteuse
-    const rateLimitResult = await checkRateLimit(email, clientIp);
+    const rateLimitResult = await checkGlobalRateLimit('login', clientIp);
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: rateLimitResult.reason },
-        { 
+        {
           status: 429,
           headers: {
             'Retry-After': String(rateLimitResult.retryAfter || 900),
@@ -59,8 +59,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !user.password) {
-      // Enregistrer l'échec
-      await recordLoginAttempt(email, clientIp, false);
       return NextResponse.json(
         { error: 'Email ou mot de passe incorrect' },
         { status: 401 }
@@ -79,16 +77,11 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await compare(password, user.password);
 
     if (!isValidPassword) {
-      // Enregistrer l'échec
-      await recordLoginAttempt(email, clientIp, false);
       return NextResponse.json(
         { error: 'Email ou mot de passe incorrect' },
         { status: 401 }
       );
     }
-
-    // Enregistrer le succès (réinitialise le compteur email)
-    await recordLoginAttempt(email, clientIp, true);
 
     // Récupérer la durée de session depuis les paramètres
     const sessionDurationSetting = await prisma.systemSetting.findUnique({

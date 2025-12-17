@@ -12,7 +12,8 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  User
+  User,
+  XCircle
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
@@ -69,6 +70,8 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [hasShownNotFound, setHasShownNotFound] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -199,6 +202,31 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
     }
   };
 
+  const handleCloseTicket = async () => {
+    if (!ticket || closing) return;
+
+    setClosing(true);
+
+    try {
+      const res = await fetch(`/api/tickets/${id}/close`, {
+        method: 'POST',
+      });
+
+      if (res.ok) {
+        toast.success(t('closeSuccess'));
+        setShowCloseDialog(false);
+        fetchTicket(true);
+      } else {
+        const error = await res.json();
+        toast.error(error.error || t('closeError'));
+      }
+    } catch {
+      toast.error(t('closeError'));
+    } finally {
+      setClosing(false);
+    }
+  };
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleString(undefined, {
       day: 'numeric',
@@ -229,6 +257,34 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Close Confirmation Dialog */}
+      {showCloseDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-xl shadow-xl max-w-md w-full p-6 border">
+            <h3 className="text-lg font-semibold mb-2">{t('closeTicketConfirm')}</h3>
+            <p className="text-muted-foreground text-sm mb-6">
+              {t('closeTicketDescription')}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowCloseDialog(false)}
+                disabled={closing}
+                className="px-4 py-2 border rounded-lg hover:bg-accent transition-colors disabled:opacity-50"
+              >
+                {t('cancel') || 'Annuler'}
+              </button>
+              <button
+                onClick={handleCloseTicket}
+                disabled={closing}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {closing && <Loader2 className="w-4 h-4 animate-spin" />}
+                {t('closeTicket')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="border-b bg-card">
         <div className="px-6 py-4">
@@ -259,6 +315,15 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
                 {t(`categories.${ticket.category}`)} · {t(`priorities.${ticket.priority}`)} · {formatDate(ticket.createdAt)}
               </p>
             </div>
+            {!isClosed && (
+              <button
+                onClick={() => setShowCloseDialog(true)}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 whitespace-nowrap"
+              >
+                <XCircle className="w-4 h-4" />
+                {t('closeTicket')}
+              </button>
+            )}
           </div>
         </div>
       </div>

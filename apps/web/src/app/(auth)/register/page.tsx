@@ -36,7 +36,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!isPasswordValid) {
       setError(t('errors.passwordRequired'));
       return;
@@ -65,7 +65,7 @@ export default function RegisterPage() {
 
       // Auto-login after registration
       const loginResult = await login(email, password);
-      
+
       if (loginResult.success) {
         router.push('/dashboard');
         router.refresh();
@@ -157,10 +157,12 @@ export default function RegisterPage() {
                   type="text"
                   autoComplete="name"
                   required
+                  maxLength={20}
                   placeholder={t('namePlaceholder')}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">Maximum 20 caractères</p>
             </div>
 
             <div className="space-y-2">
@@ -175,10 +177,12 @@ export default function RegisterPage() {
                   type="email"
                   autoComplete="email"
                   required
+                  maxLength={64}
                   placeholder={t('emailPlaceholder')}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">Maximum 64 caractères</p>
             </div>
 
             <div className="space-y-2">
@@ -193,6 +197,7 @@ export default function RegisterPage() {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
+                  maxLength={64}
                   placeholder={t('passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -210,14 +215,14 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground">Maximum 64 caractères</p>
               {password && (
                 <div className="mt-2 space-y-1">
                   {passwordChecks.map((check) => (
                     <div
                       key={check.label}
-                      className={`flex items-center gap-2 text-xs ${
-                        check.valid ? 'text-green-600' : 'text-muted-foreground'
-                      }`}
+                      className={`flex items-center gap-2 text-xs ${check.valid ? 'text-green-600' : 'text-muted-foreground'
+                        }`}
                     >
                       {check.valid ? (
                         <Check className="w-3 h-3" />

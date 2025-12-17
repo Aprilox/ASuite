@@ -630,6 +630,12 @@
     "replyPlaceholder": "Écrivez votre message...",
     "send": "Envoyer",
     "sendError": "Erreur lors de l'envoi",
+    "closeTicket": "Clore le ticket",
+    "closeTicketConfirm": "Êtes-vous sûr de vouloir clore ce ticket ?",
+    "closeTicketDescription": "Cette action fermera définitivement le ticket et vous ne pourrez plus y répondre.",
+    "closeSuccess": "Ticket clos avec succès",
+    "closeError": "Erreur lors de la clôture",
+    "cancel": "Annuler",
     "messages": "message(s)",
     "anonymous": "Anonyme",
     "categories": {
@@ -982,6 +988,44 @@
         "storage_type": "Type de stockage (non implémenté)",
         "storage_path": "Chemin de stockage (non implémenté)",
         "storage_max_file_size": "Taille max fichier (non implémenté)"
+      },
+      "rateLimit": {
+        "title": "Configuration Rate Limiting",
+        "subtitle": "Configurez les limites de taux pour protéger votre application contre les abus",
+        "reset": "Réinitialiser",
+        "save": "Enregistrer",
+        "endpoint": "Endpoint",
+        "maxAttempts": "Tentatives max",
+        "window": "Fenêtre (min)",
+        "blockDuration": "Blocage (min)",
+        "actionsUnlimited": "Illimité",
+        "actionsSetUnlimited": "Définir comme illimité",
+        "actionsActive": "∞ Actif",
+        "modified": "Modifié",
+        "infoTitle": "Comment fonctionne le rate limiting ?",
+        "infoMaxAttempts": "Nombre de requêtes autorisées dans la fenêtre de temps",
+        "infoWindow": "Période en minutes pendant laquelle les tentatives sont comptées",
+        "infoBlock": "Durée en minutes pendant laquelle l'utilisateur est bloqué après dépassement",
+        "summaryText": "{attempts} tentatives autorisées en {window} minute(s), blocage pendant {block} minute(s) en cas de dépassement",
+        "description": {
+          "user_registration": "Création de nouveaux comptes",
+          "user_login": "Tentatives de connexion",
+          "password_reset": "Réinitialisation mot de passe",
+          "admin_actions": "Actions administration",
+          "alinks_creation": "Création de liens courts",
+          "vault_creation": "Création de notes chiffrées"
+        },
+        "descriptionText": {
+          "user_registration": "Limite le nombre d'inscriptions depuis une même IP",
+          "user_login": "Limite les tentatives de connexion pour prévenir le brute-force",
+          "password_reset": "Limite les demandes de réinitialisation de mot de passe",
+          "admin_actions": "Limite les actions admin (blocage, suppression, etc.)",
+          "alinks_creation": "Limite la création de liens courts par utilisateur",
+          "vault_creation": "Limite la création de notes chiffrées par utilisateur"
+        },
+        "saveSuccess": "Configuration enregistrée",
+        "saveError": "Erreur lors de l'enregistrement",
+        "loadError": "Erreur de chargement"
       },
       "smtp": {
         "testTitle": "Tester la configuration SMTP",

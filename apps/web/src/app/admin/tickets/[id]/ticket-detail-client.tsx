@@ -119,7 +119,7 @@ export function TicketDetailClient({ id }: TicketDetailClientProps) {
   // Reply state
   const [replyContent, setReplyContent] = useState('');
   const [isInternal, setIsInternal] = useState(false);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch ticket (silent = no loading state, for polling)
   const fetchTicket = useCallback(async (silent = false) => {

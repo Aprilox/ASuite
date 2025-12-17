@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
@@ -157,7 +158,17 @@ export default function AdminSettingsPage() {
   };
 
   const categorySettings = activeCategory
-    ? settings.filter((s) => s.category === activeCategory)
+    ? settings.filter((s) => {
+      // Exclure TOUS les paramètres de rate limiting (maintenant gérés via /admin/settings/ratelimit)
+      const isRateLimitSetting = s.key.startsWith('ratelimit.') ||
+        s.key === 'security.lockout_duration' ||
+        s.key === 'security.max_login_attempts' ||
+        s.key.includes('login.max_attempts') ||
+        s.key.includes('login.lockout_duration') ||
+        s.key.includes('login.attempt_window') ||
+        s.key.includes('security.login.');
+      return s.category === activeCategory && !isRateLimitSetting;
+    })
     : [];
   const hasChanges = Object.keys(changes).length > 0;
 
@@ -376,6 +387,28 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
+          {/* Rate Limiting section for Security category */}
+          {activeCategory === 'security' && (
+            <Link href="/admin/settings/ratelimit" className="block mb-4">
+              <div className="group flex items-center justify-between p-4 rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                      {t('rateLimit.title')}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t('rateLimit.subtitle')}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+            </Link>
+          )}
+
           {/* Settings list */}
           <div className="bg-card rounded-xl border divide-y">
             {categorySettings.length === 0 ? (
@@ -452,7 +485,8 @@ export default function AdminSettingsPage() {
             </div>
           )}
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }

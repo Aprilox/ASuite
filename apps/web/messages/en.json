@@ -630,6 +630,12 @@
     "replyPlaceholder": "Write your message...",
     "send": "Send",
     "sendError": "Error sending message",
+    "closeTicket": "Close ticket",
+    "closeTicketConfirm": "Are you sure you want to close this ticket?",
+    "closeTicketDescription": "This action will permanently close the ticket and you will no longer be able to reply.",
+    "closeSuccess": "Ticket closed successfully",
+    "closeError": "Error closing ticket",
+    "cancel": "Cancel",
     "messages": "message(s)",
     "anonymous": "Anonymous",
     "categories": {
@@ -856,7 +862,8 @@
         "settings_view": "Access system settings",
         "settings_edit": "Modify system settings",
         "audit_view": "Access audit logs",
-        "admin_dashboard": "Access the admin dashboard"
+        "admin_dashboard": "Access the admin dashboard",
+        "admin_view": "Access the administration section"
       },
       "deleteConfirm": "Are you sure you want to delete the role \"{name}\"?",
       "cannotDeleteWithUsers": "Cannot delete a role assigned to users",
@@ -981,6 +988,44 @@
         "storage_type": "Storage type (not implemented)",
         "storage_path": "Storage path (not implemented)",
         "storage_max_file_size": "Max file size (not implemented)"
+      },
+      "rateLimit": {
+        "title": "Rate Limiting Configuration",
+        "subtitle": "Configure rate limits to protect your application against abuse",
+        "reset": "Reset",
+        "save": "Save",
+        "endpoint": "Endpoint",
+        "maxAttempts": "Max attempts",
+        "window": "Window (min)",
+        "blockDuration": "Block (min)",
+        "actionsUnlimited": "Unlimited",
+        "actionsSetUnlimited": "Set as unlimited",
+        "actionsActive": "∞ Active",
+        "modified": "Modified",
+        "infoTitle": "How does rate limiting work?",
+        "infoMaxAttempts": "Number of requests allowed within the time window",
+        "infoWindow": "Time period in minutes during which attempts are counted",
+        "infoBlock": "Duration in minutes during which the user is blocked after exceeding the limit",
+        "summaryText": "{attempts} attempts allowed in {window} minute(s), blocked for {block} minute(s) if exceeded",
+        "description": {
+          "user_registration": "New account creation",
+          "user_login": "Login attempts",
+          "password_reset": "Password reset",
+          "admin_actions": "Admin actions",
+          "alinks_creation": "Short link creation",
+          "vault_creation": "Encrypted note creation"
+        },
+        "descriptionText": {
+          "user_registration": "Limits the number of registrations from the same IP",
+          "user_login": "Limits login attempts to prevent brute-force attacks",
+          "password_reset": "Limits password reset requests",
+          "admin_actions": "Limits admin actions (blocking, deletion, etc.)",
+          "alinks_creation": "Limits short link creation per user",
+          "vault_creation": "Limits encrypted note creation per user"
+        },
+        "saveSuccess": " Configuration saved",
+        "saveError": "Save error",
+        "loadError": "Loading error"
       },
       "smtp": {
         "testTitle": "Test SMTP Configuration",

@@ -2,35 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@asuite/database';
 import { isValidEmail } from '@asuite/utils';
 import { generatePasswordResetToken, sendPasswordResetEmail } from '@/lib/email';
-
-// Rate limiting: max 3 requests per email per hour
-const RATE_LIMIT_MAX_REQUESTS = 3;
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-
-// In-memory rate limit store (in production, use Redis)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-
-function checkRateLimit(email: string): { allowed: boolean; retryAfter?: number } {
-    const now = Date.now();
-    const key = email.toLowerCase();
-    const record = rateLimitStore.get(key);
-
-    if (!record || now > record.resetTime) {
-        // No record or expired, create new
-        rateLimitStore.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
-        return { allowed: true };
-    }
-
-    if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
-        // Rate limit exceeded
-        const retryAfter = Math.ceil((record.resetTime - now) / 1000 / 60); // minutes
-        return { allowed: false, retryAfter };
-    }
-
-    // Increment count
-    record.count++;
-    return { allowed: true };
-}
+import { checkGlobalRateLimit, getClientIp } from '@/lib/global-rate-limit';
 
 // POST /api/auth/forgot-password
 export async function POST(request: Request) {
@@ -46,35 +18,47 @@ export async function POST(request: Request) {
             );
         }
 
+        const clientIp = getClientIp(request);
+
         // Check rate limit
-        const rateLimit = checkRateLimit(email);
+        const rateLimit = await checkGlobalRateLimit('forgot_password', clientIp);
+
         if (!rateLimit.allowed) {
             return NextResponse.json(
                 {
-                    error: `Trop de demandes. Réessayez dans ${rateLimit.retryAfter} minute(s).`,
+                    error: rateLimit.reason,
                     retryAfter: rateLimit.retryAfter
                 },
-                { status: 429 }
+                {
+                    status: 429,
+                    headers: {
+                        'Retry-After': String(rateLimit.retryAfter || 900),
+                    },
+                }
             );
         }
 
-        // Always return success to prevent email enumeration
-        // But only actually send email if user exists
+        // Always return success (security: don't reveal if email exists)
         const user = await prisma.user.findUnique({
             where: { email: email.toLowerCase() },
             select: { id: true, name: true, email: true, locale: true },
         });
 
+        // Démarrer le timer au début pour éviter les timing attacks
+        const startTime = Date.now();
+
         if (user) {
-            // Generate token and send email
+            // Generate token and send email (async, don't await to prevent timing attack)
             const token = await generatePasswordResetToken(user.id);
 
             if (token) {
                 // Envoyer l'email dans la langue de l'utilisateur
-                await sendPasswordResetEmail(user.email, user.name, token, user.locale || 'fr');
+                sendPasswordResetEmail(user.email, user.name, token, user.locale || 'fr').catch(err => {
+                    console.error('Error sending password reset email:', err);
+                });
 
                 // Log the action (without revealing if email exists)
-                await prisma.auditLog.create({
+                prisma.auditLog.create({
                     data: {
                         userId: user.id,
                         action: 'password_reset_request',
@@ -82,8 +66,18 @@ export async function POST(request: Request) {
                         resourceId: user.id,
                         metadata: JSON.stringify({ email: user.email }),
                     },
+                }).catch(err => {
+                    console.error('Error creating audit log:', err);
                 });
             }
+        }
+
+        // Ajouter un délai constant pour éviter les timing attacks
+        // Peu importe si l'utilisateur existe ou pas, la réponse prend toujours ~1 seconde
+        const elapsedTime = Date.now() - startTime;
+        const minimumDelay = 1000; // 1 seconde
+        if (elapsedTime < minimumDelay) {
+            await new Promise(resolve => setTimeout(resolve, minimumDelay - elapsedTime));
         }
 
         // Always return success (security: don't reveal if email exists)

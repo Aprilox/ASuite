@@ -8,6 +8,7 @@ import {
   canActOnUser
 } from '@/lib/admin-auth';
 import { generatePasswordResetToken, sendPasswordResetEmail } from '@/lib/email';
+import { checkGlobalRateLimit } from '@/lib/global-rate-limit';
 
 // GET /api/admin/users - Liste des utilisateurs
 export async function GET(request: Request) {
@@ -157,6 +158,20 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: canAct.reason },
         { status: 403 }
+      );
+    }
+
+    // Rate limiting - Vérifier les actions admin
+    const rateLimitResult = await checkGlobalRateLimit('admin_action', admin.id);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: rateLimitResult.reason },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.retryAfter || 900),
+          },
+        }
       );
     }
 

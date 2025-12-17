@@ -1,26 +1,61 @@
 /**
  * Text sanitization utilities for user input
- * Simple HTML tag stripping without external dependencies
+ * Using DOMPurify for robust XSS protection
  */
 
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+
+// Create DOMPurify instance for server-side
+const window = typeof globalThis.window === 'undefined'
+    ? new JSDOM('').window
+    : globalThis.window;
+
+const DOMPurify = createDOMPurify(window as any);
+
 /**
- * Strip all HTML tags from text
+ * Sanitize text to prevent XSS attacks
+ * Removes all HTML tags and dangerous content using DOMPurify
+ * 
  * @param text - Input text that may contain HTML
- * @returns Plain text with HTML tags removed
+ * @returns Plain text with HTML tags and dangerous content removed
  */
 export function sanitizeText(text: string): string {
     if (!text) return '';
 
-    // Remove all HTML tags using regex
-    // This is a simple but effective approach for server-side Next.js
-    return text
-        .replace(/<[^>]*>/g, '') // Remove HTML tags
-        .replace(/&lt;/g, '<')   // Decode HTML entities
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&#x27;/g, "'")
-        .trim();
+    // Use DOMPurify to sanitize - more robust than regex
+    // ALLOWED_TAGS: [] means no HTML tags allowed (pure text)
+    const sanitized = DOMPurify.sanitize(text, {
+        ALLOWED_TAGS: [], // Strip all HTML tags
+        ALLOWED_ATTR: [], // Strip all attributes
+        KEEP_CONTENT: true, // Keep the text content
+    });
+
+    return sanitized.trim();
+}
+
+/**
+ * Sanitize HTML to allow safe HTML content
+ * Useful for rich text editors - allows safe HTML tags
+ * 
+ * @param html - Input HTML that may contain dangerous content
+ * @returns Sanitized HTML with dangerous content removed
+ */
+export function sanitizeHtml(html: string): string {
+    if (!html) return '';
+
+    // Allow common safe HTML tags for rich text
+    const sanitized = DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: [
+            'p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'a', 'span',
+        ],
+        ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+        ALLOW_DATA_ATTR: false,
+        ALLOW_UNKNOWN_PROTOCOLS: false,
+    });
+
+    return sanitized;
 }
 
 /**

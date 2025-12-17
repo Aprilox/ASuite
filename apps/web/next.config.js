@@ -7,7 +7,7 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
   },
-  
+
   // HTTP Security Headers
   async headers() {
     return [
@@ -44,6 +44,24 @@ const nextConfig = {
             // Force HTTPS en production
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains',
+          },
+          {
+            // Content Security Policy - Protection XSS
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // unsafe-eval requis pour Next.js en dev
+              "style-src 'self' 'unsafe-inline'", // unsafe-inline requis pour Tailwind et styled-components
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data:",
+              "connect-src 'self'",
+              "media-src 'self'",
+              "object-src 'none'",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "upgrade-insecure-requests",
+            ].join('; '),
           },
         ],
       },

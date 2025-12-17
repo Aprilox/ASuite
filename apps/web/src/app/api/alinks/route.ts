@@ -4,6 +4,7 @@ import { createShortCode, isValidUrl } from '@asuite/utils';
 import QRCode from 'qrcode';
 import { hash } from 'bcryptjs';
 import { getSession } from '@/lib/auth';
+import { checkGlobalRateLimit } from '@/lib/global-rate-limit';
 
 const BASE_URL = process.env.APP_URL || 'http://localhost:3000';
 
@@ -15,6 +16,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Vous devez être connecté pour créer un lien' },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting - Vérifier la création de liens
+    const rateLimitResult = await checkGlobalRateLimit('create_link', user.id);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: rateLimitResult.reason },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.retryAfter || 900),
+          },
+        }
       );
     }
 
