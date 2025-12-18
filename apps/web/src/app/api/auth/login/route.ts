@@ -155,6 +155,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Récupérer le paramètre de vérification d'email
+    const verificationSetting = await prisma.systemSetting.findUnique({
+      where: { key: 'security_email_verification' },
+    });
+    const verificationRequired = verificationSetting?.value === 'true';
+
     return NextResponse.json({
       message: 'Connexion réussie',
       user: {
@@ -164,6 +170,8 @@ export async function POST(request: NextRequest) {
         role,
         theme: user.theme,
         locale: user.locale,
+        emailVerified: user.emailVerified,
+        verificationRequired,
       },
     });
   } catch (error) {

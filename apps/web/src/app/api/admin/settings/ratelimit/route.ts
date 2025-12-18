@@ -60,6 +60,22 @@ const defaultEndpoints: RateLimitEndpoint[] = [
         windowMinutes: 60,
         blockMinutes: 10,
     },
+    {
+        id: 'email_verification',
+        name: 'Vérification Email',
+        description: "Limite les demandes de renvoi d'email de vérification",
+        maxAttempts: 3,
+        windowMinutes: 60,
+        blockMinutes: 30,
+    },
+    {
+        id: 'email_verification_confirm',
+        name: 'Confirmation Email (IP)',
+        description: "Limite les tentatives de validation de token par IP",
+        maxAttempts: 10,
+        windowMinutes: 60,
+        blockMinutes: 15,
+    },
 ];
 
 // GET /api/admin/settings/ratelimit - Récupérer les paramètres

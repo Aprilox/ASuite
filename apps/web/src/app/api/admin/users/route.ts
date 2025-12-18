@@ -59,6 +59,7 @@ export async function GET(request: Request) {
         select: {
           id: true,
           email: true,
+          emailVerified: true,
           name: true,
           image: true,
           isBlocked: true,

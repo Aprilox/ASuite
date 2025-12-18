@@ -22,6 +22,8 @@ import {
   Shield,
   Calendar,
   Clock,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 
 interface Role {
@@ -35,6 +37,7 @@ interface Role {
 interface User {
   id: string;
   email: string;
+  emailVerified: string | Date | null;
   name: string | null;
   image: string | null;
   isBlocked: boolean;
@@ -510,16 +513,30 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      {user.isBlocked ? (
-                        <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                          <Ban className="w-3 h-3" />
-                          {t('blocked')}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                          {t('active')}
-                        </span>
-                      )}
+                      <div className="flex flex-col gap-1 items-start">
+                        {user.isBlocked ? (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                            <Ban className="w-3 h-3" />
+                            {t('blocked')}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            {t('active')}
+                          </span>
+                        )}
+
+                        {user.emailVerified ? (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {t('verified')}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                            <AlertCircle className="w-3 h-3" />
+                            {t('unverified')}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">
                       {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : '-'}
@@ -574,6 +591,17 @@ export default function AdminUsersPage() {
                       {t('active')}
                     </span>
                   )}
+                  {user.emailVerified ? (
+                    <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {t('verified')}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      <AlertCircle className="w-3 h-3" />
+                      {t('unverified')}
+                    </span>
+                  )}
                   {user.roles.map((role) => (
                     <span
                       key={role.id}
@@ -604,93 +632,96 @@ export default function AdminUsersPage() {
             ))}
           </div>
         </>
-      )}
+      )
+      }
 
       {/* Fixed Context Menu */}
-      {openMenu && menuPosition && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => {
-              setOpenMenu(null);
-              setMenuPosition(null);
-            }}
-          />
-          <div
-            className="fixed w-52 bg-popover border rounded-lg shadow-xl z-50 py-1"
-            style={{
-              top: menuPosition.top,
-              left: Math.max(8, Math.min(menuPosition.left, window.innerWidth - 216)),
-            }}
-          >
-            {(() => {
-              const user = users.find((u) => u.id === openMenu);
-              if (!user) return null;
+      {
+        openMenu && menuPosition && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => {
+                setOpenMenu(null);
+                setMenuPosition(null);
+              }}
+            />
+            <div
+              className="fixed w-52 bg-popover border rounded-lg shadow-xl z-50 py-1"
+              style={{
+                top: menuPosition.top,
+                left: Math.max(8, Math.min(menuPosition.left, window.innerWidth - 216)),
+              }}
+            >
+              {(() => {
+                const user = users.find((u) => u.id === openMenu);
+                if (!user) return null;
 
-              // Vérifier si l'utilisateur a des actions disponibles
-              const hasAnyAction = canBlock || canResetPassword || canDelete;
+                // Vérifier si l'utilisateur a des actions disponibles
+                const hasAnyAction = canBlock || canResetPassword || canDelete;
 
-              if (!hasAnyAction) {
+                if (!hasAnyAction) {
+                  return (
+                    <p className="px-4 py-3 text-sm text-muted-foreground">
+                      {t('noActionsAvailable')}
+                    </p>
+                  );
+                }
+
                 return (
-                  <p className="px-4 py-3 text-sm text-muted-foreground">
-                    {t('noActionsAvailable')}
-                  </p>
-                );
-              }
+                  <>
+                    {/* Bloquer/Débloquer - nécessite users.block */}
+                    {canBlock && (
+                      user.isBlocked ? (
+                        <button
+                          onClick={() => handleUnblock(user)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent transition-colors"
+                        >
+                          <Unlock className="w-4 h-4" />
+                          {t('unblock')}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleBlock(user)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent text-orange-600 transition-colors"
+                        >
+                          <Ban className="w-4 h-4" />
+                          {t('block')}
+                        </button>
+                      )
+                    )}
 
-              return (
-                <>
-                  {/* Bloquer/Débloquer - nécessite users.block */}
-                  {canBlock && (
-                    user.isBlocked ? (
+                    {/* Réinitialiser mot de passe - nécessite users.reset_password */}
+                    {canResetPassword && (
                       <button
-                        onClick={() => handleUnblock(user)}
+                        onClick={() => handleResetPassword(user)}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent transition-colors"
                       >
-                        <Unlock className="w-4 h-4" />
-                        {t('unblock')}
+                        <Mail className="w-4 h-4" />
+                        {t('resetPassword')}
                       </button>
-                    ) : (
-                      <button
-                        onClick={() => handleBlock(user)}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent text-orange-600 transition-colors"
-                      >
-                        <Ban className="w-4 h-4" />
-                        {t('block')}
-                      </button>
-                    )
-                  )}
+                    )}
 
-                  {/* Réinitialiser mot de passe - nécessite users.reset_password */}
-                  {canResetPassword && (
-                    <button
-                      onClick={() => handleResetPassword(user)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent transition-colors"
-                    >
-                      <Mail className="w-4 h-4" />
-                      {t('resetPassword')}
-                    </button>
-                  )}
-
-                  {/* Supprimer - nécessite users.delete */}
-                  {canDelete && (
-                    <>
-                      <hr className="my-1 border-border" />
-                      <button
-                        onClick={() => handleDelete(user)}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent text-red-600 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        {t('delete')}
-                      </button>
-                    </>
-                  )}
-                </>
-              );
-            })()}
-          </div>
-        </>
-      )}
+                    {/* Supprimer - nécessite users.delete */}
+                    {canDelete && (
+                      <>
+                        <hr className="my-1 border-border" />
+                        <button
+                          onClick={() => handleDelete(user)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent text-red-600 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          {t('delete')}
+                        </button>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          </>
+        )
+      }
 
       {/* Pagination */}
       <div className="bg-card rounded-xl border p-3 sm:p-4">
@@ -748,6 +779,6 @@ export default function AdminUsersPage() {
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 }

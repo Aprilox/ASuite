@@ -8,6 +8,7 @@ import { LocaleProvider } from '@/providers/locale-provider';
 import { NotificationsProvider } from '@/providers/notifications-provider';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { ToastProvider } from '@/components/ui/toast';
+import { VerificationGuard } from '@/components/auth/verification-guard';
 import { getSiteSettings } from '@/lib/site-settings';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -41,6 +42,7 @@ export default async function RootLayout({
         <ThemeProvider>
           <LocaleProvider initialLocale={locale as 'fr' | 'en'}>
             <AuthProvider>
+              <VerificationGuard />
               <NotificationsProvider>
                 <ConfirmProvider>
                   <ToastProvider>

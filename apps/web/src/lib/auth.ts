@@ -4,6 +4,7 @@ import { prisma } from '@asuite/database';
 export interface AuthUser {
   id: string;
   email: string;
+  emailVerified: Date | null;
   name: string | null;
   role: string;
   theme: string;
@@ -17,13 +18,13 @@ function getPrimaryRole(userRoles: Array<{ role: { name: string; isSystem: boole
   if (!userRoles || userRoles.length === 0) {
     return 'user';
   }
-  
+
   // Si l'utilisateur a un rôle système (admin), c'est son rôle principal
   const systemRole = userRoles.find((ur) => ur.role.isSystem);
   if (systemRole) {
     return systemRole.role.name;
   }
-  
+
   // Sinon, retourner le premier rôle
   return userRoles[0].role.name;
 }
@@ -71,6 +72,7 @@ export async function getSession(): Promise<AuthUser | null> {
     return {
       id: session.user.id,
       email: session.user.email,
+      emailVerified: session.user.emailVerified,
       name: session.user.name,
       role,
       theme: session.user.theme,

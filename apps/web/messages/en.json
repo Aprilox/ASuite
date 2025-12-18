@@ -164,6 +164,39 @@
       "tooManyAttempts": "Too many attempts. Try again in {minutes} minute(s)"
     }
   },
+  "verifyEmail": {
+    "title": "Verification Required",
+    "subtitle": "Please verify your email address to continue",
+    "sentMessage": "A verification link has been sent to your email address. Please click on it to activate your account.",
+    "spamNote": "If you don't receive it, check your spam folder.",
+    "successMessage": "Email sent! Check your inbox.",
+    "resendButton": "Resend Email",
+    "sending": "Sending...",
+    "sent": "Email Sent",
+    "logout": "Logout",
+    "iHaveVerified": "I have verified my email",
+    "checkSuccess": "Account verified! Redirecting...",
+    "checkError": "Email still not verified. Please check your inbox.",
+    "alreadyVerified": "Your email is already verified!",
+    "errorSending": "Error sending email"
+  },
+  "verify": {
+    "loadingTitle": "Verifying...",
+    "loadingSubtitle": "We are validating your link...",
+    "successTitle": "Email Verified!",
+    "successMessage": "Your email address has been successfully confirmed.",
+    "goToDashboard": "Go to Dashboard",
+    "errorTitle": "Verification Failed",
+    "defaultError": "An error occurred during verification.",
+    "invalidToken": "This verification link is invalid or has expired.",
+    "missingToken": "Incomplete verification link.",
+    "serverError": "Server error. Please try again.",
+    "tooManyAttempts": "Too many attempts. Please try again in a few minutes.",
+    "newLinkButton": "Request a new link",
+    "defaultTitle": "Email Verification",
+    "defaultMessage": "Please use the link received by email to verify your account.",
+    "backToLogin": "Back to login"
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome",
@@ -743,6 +776,8 @@
       "allRoles": "All roles",
       "allStatus": "All statuses",
       "active": "Active",
+      "verified": "Verified",
+      "unverified": "Unverified",
       "blocked": "Blocked",
       "user": "User",
       "roles": "Roles",
@@ -889,7 +924,6 @@
       "priorityModeDescription": "Drag roles to change their priority order. Higher = more important.",
       "finishEditing": "Finish editing",
       "saveChanges": "Save",
-      "cancel": "Cancel",
       "deleteError": "Error deleting role",
       "loadError": "Loading error"
     },
@@ -974,7 +1008,7 @@
         "security_max_login_attempts": "Max login attempts",
         "security_lockout_duration": "Lockout duration (minutes)",
         "security_session_duration": "Session duration (days)",
-        "security_require_email_verification": "Email verification (not implemented)",
+        "security_email_verification": "Require email verification",
         "email_smtp_host": "SMTP server",
         "email_smtp_port": "SMTP port",
         "email_smtp_user": "SMTP username",
@@ -1008,24 +1042,36 @@
         "infoBlock": "Duration in minutes during which the user is blocked after exceeding the limit",
         "summaryText": "{attempts} attempts allowed in {window} minute(s), blocked for {block} minute(s) if exceeded",
         "description": {
-          "user_registration": "New account creation",
-          "user_login": "Login attempts",
-          "password_reset": "Password reset",
-          "admin_actions": "Admin actions",
-          "alinks_creation": "Short link creation",
-          "vault_creation": "Encrypted note creation"
+          "login": "Login",
+          "register": "Registration",
+          "forgot_password": "Forgot Password",
+          "create_link": "ALinks Creation",
+          "create_vault": "AVault Creation",
+          "admin_actions": "Admin Actions",
+          "email_verification": "Email Verification",
+          "email_verification_confirm": "Email Confirmation (IP)"
         },
         "descriptionText": {
-          "user_registration": "Limits the number of registrations from the same IP",
-          "user_login": "Limits login attempts to prevent brute-force attacks",
-          "password_reset": "Limits password reset requests",
-          "admin_actions": "Limits admin actions (blocking, deletion, etc.)",
-          "alinks_creation": "Limits short link creation per user",
-          "vault_creation": "Limits encrypted note creation per user"
+          "login": "Limits failed login attempts",
+          "register": "Limits registrations per IP",
+          "forgot_password": "Limits password reset requests",
+          "create_link": "Limits short link creation",
+          "create_vault": "Limits encrypted note creation",
+          "admin_actions": "Limits critical administrative actions",
+          "email_verification": "Limits email resend requests",
+          "email_verification_confirm": "Limits validation attempts per IP"
         },
         "saveSuccess": " Configuration saved",
         "saveError": "Save error",
         "loadError": "Loading error"
+      },
+      "migration": {
+        "title": "User Migration",
+        "verifyAllTitle": "Retroactive Verification",
+        "verifyAllDesc": "Mark all current users as verified to prevent blocking them.",
+        "verifyAllButton": "Verify All Existing Accounts",
+        "verifying": "Verifying...",
+        "success": "{count} users marked as verified."
       },
       "smtp": {
         "testTitle": "Test SMTP Configuration",

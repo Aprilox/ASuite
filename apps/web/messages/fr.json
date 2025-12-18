@@ -164,6 +164,39 @@
       "tooManyAttempts": "Trop de tentatives. Réessayez dans {minutes} minute(s)"
     }
   },
+  "verifyEmail": {
+    "title": "Vérification requise",
+    "subtitle": "Veuillez vérifier votre adresse email pour continuer",
+    "sentMessage": "Un lien de vérification a été envoyé à votre adresse email. Veuillez cliquer dessus pour activer votre compte.",
+    "spamNote": "Si vous ne le trouvez pas, vérifiez vos spams.",
+    "successMessage": "Email envoyé ! Vérifiez votre boîte de réception.",
+    "resendButton": "Renvoyer l'email",
+    "sending": "Envoi en cours...",
+    "sent": "Email envoyé",
+    "logout": "Se déconnecter",
+    "iHaveVerified": "J'ai vérifié mon email",
+    "checkSuccess": "Compte vérifié ! Redirection...",
+    "checkError": "Email toujours pas vérifié. Vérifiez votre boîte mail.",
+    "alreadyVerified": "Votre email est déjà vérifié !",
+    "errorSending": "Erreur lors de l'envoi"
+  },
+  "verify": {
+    "loadingTitle": "Vérification en cours...",
+    "loadingSubtitle": "Nous validons votre lien...",
+    "successTitle": "Email vérifié !",
+    "successMessage": "Votre adresse email a été confirmée avec succès.",
+    "goToDashboard": "Accéder au tableau de bord",
+    "errorTitle": "Échec de la vérification",
+    "defaultError": "Une erreur est survenue lors de la vérification.",
+    "invalidToken": "Ce lien de vérification est invalide ou a expiré.",
+    "missingToken": "Lien de vérification incomplet.",
+    "serverError": "Erreur serveur. Veuillez réessayer.",
+    "tooManyAttempts": "Trop de tentatives. Veuillez réessayer dans quelques minutes.",
+    "newLinkButton": "Demander un nouveau lien",
+    "defaultTitle": "Vérification d'email",
+    "defaultMessage": "Veuillez utiliser le lien reçu par email pour vérifier votre compte.",
+    "backToLogin": "Retour à la connexion"
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Bienvenue",
@@ -743,6 +776,8 @@
       "allRoles": "Tous les rôles",
       "allStatus": "Tous les statuts",
       "active": "Actif",
+      "verified": "Vérifié",
+      "unverified": "Non vérifié",
       "blocked": "Bloqué",
       "user": "Utilisateur",
       "roles": "Rôles",
@@ -889,7 +924,6 @@
       "priorityModeDescription": "Glissez les rôles pour modifier leur ordre de priorité. Plus haut = plus important.",
       "finishEditing": "Terminer l'édition",
       "saveChanges": "Enregistrer",
-      "cancel": "Annuler",
       "deleteError": "Erreur lors de la suppression",
       "loadError": "Erreur de chargement"
     },
@@ -974,7 +1008,7 @@
         "security_max_login_attempts": "Tentatives de connexion max",
         "security_lockout_duration": "Durée de blocage (minutes)",
         "security_session_duration": "Durée de session (jours)",
-        "security_require_email_verification": "Vérification email (non implémenté)",
+        "security_email_verification": "Vérification email requise",
         "email_smtp_host": "Serveur SMTP",
         "email_smtp_port": "Port SMTP",
         "email_smtp_user": "Utilisateur SMTP",
@@ -1008,24 +1042,36 @@
         "infoBlock": "Durée en minutes pendant laquelle l'utilisateur est bloqué après dépassement",
         "summaryText": "{attempts} tentatives autorisées en {window} minute(s), blocage pendant {block} minute(s) en cas de dépassement",
         "description": {
-          "user_registration": "Création de nouveaux comptes",
-          "user_login": "Tentatives de connexion",
-          "password_reset": "Réinitialisation mot de passe",
-          "admin_actions": "Actions administration",
-          "alinks_creation": "Création de liens courts",
-          "vault_creation": "Création de notes chiffrées"
+          "login": "Connexion",
+          "register": "Inscription",
+          "forgot_password": "Mot de passe oublié",
+          "create_link": "Création ALinks",
+          "create_vault": "Création AVault",
+          "admin_actions": "Actions Admin",
+          "email_verification": "Vérification Email",
+          "email_verification_confirm": "Confirmation Email (IP)"
         },
         "descriptionText": {
-          "user_registration": "Limite le nombre d'inscriptions depuis une même IP",
-          "user_login": "Limite les tentatives de connexion pour prévenir le brute-force",
-          "password_reset": "Limite les demandes de réinitialisation de mot de passe",
+          "login": "Limite les tentatives de connexion pour prévenir le brute-force",
+          "register": "Limite le nombre d'inscriptions depuis une même IP",
+          "forgot_password": "Limite les demandes de réinitialisation de mot de passe",
+          "create_link": "Limite la création de liens courts par utilisateur",
+          "create_vault": "Limite la création de notes chiffrées par utilisateur",
           "admin_actions": "Limite les actions admin (blocage, suppression, etc.)",
-          "alinks_creation": "Limite la création de liens courts par utilisateur",
-          "vault_creation": "Limite la création de notes chiffrées par utilisateur"
+          "email_verification": "Limite les demandes de renvoi d'email",
+          "email_verification_confirm": "Limite les tentatives de validation par IP (anti-brute-force)"
         },
         "saveSuccess": "Configuration enregistrée",
         "saveError": "Erreur lors de l'enregistrement",
         "loadError": "Erreur de chargement"
+      },
+      "migration": {
+        "title": "Migration des utilisateurs",
+        "verifyAllTitle": "Vérification rétroactive",
+        "verifyAllDesc": "Marquer tous les utilisateurs actuels comme vérifiés pour éviter de les bloquer.",
+        "verifyAllButton": "Valider tous les comptes existants",
+        "verifying": "Validation en cours...",
+        "success": "{count} utilisateurs ont été marqués comme vérifiés."
       },
       "smtp": {
         "testTitle": "Tester la configuration SMTP",

@@ -111,12 +111,20 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Récupérer le paramètre de vérification d'email
+    const verificationSetting = await prisma.systemSetting.findUnique({
+      where: { key: 'security_email_verification' },
+    });
+    const verificationRequired = verificationSetting?.value === 'true';
+
     return NextResponse.json(
       {
         message: 'Compte créé avec succès',
         user: {
           ...user,
           role: 'user', // Les nouveaux utilisateurs sont des users par défaut
+          emailVerified: null, // Toujours null à l'inscription
+          verificationRequired,
         },
       },
       { status: 201 }

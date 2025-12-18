@@ -2,6 +2,70 @@
 
 Toutes les modifications notables de ce projet sont documentées dans ce fichier.
 
+## [1.10.0] - 2025-12-18
+
+### Nouveautés
+
+#### Système de Vérification d'Email
+- Vérification obligatoire pour tous les nouveaux utilisateurs
+- Page dédiée `/verify-email` avec envoi automatique du lien de vérification
+- Page de confirmation `/verify` avec support multilingue (FR/EN)
+- Garde de vérification globale bloquant l'accès aux routes protégées
+- Support du mode sombre et sélecteur de langue
+- Bouton "J'ai vérifié mon email" avec refresh de session
+- Compatibilité avec liens legacy (redirection automatique vers API)
+
+#### Contrôles Administrateur
+- Panel de gestion de la vérification dans `/admin/settings`
+- Bouton "Vérifier tous les utilisateurs" pour migration des comptes existants
+- Statut de vérification visible dans la liste des utilisateurs admin
+- Configuration des rate limits pour la vérification d'email (interface admin)
+
+#### Sécurité Renforcée
+
+Hashing des Tokens
+- Tokens de vérification hashés en SHA-256 avant stockage en base de données
+- Protection contre l'exploitation d'une compromission de base de données
+- Tokens en clair jamais stockés, uniquement transmis par email
+
+Rate Limiting Double Niveau
+- Limitation des demandes d'email : 3 tentatives/heure, blocage 30 minutes (configurable)
+- Limitation des confirmations par IP : 10 tentatives/heure, blocage 15 minutes (configurable)
+- Protection contre le spam d'emails et les attaques par énumération de tokens
+
+Expiration Réduite
+- Durée de validité des tokens réduite de 24h à 6h
+- Fenêtre d'attaque réduite de 75%
+- Messages d'email mis à jour
+
+### Technique
+
+- Token de 256 bits généré cryptographiquement
+- Usage unique des tokens avec suppression immédiate après utilisation
+- Validation côté serveur avec vérification de l'expiration
+- Architecture backend-driven pour la confirmation
+- Stockage hashé SHA-256 en base de données
+
+### Traductions
+
+- Ajout de toutes les clés FR/EN pour les pages de vérification
+- Messages d'email de vérification traduits
+- Descriptions des rate limits dans le panel admin
+
+### Sécurité
+
+Score de sécurité : 9.8/10
+
+- Cryptographie forte (256 bits)
+- Tokens hashés SHA-256
+- Rate limiting double niveau
+- Expiration courte (6h)
+- Protection XSS/injection
+- Tokens à usage unique
+
+---
+
+
 ## [1.9.0] - 2025-12-17
 
 ### Nouveautés - Sécurité

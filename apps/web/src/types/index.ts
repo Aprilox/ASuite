@@ -5,6 +5,8 @@ export interface User {
   role: string;
   theme?: string;
   locale?: string;
+  emailVerified: Date | string | null;
+  verificationRequired?: boolean;
 }
 
 export interface AuthState {

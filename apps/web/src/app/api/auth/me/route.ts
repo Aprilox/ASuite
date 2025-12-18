@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
+import { prisma } from '@asuite/database';
 
 export async function GET() {
   try {
@@ -10,6 +11,12 @@ export async function GET() {
       return NextResponse.json(null);
     }
 
+    // Récupérer le paramètre de vérification d'email
+    const verificationSetting = await prisma.systemSetting.findFirst({
+      where: { key: 'security_email_verification' }
+    });
+    const verificationRequired = verificationSetting?.value === 'true';
+
     return NextResponse.json({
       id: user.id,
       email: user.email,
@@ -17,6 +24,8 @@ export async function GET() {
       role: user.role,
       theme: user.theme,
       locale: user.locale,
+      emailVerified: user.emailVerified,
+      verificationRequired,
     });
   } catch (error) {
     console.error('Error checking auth:', error);

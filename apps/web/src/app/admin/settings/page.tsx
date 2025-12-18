@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useAdmin } from '@/hooks/use-admin';
 import {
   Settings,
@@ -17,6 +18,8 @@ import {
   ChevronRight,
   AlertCircle,
   Send,
+  Users,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface SystemSetting {
@@ -52,6 +55,7 @@ const categoryColors: Record<string, { bg: string; text: string; border: string 
 
 export default function AdminSettingsPage() {
   const toast = useToast();
+  const confirm = useConfirm();
   const t = useTranslations('admin.settings');
   const { hasPermission } = useAdmin();
 
@@ -65,6 +69,7 @@ export default function AdminSettingsPage() {
   const [changes, setChanges] = useState<Record<string, string>>({});
   const [testingSmtp, setTestingSmtp] = useState(false);
   const [testEmail, setTestEmail] = useState('');
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -154,6 +159,37 @@ export default function AdminSettingsPage() {
       toast.error(t('smtp.testError'));
     } finally {
       setTestingSmtp(false);
+    }
+  };
+
+  const handleVerifyAll = async () => {
+    const confirmed = await confirm({
+      title: t('migration.verifyAllTitle'),
+      message: t('migration.verifyAllDesc'),
+      confirmText: t('migration.verifyAllButton'),
+      variant: 'warning',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      const res = await fetch('/api/admin/users/verify-all', {
+        method: 'POST',
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(t('migration.success', { count: data.count }));
+      } else {
+        toast.error(data.error || 'Erreur lors de la migration');
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la migration');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -409,6 +445,35 @@ export default function AdminSettingsPage() {
             </Link>
           )}
 
+          {/* Migration Section for Security category */}
+          {activeCategory === 'security' && (
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl p-5 mb-4">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-amber-900 dark:text-amber-100">{t('migration.title')}</h3>
+                  <p className="text-sm text-amber-700 dark:text-amber-300 mt-1 mb-4">
+                    {t('migration.verifyAllDesc')}
+                  </p>
+                  <button
+                    onClick={handleVerifyAll}
+                    disabled={verifying}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                  >
+                    {verifying ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                    {verifying ? t('migration.verifying') : t('migration.verifyAllButton')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Settings list */}
           <div className="bg-card rounded-xl border divide-y">
             {categorySettings.length === 0 ? (
@@ -485,8 +550,7 @@ export default function AdminSettingsPage() {
             </div>
           )}
         </div>
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 }

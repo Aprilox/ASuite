@@ -72,6 +72,22 @@ const defaultEndpoints: RateLimitEndpoint[] = [
         windowMinutes: 60,
         blockMinutes: 10,
     },
+    {
+        id: 'email_verification',
+        name: 'Vérification Email',
+        description: "Limite les demandes de renvoi d'email de vérification",
+        maxAttempts: 3,
+        windowMinutes: 60,
+        blockMinutes: 30,
+    },
+    {
+        id: 'email_verification_confirm',
+        name: 'Confirmation Email (IP)',
+        description: "Limite les tentatives de validation de token par IP",
+        maxAttempts: 10,
+        windowMinutes: 60,
+        blockMinutes: 15,
+    },
 ];
 
 export default function RateLimitSettingsPage() {
@@ -232,7 +248,16 @@ export default function RateLimitSettingsPage() {
                             <div className="flex items-start justify-between mb-4">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <h3 className="font-semibold">{endpoint.id.startsWith('admin_action') ? t('rateLimit.description.admin_actions') : endpoint.id.startsWith('create_link') ? t('rateLimit.description.alinks_creation') : endpoint.id.startsWith('create_vault') ? t('rateLimit.description.vault_creation') : endpoint.id === 'register' ? t('rateLimit.description.user_registration') : endpoint.id === 'login' ? t('rateLimit.description.user_login') : t('rateLimit.description.password_reset')}</h3>
+                                        <h3 className="font-semibold">
+                                            {endpoint.id.startsWith('admin_action') ? t('rateLimit.description.admin_actions') :
+                                                endpoint.id.startsWith('create_link') ? t('rateLimit.description.create_link') :
+                                                    endpoint.id.startsWith('create_vault') ? t('rateLimit.description.create_vault') :
+                                                        endpoint.id === 'register' ? t('rateLimit.description.register') :
+                                                            endpoint.id === 'login' ? t('rateLimit.description.login') :
+                                                                endpoint.id === 'email_verification' ? t('rateLimit.description.email_verification') :
+                                                                    endpoint.id === 'email_verification_confirm' ? t('rateLimit.description.email_verification_confirm') :
+                                                                        t('rateLimit.description.forgot_password')}
+                                        </h3>
                                         {isModified && (
                                             <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
                                                 {t('rateLimit.modified')}
@@ -240,7 +265,14 @@ export default function RateLimitSettingsPage() {
                                         )}
                                     </div>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                        {endpoint.id.startsWith('admin_action') ? t('rateLimit.descriptionText.admin_actions') : endpoint.id.startsWith('create_link') ? t('rateLimit.descriptionText.alinks_creation') : endpoint.id.startsWith('create_vault') ? t('rateLimit.descriptionText.vault_creation') : endpoint.id === 'register' ? t('rateLimit.descriptionText.user_registration') : endpoint.id === 'login' ? t('rateLimit.descriptionText.user_login') : t('rateLimit.descriptionText.password_reset')}
+                                        {endpoint.id.startsWith('admin_action') ? t('rateLimit.descriptionText.admin_actions') :
+                                            endpoint.id.startsWith('create_link') ? t('rateLimit.descriptionText.create_link') :
+                                                endpoint.id.startsWith('create_vault') ? t('rateLimit.descriptionText.create_vault') :
+                                                    endpoint.id === 'register' ? t('rateLimit.descriptionText.register') :
+                                                        endpoint.id === 'login' ? t('rateLimit.descriptionText.login') :
+                                                            endpoint.id === 'email_verification' ? t('rateLimit.descriptionText.email_verification') :
+                                                                endpoint.id === 'email_verification_confirm' ? t('rateLimit.descriptionText.email_verification_confirm') :
+                                                                    t('rateLimit.descriptionText.forgot_password')}
                                     </p>
                                 </div>
                             </div>

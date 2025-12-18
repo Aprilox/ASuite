@@ -118,17 +118,17 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 <button
                   onClick={handleCancel}
                   disabled={isLoading}
-                  className="flex-1 h-11 rounded-xl border border-input bg-background hover:bg-accent font-medium transition-colors disabled:opacity-50"
+                  className="flex-1 h-auto min-h-[44px] py-2 px-4 rounded-xl border border-input bg-background hover:bg-accent font-medium transition-colors disabled:opacity-50"
                 >
                   {options?.cancelText || 'Annuler'}
                 </button>
                 <button
                   onClick={handleConfirm}
                   disabled={isLoading}
-                  className={`flex-1 h-11 rounded-xl text-white font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${styles.buttonBg}`}
+                  className={`flex-1 h-auto min-h-[44px] py-2 px-4 rounded-xl text-white font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${styles.buttonBg}`}
                 >
                   {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                   ) : (
                     options?.confirmText || 'Confirmer'
                   )}
